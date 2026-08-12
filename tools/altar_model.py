@@ -1907,11 +1907,15 @@ def write_colliders(parts, name):
     os.makedirs(OUT_DIR, exist_ok=True)
     path = os.path.join(OUT_DIR, "thrall_altar_%s.col" % name)
 
-    lines = ["# box  centre x y z  size x y z  yaw   (metres, Y-up)"]
+    lines = ["# box  centre x y z  size x y z  qx qy qz qw   (metres, Y-up, Unity quat)"]
     for obj in parts:
-        # Tilted and hanging parts opt out. The box written here only carries yaw, so a
-        # diagonal brace would become an upright box standing through the bench top -
-        # collision you can feel but cannot see. Detail is not worth blocking on.
+        # Hanging and decorative parts opt out - a charm swinging off a horn should not
+        # be something you walk into.
+        #
+        # This used to exclude tilted parts as well, because the line could only carry a
+        # yaw and a leaning slab would come out as an upright box standing through its
+        # own face - collision you can feel but cannot see. The line carries a full
+        # rotation now, so a tilt is no longer a reason to skip anything.
         if not obj.get("thralls_collide", True):
             continue
 
@@ -1931,9 +1935,17 @@ def write_colliders(parts, name):
         if max(dx, dy, dz) < 0.12:
             continue
 
-        yaw = math.degrees(obj.rotation_euler.z)
-        lines.append("box %.3f %.3f %.3f %.3f %.3f %.3f %.2f"
-                     % (cx, cz, cy, dx, dz, dy, yaw))
+        # Blender is Z-up and Unity is Y-up, and swapping those two axes is a mirror, not
+        # a turn - so the rotation has to be reflected as well as permuted. For a
+        # quaternion that works out as swapping y and z and negating the axis, because
+        # the mirror reverses which way a positive angle goes.
+        #
+        # Checked against the yaw this replaces: a Blender turn of t about Z is
+        # (cos t/2, 0, 0, sin t/2), which comes through here as a Unity turn of -t about
+        # Y - exactly the Quaternion.Euler(0, -yaw, 0) the old pair of lines produced.
+        bw, bx, by, bz = obj.rotation_euler.to_quaternion()
+        lines.append("box %.3f %.3f %.3f %.3f %.3f %.3f %.5f %.5f %.5f %.5f"
+                     % (cx, cz, cy, dx, dz, dy, -bx, -bz, -by, bw))
 
     with open(path, "w") as handle:
         handle.write("\n".join(lines) + "\n")

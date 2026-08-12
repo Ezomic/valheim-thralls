@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using HarmonyLib;
 using UnityEngine;
@@ -45,12 +45,31 @@ namespace Thralls
 
             try
             {
-                rig = new GameObject("thralls_shot");
-                var cam = rig.AddComponent<Camera>();
+                // Cloned from the game's camera object rather than built from scratch.
+                //
+                // This used to be a bare GameObject with a Camera on it and a
+                // CopyFrom(main), and the comment claimed that carried the post
+                // processing. It does not: CopyFrom copies the Camera component's own
+                // fields - clear flags, culling mask, projection - and nothing else, and
+                // Valheim's grading, bloom and tonemapping live in separate components
+                // hanging off the same object. So every shot this took came out lighter
+                // and flatter than the game, and three rounds of a darkness bug got spent
+                // arguing with evidence that was wrong. Instantiating the object brings
+                // those components along.
+                rig = UnityEngine.Object.Instantiate(main.gameObject);
+                rig.name = "thralls_shot";
 
-                // Copied from the game's camera so the shot goes through the same clear
-                // flags, culling mask, fog and post processing the player is looking at.
-                cam.CopyFrom(main);
+                // An audio listener would fight the player's own.
+                var ears = rig.GetComponentsInChildren<AudioListener>(true);
+                for (int i = 0; i < ears.Length; i++) UnityEngine.Object.Destroy(ears[i]);
+
+                // Anything that would drive this camera back to following the player.
+                var drivers = rig.GetComponentsInChildren<GameCamera>(true);
+                for (int i = 0; i < drivers.Length; i++) UnityEngine.Object.Destroy(drivers[i]);
+
+                var cam = rig.GetComponent<Camera>();
+                if (cam == null) cam = rig.AddComponent<Camera>();
+
                 cam.enabled = false;
                 cam.targetTexture = target = new RenderTexture(Width, Height, 24);
 

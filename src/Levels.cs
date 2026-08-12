@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Thralls
@@ -38,7 +38,7 @@ namespace Thralls
 
         public static int MaxLevel
         {
-            get { return Mathf.Min(Thresholds.Count + 1, Mathf.Max(1, ThrallConfig.MaxTier.Value)); }
+            get { return Mathf.Min(Thresholds.Count + 1, Mathf.Max(1, ThrallConfig.MaxLevel.Value)); }
         }
 
         public static int LevelFor(float xp)

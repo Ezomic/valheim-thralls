@@ -31,6 +31,10 @@ namespace Thralls
             _harmony.PatchAll(typeof(HoverPatches));
 
             Log.LogInfo(PluginName + " " + PluginVersion + " by " + PluginAuthor + " - ready.");
+
+            if (ThrallConfig.TestMode.Value)
+                Log.LogWarning("TEST MODE: the altar and every upgrade cost one wood. "
+                               + "Turn TestMode off in the config before playing for real.");
         }
 
         private void OnDestroy()

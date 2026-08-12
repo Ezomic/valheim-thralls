@@ -733,18 +733,27 @@ namespace Thralls
 
                     var centre = new Vector3(ParseFloat(f[1], 0f), ParseFloat(f[2], 0f), ParseFloat(f[3], 0f));
                     var size = new Vector3(ParseFloat(f[4], 1f), ParseFloat(f[5], 1f), ParseFloat(f[6], 1f));
-                    var yaw = f.Length > 7 ? ParseFloat(f[7], 0f) : 0f;
+
+                    // Two line shapes. The current writer puts a full rotation on the end
+                    // as a quaternion; the older one could only manage a yaw in degrees,
+                    // and .col files written by it are still readable.
+                    var turn = Quaternion.identity;
+                    if (f.Length >= 11)
+                        turn = new Quaternion(ParseFloat(f[7], 0f), ParseFloat(f[8], 0f),
+                                              ParseFloat(f[9], 0f), ParseFloat(f[10], 1f));
+                    else if (f.Length > 7)
+                        turn = Quaternion.Euler(0f, -ParseFloat(f[7], 0f), 0f);
 
                     // A BoxCollider cannot be rotated on its own, so a turned block gets its
-                    // own child transform. The sign flips because the export swaps handedness.
+                    // own child transform.
                     var owner = body;
-                    if (Mathf.Abs(yaw) > 0.5f)
+                    if (Quaternion.Angle(turn, Quaternion.identity) > 0.5f)
                     {
                         owner = new GameObject("box");
                         owner.layer = body.layer;
                         owner.transform.SetParent(body.transform, false);
                         owner.transform.localPosition = centre;
-                        owner.transform.localRotation = Quaternion.Euler(0f, -yaw, 0f);
+                        owner.transform.localRotation = turn;
                         centre = Vector3.zero;
                     }
 
@@ -1428,7 +1437,7 @@ namespace Thralls
 
         private static Piece.Requirement[] Requirements()
         {
-            return Requirements(ThrallConfig.AltarCost.Value);
+            return Requirements(ThrallConfig.AltarCostNow());
         }
 
         private static Piece.Requirement[] Requirements(string spec)
@@ -1527,6 +1536,15 @@ namespace Thralls
             }
             if (known == null) return;
 
+            // One card per pass, no matter how many pieces come free at once.
+            //
+            // A character that already has the materials for the whole ladder learns all
+            // five in the same frame, and each one queued its own unlock card - so the
+            // reward for finishing a tier was five cards playing end to end while you
+            // stood there. The rest are taught quietly and the log still names them;
+            // they are all in the hammer either way.
+            var announced = false;
+
             foreach (var prefab in Built)
             {
                 if (prefab == null) continue;
@@ -1561,11 +1579,12 @@ namespace Thralls
                 // the set - which is all this used to do - leaves the player with no idea
                 // anything new exists: AddKnownPiece is what queues the unlock card and
                 // plays its sound, and it is the only difference between the two paths.
-                if (AddKnownPieceRef != null && MessageHud.instance != null)
+                if (!announced && AddKnownPieceRef != null && MessageHud.instance != null)
                 {
                     try
                     {
                         AddKnownPieceRef.Invoke(player, new object[] { piece });
+                        announced = true;
                         ThrallsPlugin.Log.LogInfo("Taught piece with card: " + piece.m_name);
                         continue;
                     }

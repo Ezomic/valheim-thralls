@@ -38,7 +38,9 @@ namespace Thralls
         public static ConfigEntry<float> XpPerPlant;
         public static ConfigEntry<float> XpPerBuild;
         public static ConfigEntry<float> XpPerRepair;
-        public static ConfigEntry<int> MaxTier;
+        // Named for the key it binds. It was MaxTier, which is the one thing it is not:
+        // this caps the rank a thrall trains to, and tier is the breed you hired.
+        public static ConfigEntry<int> MaxLevel;
         public static ConfigEntry<string> Tier2Trophies;
         public static ConfigEntry<string> Tier3Trophies;
         public static ConfigEntry<string> Tier4Trophies;
@@ -161,6 +163,7 @@ namespace Thralls
 
         public static ConfigEntry<bool> ShowKeybinds;
         public static ConfigEntry<bool> Verbose;
+        public static ConfigEntry<bool> TestMode;
 
         /// <summary>What each upgrade piece is called on the hammer.</summary>
         public static string UpgradeName(int level)
@@ -200,9 +203,28 @@ namespace Thralls
             }
         }
 
+        /// <summary>
+        /// What everything costs while testing: one wood.
+        ///
+        /// This exists because the altar tiers are gated behind four biomes, and checking
+        /// that a mountain cairn renders correctly should not require a mountain. The
+        /// costs were all hand-edited to Wood:1 once already while the shapes were being
+        /// modelled; this makes that a switch instead of five edits you have to remember
+        /// to undo.
+        /// </summary>
+        private const string TestCost = "Wood:1";
+
+        /// <summary>What the summoning altar costs, honouring TestMode.</summary>
+        public static string AltarCostNow()
+        {
+            return TestMode.Value ? TestCost : AltarCost.Value;
+        }
+
         /// <summary>What the numbered altar upgrade costs.</summary>
         public static string UpgradeCost(int level)
         {
+            if (TestMode.Value) return TestCost;
+
             switch (level)
             {
                 case 1: return Upgrade1Cost.Value;
@@ -276,7 +298,8 @@ namespace Thralls
                 "Cost per thrall, as PrefabName:Amount, comma separated. Empty means free. Set to something like Coins:50 if you want recruiting to bite.");
             HeadsPerWorker = cfg.Bind("2 - Thralls", "HeadsPerWorker", 10,
                 "Trophies sacrificed to hire a thrall. They must match the tier being hired, or be better.");
-            MaxTier = cfg.Bind("2 - Thralls", "MaxLevel", 20, "Highest level a thrall can reach within its tier.");
+            MaxLevel = cfg.Bind("2 - Thralls", "MaxLevel", 20,
+                "Highest rank a thrall can train to. This is rank, not tier: it does not change which breed you can hire or what tools they can use, only how far the one you hired can be pushed.");
 
             LevelThresholds = cfg.Bind("2 - Thralls", "LevelThresholds", "150,400,750,1200,1800,2500,3400,4500,5800,7300,9000,11000,13200,15700,18500,21600,25000,28800,33000",
                 "Experience needed to reach level 2, 3, 4 and so on. Thralls earn it by working; there is nothing to buy.");
@@ -499,7 +522,7 @@ namespace Thralls
                 "Model file sitting next to the plugin dll, used only when AltarShapes is empty. Delete or rename it to fall back to the altar assembled from existing pieces.");
             AltarDiagnostics = cfg.Bind("6 - Altar props", "Diagnostics", false,
                 "Cycle the altar through a series of test states on load, photographing each. For working out which part of the altar is responsible for something you can see. Costs a few seconds and six images every time a world loads.");
-            AltarScreenshot = cfg.Bind("6 - Altar props", "Screenshot", true,
+            AltarScreenshot = cfg.Bind("6 - Altar props", "Screenshot", false,
                 "Photograph the altar from four sides shortly after it loads, next to the plugin. Only altars standing at load time are caught. Do NOT judge colour or brightness from these: the routine forces daylight before shooting and renders through a camera of its own, which carries none of the game's post-processing, so every object in them is lighter and flatter than on screen. Good for shape and placement, misleading for anything else.");
 
             AltarTexturePoint = cfg.Bind("2 - Thralls", "AltarTexturePoint", true,
@@ -643,6 +666,12 @@ namespace Thralls
             ShowKeybinds = cfg.Bind("4 - Misc", "ShowKeybinds", true,
                 "Show a small list of the mod's keys on screen. Handy while learning them, easy to switch off once they are muscle memory.");
             Verbose = cfg.Bind("4 - Misc", "VerboseLogging", false, "Chatty logs, for when something misbehaves.");
+
+            TestMode = cfg.Bind("4 - Misc", "TestMode", false,
+                "Makes the altar and every upgrade cost one wood, so all four tiers can be "
+                + "built and looked at without four biomes of progression behind them. "
+                + "Turn it off before playing for real - it is announced in the log on "
+                + "startup so it is hard to leave on by accident.");
         }
 
         /// <summary>Parses RecruitCost into prefab/amount pairs. Malformed entries are skipped, not fatal.</summary>
