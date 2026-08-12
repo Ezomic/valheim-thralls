@@ -64,8 +64,33 @@ namespace Thralls
                 for (int i = 0; i < ears.Length; i++) UnityEngine.Object.Destroy(ears[i]);
 
                 // Anything that would drive this camera back to following the player.
+                //
+                // Cloning the main camera steals GameCamera.instance and then throws it
+                // away. Its Awake is an unguarded "m_instance = this", so the copy takes
+                // the singleton the moment Instantiate runs; its OnDestroy is
+                // "if (m_instance == this) m_instance = null", so tearing the copy down
+                // leaves the static null - and the real camera's Awake ran at load and
+                // never runs again to put it back.
+                //
+                // The game then has no GameCamera.instance at all. Everything that
+                // raycasts from the camera to work out what you are pointing at stops
+                // working, which shows up as tools that no longer do anything: you keep
+                // the picture and lose the game.
+                //
+                // So: remember the real one, destroy the copies immediately rather than
+                // at end of frame, and put the static back.
+                var realCamera = GameCamera.instance;
+
                 var drivers = rig.GetComponentsInChildren<GameCamera>(true);
-                for (int i = 0; i < drivers.Length; i++) UnityEngine.Object.Destroy(drivers[i]);
+                for (int i = 0; i < drivers.Length; i++)
+                    UnityEngine.Object.DestroyImmediate(drivers[i]);
+
+                if (realCamera != null && GameCamera.instance != realCamera)
+                {
+                    AccessTools.Field(typeof(GameCamera), "m_instance")
+                               .SetValue(null, realCamera);
+                    ThrallsPlugin.Log.LogInfo("Restored GameCamera.instance after cloning the camera.");
+                }
 
                 var cam = rig.GetComponent<Camera>();
                 if (cam == null) cam = rig.AddComponent<Camera>();
