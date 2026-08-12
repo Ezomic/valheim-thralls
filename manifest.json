@@ -1,0 +1,10 @@
+{
+  "name": "Thralls",
+  "author": "Robbin Thijssen",
+  "version_number": "1.0.0",
+  "website_url": "",
+  "description": "Recruit workers to chop, mine, gather, farm and haul to your chests.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2333"
+  ]
+}

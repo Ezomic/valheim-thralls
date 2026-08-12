@@ -1,0 +1,681 @@
+﻿using System;
+using System.Collections.Generic;
+using BepInEx.Configuration;
+using UnityEngine;
+
+namespace Thralls
+{
+    /// <summary>All tunables. Everything the player is likely to want to change lives here.</summary>
+    internal static class ThrallConfig
+    {
+        // --- keys ---
+        public static ConfigEntry<KeyboardShortcut> KeyRecruit;
+        public static ConfigEntry<KeyboardShortcut> KeyAssign;
+        public static ConfigEntry<KeyboardShortcut> KeyDeposit;
+        public static ConfigEntry<KeyboardShortcut> KeyFollow;
+        public static ConfigEntry<KeyboardShortcut> KeyDismiss;
+        public static ConfigEntry<KeyboardShortcut> KeySteward;
+        public static ConfigEntry<KeyboardShortcut> KeyPlan;
+        public static ConfigEntry<KeyboardShortcut> KeyTimeOfDay;
+        public static ConfigEntry<KeyboardShortcut> KeyFlatten;
+        public static ConfigEntry<float> FlattenRadius;
+        public static ConfigEntry<KeyboardShortcut> KeyGodMode;
+        public static ConfigEntry<KeyboardShortcut> KeyAltarEffects;
+        public static ConfigEntry<bool> ShowThrallsOnMap;
+        public static ConfigEntry<float> MapToggleOffset;
+        public static ConfigEntry<string> MapPinType;
+        public static ConfigEntry<bool> MapPinLabels;
+        public static ConfigEntry<bool> GodMode;
+
+        // --- thralls ---
+        public static ConfigEntry<string> WorkerPrefab;
+        public static ConfigEntry<int> MaxThralls;
+        public static ConfigEntry<string> RecruitCost;
+        public static ConfigEntry<int> HeadsPerWorker;
+        public static ConfigEntry<string> LevelThresholds;
+        public static ConfigEntry<float> XpPerSwing;
+        public static ConfigEntry<float> XpPerHarvest;
+        public static ConfigEntry<float> XpPerPlant;
+        public static ConfigEntry<float> XpPerBuild;
+        public static ConfigEntry<float> XpPerRepair;
+        public static ConfigEntry<int> MaxTier;
+        public static ConfigEntry<string> Tier2Trophies;
+        public static ConfigEntry<string> Tier3Trophies;
+        public static ConfigEntry<string> Tier4Trophies;
+        public static ConfigEntry<float> TierDamageStep;
+        public static ConfigEntry<float> TierSpeedStep;
+        public static ConfigEntry<float> LevelDamageStep;
+        public static ConfigEntry<float> LevelSpeedStep;
+
+        public static ConfigEntry<string> Tier1Prefab;
+        public static ConfigEntry<string> Tier2Prefab;
+        public static ConfigEntry<string> Tier3Prefab;
+        public static ConfigEntry<string> Tier4Prefab;
+        public static ConfigEntry<string> Tier5Prefab;
+
+        public static ConfigEntry<string> Tier1Key;
+        public static ConfigEntry<string> Tier2Key;
+        public static ConfigEntry<string> Tier3Key;
+        public static ConfigEntry<string> Tier4Key;
+        public static ConfigEntry<string> Tier5Key;
+
+        public static ConfigEntry<bool> UpgradesGateTiers;
+        public static ConfigEntry<string> Upgrade1Parts;
+        public static ConfigEntry<string> Upgrade2Parts;
+        public static ConfigEntry<string> Upgrade3Parts;
+        public static ConfigEntry<string> Upgrade4Parts;
+        public static ConfigEntry<string> Upgrade1Cost;
+        public static ConfigEntry<string> Upgrade2Cost;
+        public static ConfigEntry<string> Upgrade3Cost;
+        public static ConfigEntry<string> Upgrade4Cost;
+        public static ConfigEntry<string> Upgrade1Model;
+        public static ConfigEntry<string> Upgrade2Model;
+        public static ConfigEntry<string> Upgrade3Model;
+        public static ConfigEntry<string> Upgrade4Model;
+        public static ConfigEntry<string> Tier1Cost;
+        public static ConfigEntry<string> Tier2Cost;
+        public static ConfigEntry<string> Tier3Cost;
+        public static ConfigEntry<string> Tier4Cost;
+        public static ConfigEntry<string> Tier5Cost;
+        public static ConfigEntry<string> Tier1Revive;
+        public static ConfigEntry<string> Tier2Revive;
+        public static ConfigEntry<string> Tier3Revive;
+        public static ConfigEntry<string> Tier4Revive;
+        public static ConfigEntry<string> Tier5Revive;
+        public static ConfigEntry<int> PackBaseSlots;
+        public static ConfigEntry<int> PackPerTier;
+        public static ConfigEntry<int> PackLevelsPerSlot;
+        public static ConfigEntry<int> CarryColumns;
+        public static ConfigEntry<int> CarryRows;
+
+        // --- work ---
+        public static ConfigEntry<float> WorkRadius;
+        public static ConfigEntry<float> CommandRadius;
+        public static ConfigEntry<float> HarvestRange;
+        public static ConfigEntry<float> SwingInterval;
+        public static ConfigEntry<float> ChopDamage;
+        public static ConfigEntry<float> PickaxeDamage;
+        public static ConfigEntry<int> ToolTier;
+        public static ConfigEntry<float> PickupRadius;
+        public static ConfigEntry<float> DepositRange;
+        public static ConfigEntry<bool> AutoDropOff;
+        public static ConfigEntry<float> AutoDropOffRange;
+        public static ConfigEntry<bool> WorkAtNight;
+        public static ConfigEntry<string> MineablePrefabs;
+        public static ConfigEntry<int> SeedsPerTrip;
+        public static ConfigEntry<string> SwingAnimation;
+
+        // --- misc ---
+        public static ConfigEntry<string> AltarName;
+        public static ConfigEntry<string> AltarCost;
+        public static ConfigEntry<string> AltarBasePrefab;
+        public static ConfigEntry<float> AltarRange;
+        public static ConfigEntry<float> AltarScale;
+        public static ConfigEntry<string> AltarParts;
+        public static ConfigEntry<string> PropsPlinth;
+        public static ConfigEntry<string> PropsDolmen;
+        public static ConfigEntry<string> PropsCairn;
+        public static ConfigEntry<string> PropsCircle;
+        public static ConfigEntry<string> PropsBarrow;
+        public static ConfigEntry<string> PropsWorktable;
+        public static ConfigEntry<string> PropsBindstone;
+        public static ConfigEntry<string> PropsNoEffects;
+        public static ConfigEntry<string> PropsShrine;
+        public static ConfigEntry<bool> AltarEffects;
+        public static ConfigEntry<float> AltarEffectStrength;
+        public static ConfigEntry<string> AltarEffectFrom;
+        public static ConfigEntry<bool> AltarLight;
+        public static ConfigEntry<float> AltarLightRange;
+        public static ConfigEntry<float> AltarLightStrength;
+        public static ConfigEntry<int> OneStarRank;
+        public static ConfigEntry<int> TwoStarRank;
+        public static ConfigEntry<bool> AltarAmbience;
+        public static ConfigEntry<string> AltarAmbienceFrom;
+        public static ConfigEntry<float> AltarAmbienceVolume;
+        public static ConfigEntry<bool> AltarFlattenNormals;
+        public static ConfigEntry<string> AltarVanillaGroups;
+        public static ConfigEntry<string> AltarVanillaWoodGroups;
+        public static ConfigEntry<string> AltarWoodMaterialFrom;
+        public static ConfigEntry<string> AltarShapes;
+        public static ConfigEntry<string> AltarModel;
+        public static ConfigEntry<string> AltarMaterialFrom;
+        public static ConfigEntry<bool> AltarBakedShading;
+        public static ConfigEntry<bool> AltarTexturePoint;
+        public static ConfigEntry<bool> AltarDiagnostics;
+        public static ConfigEntry<bool> AltarScreenshot;
+        public static ConfigEntry<float> AltarUvScale;
+        public static ConfigEntry<string> AltarUvRegion;
+        public static ConfigEntry<int> BaseWorkSlots;
+        public static ConfigEntry<int> MaxWorkSlots;
+        public static ConfigEntry<float> SlotSearchRange;
+
+        public static ConfigEntry<bool> RequireTools;
+        public static ConfigEntry<string> ToolsChop;
+        public static ConfigEntry<string> ToolsMine;
+        public static ConfigEntry<string> ToolsFarm;
+        public static ConfigEntry<bool> ShowTools;
+        public static ConfigEntry<string> ToolChop;
+        public static ConfigEntry<string> ToolMine;
+        public static ConfigEntry<string> ToolFarm;
+        public static ConfigEntry<string> ToolBuild;
+
+        public static ConfigEntry<bool> ShowKeybinds;
+        public static ConfigEntry<bool> Verbose;
+
+        /// <summary>What each upgrade piece is called on the hammer.</summary>
+        public static string UpgradeName(int level)
+        {
+            switch (level)
+            {
+                // Named for what each one opens, so the hammer menu reads as a ladder.
+                //
+                // No numerals on the end: the game does not number its own station
+                // upgrades - chopping block, tanning rack, adze, forge bellows - and each
+                // of these says in its description what it opens, so a "(II)" was only
+                // ever repeating what the menu already showed.
+                case 1: return "Bog stone";
+                case 2: return "Mountain cairn";
+                case 3: return "War totem";
+                default: return "Rift stone";
+            }
+        }
+
+        /// <summary>
+        /// Names an upgrade has gone by in an earlier version of this mod.
+        ///
+        /// Player.m_knownRecipes is keyed by the display name and there is no id beside
+        /// it, so renaming a piece un-learns it for everyone who had it and drops it out
+        /// of the hammer with no message at all. Anything renamed from here on has to
+        /// leave its old name behind in this list. A stale entry costs nothing; a missing
+        /// one costs the player the piece.
+        /// </summary>
+        public static string[] UpgradeLegacyNames(int level)
+        {
+            switch (level)
+            {
+                case 1: return new[] { "Bog stone (I)" };
+                case 2: return new[] { "Mountain cairn (II)" };
+                case 3: return new[] { "War camp arch (III)", "War totem (III)" };
+                default: return new[] { "Rift stone (IV)" };
+            }
+        }
+
+        /// <summary>What the numbered altar upgrade costs.</summary>
+        public static string UpgradeCost(int level)
+        {
+            switch (level)
+            {
+                case 1: return Upgrade1Cost.Value;
+                case 2: return Upgrade2Cost.Value;
+                case 3: return Upgrade3Cost.Value;
+                default: return Upgrade4Cost.Value;
+            }
+        }
+
+        /// <summary>
+        /// The model file an upgrade wears. Empty, or a name with no file beside the
+        /// plugin, falls the piece back to its assembly of vanilla prefabs.
+        /// </summary>
+        public static string UpgradeModel(int level)
+        {
+            switch (level)
+            {
+                case 1: return Upgrade1Model.Value;
+                case 2: return Upgrade2Model.Value;
+                case 3: return Upgrade3Model.Value;
+                default: return Upgrade4Model.Value;
+            }
+        }
+
+        public static void Bind(ConfigFile cfg)
+        {
+            KeyRecruit = cfg.Bind("1 - Keys", "Recruit", new KeyboardShortcut(KeyCode.Keypad0),
+                "Spawn a thrall where you are looking.");
+            KeyAssign = cfg.Bind("1 - Keys", "Assign", new KeyboardShortcut(KeyCode.Keypad1),
+                "Assign a job at whatever you are looking at (tree = chop, rock/ore = mine, berry/crop = gather, ground = stand guard).");
+            KeyDeposit = cfg.Bind("1 - Keys", "SetDropOff", new KeyboardShortcut(KeyCode.Keypad2),
+                "Look at a chest to make it the drop-off point for the nearest thrall.");
+            KeyFollow = cfg.Bind("1 - Keys", "FollowToggle", new KeyboardShortcut(KeyCode.Keypad3),
+                "Toggle follow-me for the nearest thrall.");
+            KeyDismiss = cfg.Bind("1 - Keys", "Dismiss", new KeyboardShortcut(KeyCode.Keypad4),
+                "Look at a thrall and dismiss it. It drops what it carries.");
+            KeySteward = cfg.Bind("1 - Keys", "OpenAltar", new KeyboardShortcut(KeyCode.Keypad5),
+                "Open the panel of the nearest summoning altar, and close it again.");
+            KeyPlan = cfg.Bind("1 - Keys", "MarkBuildPlan", new KeyboardShortcut(KeyCode.Keypad6),
+                "With a hammer out and a piece selected, records the current placement as a build order for your thralls instead of building it yourself.");
+            KeyTimeOfDay = cfg.Bind("1 - Keys", "TimeOfDay", new KeyboardShortcut(KeyCode.Keypad7),
+                "Step the time of day through dawn, midday, dusk and night, then back to normal.");
+            KeyFlatten = cfg.Bind("1 - Keys", "FlattenGround", new KeyboardShortcut(KeyCode.Keypad8),
+                "Level a wide circle of ground at the spot you are looking at.");
+            ShowThrallsOnMap = cfg.Bind("2 - Thralls", "ShowThrallsOnMap", false,
+                "Whether thralls are marked on the map. Set by the 'Show thralls' checkbox on the map itself, under the one that shares your position.");
+            MapToggleOffset = cfg.Bind("2 - Thralls", "MapToggleOffset", 26f,
+                "How far below the map's public-position checkbox the 'Show thralls' one sits, in pixels. Only worth touching if another mod has put something in that space.");
+
+            MapPinType = cfg.Bind("2 - Thralls", "MapPinType", "Player",
+                "Which map marker a thrall gets. One of Icon0, Icon1, Icon2, Icon3, Icon4, Death, Bed, Shout, Boss, Player, Ping, Hildir1, Hildir2, Hildir3.");
+            MapPinLabels = cfg.Bind("2 - Thralls", "MapPinLabels", true,
+                "Write each thrall's name and job beside its marker. Turn off if a large crew makes the map unreadable.");
+
+            KeyAltarEffects = cfg.Bind("1 - Keys", "AltarEffects",
+                new KeyboardShortcut(KeyCode.KeypadMinus),
+                "Cycles the altar's light and drifting motes on and off: both, no light, no motes, neither. For working out which of them is behind something you can see.");
+
+            KeyGodMode = cfg.Bind("1 - Keys", "GodMode", new KeyboardShortcut(KeyCode.Keypad9),
+                "Toggle unlimited health and stamina. A building aid, not a feature.");
+            GodMode = cfg.Bind("4 - Misc", "GodMode", false,
+                "Hold health and stamina full and switch on the game's own god mode. For building and testing.");
+            FlattenRadius = cfg.Bind("3 - Work", "FlattenRadius", 5f,
+                "Radius of the ground levelling tool, so 5 gives a 10m circle.");
+
+            WorkerPrefab = cfg.Bind("2 - Thralls", "WorkerPrefab", "Goblin",
+                "Creature prefab used as the worker body. Use a MELEE creature - the work animation is the creature's own attack, so a ranged one will shoot at the tree instead of hitting it. Good: Goblin, Draugr, Skeleton_NoArcher, Greydwarf. Avoid: Dverger, GoblinArcher, Draugr_Ranged.");
+            MaxThralls = cfg.Bind("2 - Thralls", "MaxThralls", 20,
+                "How many thralls you may keep in total. Only a few of them can be working at once - see WorkSlots.");
+            RecruitCost = cfg.Bind("2 - Thralls", "RecruitCost", "",
+                "Cost per thrall, as PrefabName:Amount, comma separated. Empty means free. Set to something like Coins:50 if you want recruiting to bite.");
+            HeadsPerWorker = cfg.Bind("2 - Thralls", "HeadsPerWorker", 10,
+                "Trophies sacrificed to hire a thrall. They must match the tier being hired, or be better.");
+            MaxTier = cfg.Bind("2 - Thralls", "MaxLevel", 20, "Highest level a thrall can reach within its tier.");
+
+            LevelThresholds = cfg.Bind("2 - Thralls", "LevelThresholds", "150,400,750,1200,1800,2500,3400,4500,5800,7300,9000,11000,13200,15700,18500,21600,25000,28800,33000",
+                "Experience needed to reach level 2, 3, 4 and so on. Thralls earn it by working; there is nothing to buy.");
+            XpPerSwing = cfg.Bind("2 - Thralls", "XpPerSwing", 1f,
+                "Experience for each swing of the axe or pick.");
+            XpPerHarvest = cfg.Bind("2 - Thralls", "XpPerHarvest", 10f,
+                "Experience for finishing something off - a tree felled, a vein broken, a crop picked.");
+            XpPerPlant = cfg.Bind("2 - Thralls", "XpPerPlant", 3f, "Experience for sowing a seed.");
+            XpPerBuild = cfg.Bind("2 - Thralls", "XpPerBuild", 20f, "Experience for raising a piece.");
+            XpPerRepair = cfg.Bind("2 - Thralls", "XpPerRepair", 3f, "Experience for a repair.");
+
+            Tier2Trophies = cfg.Bind("2 - Thralls", "Rank2Trophies",
+                "TrophyDraugr,TrophyDraugrElite,TrophyDraugrFem,TrophyBlob,TrophyLeech,TrophySurtling,TrophyBonemass,TrophyWraith,TrophySkeletonPoison,TrophyAbomination,TrophyForestTroll",
+                "Heads worth tier 2, for hiring a draugr. Anything not listed anywhere counts as tier 1. Tier is the breed you hire; rank is the level it trains to, and these do not affect rank.");
+            Tier3Trophies = cfg.Bind("2 - Thralls", "Rank3Trophies",
+                "TrophyWolf,TrophyFenring,TrophyHatchling,TrophyDragonQueen,TrophySGolem,TrophyUlv,TrophyCultist,TrophyFrostTroll,TrophyDeathsquito,TrophyLox,TrophyGoblin,TrophyGoblinBrute,TrophyGoblinShaman,TrophyGoblinKing,TrophySerpent",
+                "Heads worth tier 3, for hiring a golem.");
+            Tier4Trophies = cfg.Bind("2 - Thralls", "Rank4Trophies",
+                "TrophySeeker,TrophySeekerBrute,TrophySeekerQueen,TrophyGjall,TrophyDvergr,TrophyMorgen,TrophyCharredMelee,TrophyCharredArcher,TrophyCharredMage,TrophyFader,TrophyFallenValkyrie,TrophyBonemawSerpent,TrophyAsksvin,TrophyGrowth,TrophyKvastur,TrophyTick",
+                "Heads worth tier 4, for hiring a berserker.");
+
+            Tier1Prefab = cfg.Bind("2 - Thralls", "Tier1Creature", "Greydwarf_Elite",
+                "Creature hired as a tier 1 thrall (greydwarf brute). Must be melee.");
+            Tier2Prefab = cfg.Bind("2 - Thralls", "Tier2Creature", "Draugr_Elite",
+                "Creature hired as a tier 2 thrall (swamp elite). Must be melee.");
+            Tier3Prefab = cfg.Bind("2 - Thralls", "Tier3Creature", "StoneGolem",
+                "Creature hired as a tier 3 thrall (mountain golem). Must be melee.");
+            Tier4Prefab = cfg.Bind("2 - Thralls", "Tier4Creature", "GoblinBrute",
+                "Creature hired as a tier 4 thrall (fuling berserker). Must be melee.");
+            Tier5Prefab = cfg.Bind("2 - Thralls", "Tier5Creature", "SeekerBrute",
+                "Creature hired as a tier 5 thrall (mistlands seeker). Must be melee - the plain Seeker throws, the brute closes.");
+
+            Tier1Key = cfg.Bind("2 - Thralls", "Tier1RequiresBoss", "defeated_eikthyr",
+                "World key that must be set before tier 1 can be bound. Empty means no gate.");
+            Tier2Key = cfg.Bind("2 - Thralls", "Tier2RequiresBoss", "defeated_gdking",
+                "The Elder must fall before swamp thralls will answer.");
+            Tier3Key = cfg.Bind("2 - Thralls", "Tier3RequiresBoss", "defeated_bonemass",
+                "Bonemass must fall before golems will answer.");
+            Tier4Key = cfg.Bind("2 - Thralls", "Tier4RequiresBoss", "defeated_dragon",
+                "Moder must fall before berserkers will answer.");
+            Tier5Key = cfg.Bind("2 - Thralls", "Tier5RequiresBoss", "defeated_queen",
+                "The Queen must fall before seekers will answer.");
+
+            UpgradesGateTiers = cfg.Bind("2 - Thralls", "UpgradesGateTiers", true,
+                "Each altar upgrade opens the next breed. Turn off to let the boss keys alone decide.");
+            Upgrade1Parts = cfg.Bind("2 - Thralls", "Upgrade1Parts",
+                "stone_floor_2x2:0,0,0:0.34:0"
+                + ";stone_pillar:0,0.04,0:0.30:0"
+                + ";piece_groundtorch_green:0,0.70,0:0.85:0",
+                "Fallback for the first altar upgrade, used only if Upgrade1Model is missing from disk. Each part is prefab:x,y,z:scale:yaw. Green fire over a sunken slab, for the swamp.");
+            Upgrade2Parts = cfg.Bind("2 - Thralls", "Upgrade2Parts",
+                "stone_floor_2x2:0,0,0:0.46:0"
+                + ";stone_floor_2x2:0,0.18,0:0.32:45"
+                + ";stone_pillar:0,0.30,0:0.42:0"
+                + ";guard_stone:0,0.95,0:0.60:0",
+                "Fallback for the second altar upgrade, used only if Upgrade2Model is missing. Stacked rock with a rune stone crowning it, for the mountain.");
+            Upgrade4Parts = cfg.Bind("2 - Thralls", "Upgrade4Parts",
+                "blackmarble_pillar:0,0,0:0.5:0"
+                + ";blackmarble_head_big01:0,0.9,0:0.4:0",
+                "What the fourth altar upgrade is built out of, if its model is missing. Black marble, for the mistlands.");
+            Upgrade3Parts = cfg.Bind("2 - Thralls", "Upgrade3Parts",
+                "stone_floor_2x2:0,0,0:0.44:0"
+                + ";stone_arch:0,0.10,0:0.52:0"
+                + ";fire_pit:0,0.14,0:0.55:0"
+                + ";piece_groundtorch:-0.62,0.16,0:0.78:0"
+                + ";piece_groundtorch:0.62,0.16,0:0.78:0",
+                "Fallback for the third altar upgrade, used only if Upgrade3Model is missing. An arch over open fire, for the war camps of the plains.");
+
+            // Each one is paid for in the goods of the biome whose dead it opens, so the
+            // rung cannot be reached before you have been where its thralls come from.
+            // These were all Wood:1 while the shapes were being built - a test value that
+            // let every breed be unlocked in a minute, and one that should not ship.
+            Upgrade1Cost = cfg.Bind("2 - Thralls", "Upgrade1Cost",
+                "Iron:10,Guck:10,WitheredBone:5,Stone:20,ElderBark:15",
+                "What the bog stone costs. It is the first altar upgrade and it opens swamp elites.");
+            Upgrade2Cost = cfg.Bind("2 - Thralls", "Upgrade2Cost",
+                "Obsidian:20,FineWood:20,DeerHide:10,Silver:6,Crystal:25,FreezeGland:10",
+                "What the mountain cairn costs. It is the second altar upgrade and it opens mountain golems.");
+            Upgrade3Cost = cfg.Bind("2 - Thralls", "Upgrade3Cost",
+                "BlackMetal:20,Needle:15,LinenThread:25,GoblinTotem:2",
+                "What the war totem costs. It is the third altar upgrade and it opens fuling berserkers.");
+            Upgrade4Cost = cfg.Bind("2 - Thralls", "Upgrade4Cost",
+                "BlackMarble:30,Eitr:20,YggdrasilWood:30,Iron:30",
+                "What the rift stone costs. It is the fourth altar upgrade and it opens mistlands seekers.");
+
+            // Each upgrade wears its own hand-modelled mesh, sitting next to the plugin
+            // alongside the altar's. The UpgradeNParts assemblies above are still the
+            // fallback for anyone who deletes the files, which is why they stay.
+            //
+            // Each carries the breed it unlocks rather than only its biome: a draugr
+            // rising out of the guck, a golem under the cairn, a fuling war totem.
+            Upgrade1Model = cfg.Bind("2 - Thralls", "Upgrade1Model",
+                "thrall_altar_upgrade1.obj",
+                "Model file for the first altar upgrade, sitting next to the plugin dll. Empty falls back to Upgrade1Parts.");
+            Upgrade2Model = cfg.Bind("2 - Thralls", "Upgrade2Model",
+                "thrall_altar_upgrade2.obj",
+                "Model file for the second altar upgrade. Empty falls back to Upgrade2Parts.");
+            Upgrade3Model = cfg.Bind("2 - Thralls", "Upgrade3Model",
+                "thrall_altar_upgrade3.obj",
+                "Model file for the third altar upgrade. Empty falls back to Upgrade3Parts.");
+            Upgrade4Model = cfg.Bind("2 - Thralls", "Upgrade4Model",
+                "thrall_altar_upgrade4.obj",
+                "Model file for the fourth altar upgrade. Empty falls back to Upgrade4Parts.");
+
+            Tier1Cost = cfg.Bind("2 - Thralls", "Tier1Cost",
+                "Bronze:5,Resin:20,GreydwarfEye:10,RoundLog:25,Stone:25,TrophyGreydwarfBrute:3",
+                "What it costs to raise a greydwarf brute, as PrefabName:Amount separated by commas.");
+            Tier2Cost = cfg.Bind("2 - Thralls", "Tier2Cost",
+                "Iron:5,Entrails:20,Bloodbag:10,ElderBark:25,Flint:25,TrophyDraugrElite:3",
+                "What it costs to raise a swamp elite.");
+            Tier3Cost = cfg.Bind("2 - Thralls", "Tier3Cost",
+                "Silver:5,Crystal:10,RoundLog:15,ElderBark:15,Stone:15,Flint:15,TrophySGolem:3",
+                "What it costs to raise a mountain golem.");
+            Tier5Cost = cfg.Bind("2 - Thralls", "Tier5Cost",
+                "BlackMarble:20,Eitr:15,Softtissue:20,Carapace:15,TrophySeekerBrute:3",
+                "What it costs to raise a mistlands seeker.");
+            Tier4Cost = cfg.Bind("2 - Thralls", "Tier4Cost",
+                "BlackMetal:10,Coins:50,FineWood:25,Obsidian:25,TrophyGoblinBrute:3",
+                "What it costs to raise a fuling berserker.");
+
+            Tier1Revive = cfg.Bind("2 - Thralls", "Tier1ReviveCost", "GreydwarfEye:20,Wood:20",
+                "Black forest goods to raise a fallen tier 1 thrall.");
+            Tier2Revive = cfg.Bind("2 - Thralls", "Tier2ReviveCost", "Bloodbag:15,IronScrap:5",
+                "Swamp goods to raise a fallen tier 2 thrall.");
+            Tier3Revive = cfg.Bind("2 - Thralls", "Tier3ReviveCost", "Crystal:10,WolfPelt:5",
+                "Mountain goods to raise a fallen tier 3 thrall.");
+            Tier4Revive = cfg.Bind("2 - Thralls", "Tier4ReviveCost", "BlackMetalScrap:15,Needle:10",
+                "Plains goods to raise a fallen tier 4 thrall.");
+            Tier5Revive = cfg.Bind("2 - Thralls", "Tier5ReviveCost", "Eitr:10,BlackCore:2",
+                "Mistlands goods to raise a fallen tier 5 thrall.");
+
+            TierDamageStep = cfg.Bind("2 - Thralls", "TierDamageStep", 0.5f,
+                "Extra work damage per tier above the first, as a fraction.");
+            TierSpeedStep = cfg.Bind("2 - Thralls", "TierSpeedStep", 0.12f,
+                "How much faster each tier swings, as a fraction of the base interval.");
+            LevelDamageStep = cfg.Bind("2 - Thralls", "LevelDamageStep", 0.08f,
+                "Extra work damage per level above the first, as a fraction.");
+            LevelSpeedStep = cfg.Bind("2 - Thralls", "LevelSpeedStep", 0.03f,
+                "How much faster each level swings, as a fraction of the base interval.");
+
+            PackBaseSlots = cfg.Bind("2 - Thralls", "PackBaseSlots", 1,
+                "Pack slots a tier one thrall carries. A greydwarf brute is not a pack mule.");
+            PackPerTier = cfg.Bind("2 - Thralls", "PackPerTier", 1,
+                "Extra pack slots for each tier above the first, so a berserker out-carries a brute.");
+            PackLevelsPerSlot = cfg.Bind("2 - Thralls", "PackLevelsPerSlot", 5,
+                "Levels between each extra pack slot. Note this only ever fires if MaxLevel is at least this high.");
+
+            CarryColumns = cfg.Bind("2 - Thralls", "CarryColumns", 4, "Unused for thralls now that pack size comes from tier and level. Kept so old configs still load.");
+            CarryRows = cfg.Bind("2 - Thralls", "CarryRows", 2, "Backpack height (slots).");
+
+            WorkRadius = cfg.Bind("3 - Work", "WorkRadius", 25f,
+                "How far from its assigned spot a thrall looks for more of the same resource.");
+            CommandRadius = cfg.Bind("3 - Work", "CommandRadius", 40f,
+                "How far away a thrall can be and still hear your orders.");
+            HarvestRange = cfg.Bind("3 - Work", "HarvestRange", 4.5f,
+                "How close a thrall must be to swing at its target.");
+            SwingInterval = cfg.Bind("3 - Work", "SwingInterval", 1.6f,
+                "Seconds between swings. Higher = slower workers.");
+            ChopDamage = cfg.Bind("3 - Work", "ChopDamage", 40f, "Chop damage per swing (trees).");
+            PickaxeDamage = cfg.Bind("3 - Work", "PickaxeDamage", 40f, "Pickaxe damage per swing (rock and ore).");
+            ToolTier = cfg.Bind("3 - Work", "ToolTier", 1,
+                "Tool tier of a tier 1 thrall. Each breed above the first adds one, so a berserker works as tier 4 and a seeker as tier 5. Levels do NOT raise this - they only make a thrall hit harder and faster, so a rank 20 brute still cannot touch what a draugr can. 0 = flint/antler, 2 = bronze/iron, 4 = black metal.");
+            PickupRadius = cfg.Bind("3 - Work", "PickupRadius", 10f, "How far a thrall reaches to pick up what it knocked loose.");
+            DepositRange = cfg.Bind("3 - Work", "DepositRange", 4f, "How close a thrall must be to a chest to unload.");
+            AutoDropOff = cfg.Bind("3 - Work", "AutoDropOff", true,
+                "A thrall with a full pack and no chest of its own claims the nearest one to the altar instead of standing there waiting to be told. Turn off if you want to place every drop-off by hand.");
+            AutoDropOffRange = cfg.Bind("3 - Work", "AutoDropOffRange", 30f,
+                "How far from the altar a thrall will look for a chest to adopt.");
+
+            WorkAtNight = cfg.Bind("3 - Work", "WorkAtNight", true, "If false, thralls idle between dusk and dawn.");
+            MineablePrefabs = cfg.Bind("3 - Work", "ExtraMineableNames", "rock,stone,copper,tin,silver,obsidian,flametal,mudpile,ore",
+                "Extra name fragments treated as mineable, on top of proper ore veins. Comma separated, case insensitive.");
+            SeedsPerTrip = cfg.Bind("3 - Work", "SeedsPerTrip", 20,
+                "How much seed a farming thrall draws from its drop-off chest per visit. 0 stops them restocking, so they only sow what you hand them.");
+
+            SwingAnimation = cfg.Bind("3 - Work", "SwingAnimation", "",
+                "Animator trigger played when a thrall works. Empty picks the first one the creature has. Set to 'none' for no animation at all if your chosen creature does something silly.");
+
+            AltarName = cfg.Bind("2 - Thralls", "AltarName", "Summoning altar",
+                "What the altar is called in the build menu and when you look at it.");
+            AltarCost = cfg.Bind("2 - Thralls", "AltarCost", "HardAntler:3,Stone:30,Wood:20,GreydwarfEye:5,Bronze:5",
+                "What it takes to build the altar. ElderBark is ancient bark, so the altar now sits behind the swamp rather than behind Eikthyr - hard antler and greydwarf eyes no longer set the gate, they are just flavour on top of it.");
+            AltarBasePrefab = cfg.Bind("2 - Thralls", "AltarBasePrefab", "guard_stone",
+                "Existing piece the altar is cloned from, for its components - the network view, the wear-and-tear and the piece itself. Its own model is switched off and replaced, so this does NOT decide how the altar looks; AltarMaterialFrom and the model files do. Change only if the clone is misbehaving.");
+            AltarRange = cfg.Bind("2 - Thralls", "AltarRange", 20f,
+                "How close to an altar you must be to bind thralls or open its panel.");
+            AltarScale = cfg.Bind("2 - Thralls", "AltarScale", 1f,
+                "Overall size of the altar.");
+            // The bench is gone: the bindstone replaced it and it has been archived.
+            //
+            // Note this list, not the files on disk, is what decides whether a shape's
+            // prefab exists - Shapes() never checks the disk. A name dropped from here
+            // destroys every altar of that shape already standing, because ZNetScene
+            // discards ZDOs whose prefab it cannot resolve. A name kept here with no model
+            // beside the plugin is harmless: it falls back to the AltarParts assembly.
+            AltarShapes = cfg.Bind("2 - Thralls", "AltarShapes",
+                "bindstone",
+                "Which altar shapes appear on the hammer, each as its own buildable piece. They all work identically. Names match the model files sitting next to the plugin dll; the shelved ones are in assets/archive. CAREFUL: this list alone decides which prefabs exist - nothing here checks the disk. Removing a name destroys every altar of that shape already standing in a world, because ZNetScene discards ZDOs whose prefab it cannot resolve. Leaving a name here with no model beside the plugin is harmless: it falls back to the AltarParts assembly. Empty falls back to the single AltarModel.");
+            AltarVanillaGroups = cfg.Bind("2 - Thralls", "AltarVanillaGroups", "darkstone",
+                "Material groups that wear Valheim's own stone material instead of a texture of ours, comma separated. Ours are flattened to remove the normal map, which is where the game's stone gets most of its contrast, so a large plain mass reads flatter and darker than the rock around it. Empty means every group uses our own sheets.");
+            OneStarRank = cfg.Bind("2 - Thralls", "OneStarRank", 10,
+                "Rank at which a thrall gains its first star. Stars are the game's own creature levels, so a starred thrall is tougher as well as marked.");
+            TwoStarRank = cfg.Bind("2 - Thralls", "TwoStarRank", 20,
+                "Rank at which a thrall gains its second star.");
+            AltarAmbience = cfg.Bind("6 - Altar props", "Ambience", true,
+                "A looping sound on each altar, lifted off a vanilla piece so it belongs to the world rather than being a foreign clip. The altars were silent, and Valheim leans on ambient sound for presence more than most games.");
+            AltarAmbienceFrom = cfg.Bind("6 - Altar props", "AmbienceFrom",
+                "portal_wood,guard_stone,piece_magetable,fire_pit",
+                "Pieces to lift a looping sound from, first one that carries a clip wins.");
+            AltarAmbienceVolume = cfg.Bind("6 - Altar props", "AmbienceVolume", 0.35f,
+                "How loud the altar's own sound is. Kept well under the donor's, since a hum you notice is a hum you will get tired of.");
+            AltarFlattenNormals = cfg.Bind("2 - Thralls", "AltarFlattenNormals", false,
+                "Replace the borrowed material's normal map with a flat one on our own textures. Off keeps it, which is where the game's surfaces get their highlights: with it on, every custom sheet reads flat and dead next to real wood and stone however bright the texture is. On is the old behaviour, worth returning to if the donor's bumps land in obviously wrong places on our geometry.");
+            AltarVanillaWoodGroups = cfg.Bind("2 - Thralls", "AltarVanillaWoodGroups", "timber,wood",
+                "Material groups that wear Valheim's own wood material instead of a texture of ours, comma separated. Same reasoning as AltarVanillaGroups: ours are flattened of their normal map, so a pole beside a real workbench reads black and grainless. Empty means every wood group uses our own sheets.");
+            AltarWoodMaterialFrom = cfg.Bind("2 - Thralls", "AltarWoodMaterialFrom",
+                "wood_wall,wood_beam,wood_pole,wood_floor,piece_workbench,wood_door",
+                "Pieces to lift a wood material from, first one that resolves wins. The wooden counterpart of AltarMaterialFrom.");
+            AltarModel = cfg.Bind("2 - Thralls", "AltarModel", "thrall_altar_bindstone.obj",
+                "Model file sitting next to the plugin dll, used only when AltarShapes is empty. Delete or rename it to fall back to the altar assembled from existing pieces.");
+            AltarDiagnostics = cfg.Bind("6 - Altar props", "Diagnostics", false,
+                "Cycle the altar through a series of test states on load, photographing each. For working out which part of the altar is responsible for something you can see. Costs a few seconds and six images every time a world loads.");
+            AltarScreenshot = cfg.Bind("6 - Altar props", "Screenshot", true,
+                "Photograph the altar from four sides shortly after it loads, next to the plugin. Only altars standing at load time are caught. Do NOT judge colour or brightness from these: the routine forces daylight before shooting and renders through a camera of its own, which carries none of the game's post-processing, so every object in them is lighter and flatter than on screen. Good for shape and placement, misleading for anything else.");
+
+            AltarTexturePoint = cfg.Bind("2 - Thralls", "AltarTexturePoint", true,
+                "Sample the altar textures without smoothing, so texels stay square. This is most of what gives Valheim props their crisp blocky look up close; turn it off for a soft, filtered surface.");
+
+            AltarBakedShading = cfg.Bind("2 - Thralls", "AltarBakedShading", false,
+                "Feed the altar's baked ambient occlusion to the shader through vertex colours. Only correct if Valheim's piece shader treats vertex colour as a plain tint; if it uses those channels for blending or wear instead, this paints black facets across the model. Off sends plain white.");
+
+            AltarUvScale = cfg.Bind("2 - Thralls", "AltarUvScale", 0.5f,
+                "How many times the texture repeats per metre. Lower means larger, coarser grain. Must match UV_SCALE in tools/altar_model.py, or the preview renders lie about how the altar will look.");
+            AltarUvRegion = cfg.Bind("2 - Thralls", "AltarUvRegion", "",
+                "Patch of the shared stone atlas to sample, as x,y,width,height. Empty reads it off the donor piece, which is almost always right.");
+
+            AltarMaterialFrom = cfg.Bind("2 - Thralls", "AltarMaterialFrom",
+                "stone_wall_2x1,stone_floor_2x2,stone_pillar,stone_arch,stone_wall_4x2,guard_stone,blackmarble_column_1",
+                "Pieces to lift a stone material from, first one that resolves wins. This is what makes the altar light and weather like the rest of the world.");
+
+            // Dressed and ceremonial: torches lighting the steps.
+            PropsPlinth = cfg.Bind("6 - Altar props", "Plinth",
+                "piece_groundtorch:-1.05,0,-1.95:0.9:0"
+                + ";piece_groundtorch:1.05,0,-1.95:0.9:0",
+                "Props added to the plinth altar, as prefab:x,y,z:scale:yaw separated by semicolons. Missing prefabs are skipped.");
+
+            // Ancient and cold: dwarven lamps under the capstone.
+            PropsDolmen = cfg.Bind("6 - Altar props", "Dolmen",
+                "piece_dvergr_lantern:0,0,-1.55:0.85:0"
+                + ";piece_groundtorch_blue:-1.95,0,1.05:0.8:0"
+                + ";piece_groundtorch_blue:1.95,0,1.05:0.8:0",
+                "Props added to the dolmen altar.");
+
+            // Rough and lived-in: a fire burning in the crown of the pile.
+            PropsCairn = cfg.Bind("6 - Altar props", "Cairn",
+                "fire_pit:0,1.32,0:0.75:0"
+                + ";piece_groundtorch_wood:-2.05,0,-1.25:0.85:0",
+                "Props added to the cairn altar.");
+
+            // Ritual and overgrown: green fire in the ring.
+            PropsCircle = cfg.Bind("6 - Altar props", "Circle",
+                "fire_pit:0,0.36,0:0.7:0"
+                + ";piece_groundtorch_green:-2.15,0,1.25:0.85:0"
+                + ";piece_groundtorch_green:2.15,0,1.25:0.85:0"
+                + ";piece_groundtorch_green:0,0,-2.35:0.85:0",
+                "Props added to the stone circle altar.");
+
+            PropsNoEffects = cfg.Bind("6 - Altar props", "PropsWithoutEffects", "Trophy",
+                "Prefab name prefixes whose props lose their particles and lights when mounted on an altar. Item prefabs sparkle so you can find them dropped in grass, which on an altar just looks like loot lying there. Torches and candles are not listed, because their flame is the point.");
+
+            AltarEffects = cfg.Bind("6 - Altar props", "Motes", false,
+                "Drifting motes above each altar, coloured to match it. Off by default: the altars now wear the game's own stone and wood, and the motes were doing work that the material was not doing before. Turn on for the coloured drift.");
+            AltarEffectStrength = cfg.Bind("6 - Altar props", "MoteStrength", 1f,
+                "Multiplier on how many motes each altar gives off.");
+            AltarLight = cfg.Bind("6 - Altar props", "Light", false,
+                "A light on the altar itself, coloured to match its motes. Vanilla torches cannot be used as props for this - they are stripped of the component that lights them - and candles alone are too dim to work by.");
+            AltarLightRange = cfg.Bind("6 - Altar props", "LightRange", 18f,
+                "How far the altar's light reaches, in metres.");
+            AltarLightStrength = cfg.Bind("6 - Altar props", "LightStrength", 2f,
+                "How bright the altar's light is, as a multiple of one of Valheim's own fires. 1 is about a campfire. 0 is the same as turning it off.");
+
+            AltarEffectFrom = cfg.Bind("6 - Altar props", "MoteMaterialFrom",
+                "fire_pit,bonfire,piece_groundtorch,piece_groundtorch_green",
+                "Pieces to borrow a particle material from, so the motes blend and fog like the game's own effects.");
+
+            // Bench sized and meant for indoors, so only what fits on the stone itself.
+            PropsShrine = cfg.Bind("6 - Altar props", "Shrine",
+                "Candle_resin:-0.62,1.06,-0.18:1:0"
+                + ";Candle_resin:0.62,1.06,-0.18:1:0",
+                "Props added to the bench-sized shrine.");
+
+            // Candle flames on the boards, and nothing else. The torches that used to
+            // flank it never lit: a prop has every component stripped off it before it
+            // goes on, and a torch without its Fireplace is an unlit post. The altar's
+            // own light does the work those were meant to do.
+            // Scaled well down: a vanilla candle is sized for a floor, and at full size
+            // three of them stood on the bench like barrels next to the skull.
+            PropsWorktable = cfg.Bind("6 - Altar props", "Worktable",
+                "Candle_resin:-0.60,1.16,-0.30:0.45:0"
+                + ";Candle_resin:-0.46,1.16,-0.38:0.38:0"
+                + ";Candle_resin:0.62,1.16,-0.30:0.42:0",
+                "Props for the summoning bench, which has been archived and replaced by the summoning altar - kept so the shape still dresses correctly if it is ever put back in AltarShapes. Only the candles: a vanilla item prefab mounted as decoration keeps the sparkle it uses to be findable on the ground.");
+
+            // The bindstone's shelf runs across the back of its crown, 1.20 up and 0.27
+            // back. The skeleton trophy stands between the two candles, where the model
+            // leaves a bare plinth for it - the skull is not modelled, because one built
+            // out of spheres never stopped looking like a pile of spheres and the game
+            // ships a hand-made one.
+            PropsBindstone = cfg.Bind("6 - Altar props", "Bindstone",
+                "Candle_resin:-0.17,0.52,-0.73:0.45:0"
+                + ";Candle_resin:0.17,0.52,-0.73:0.42:0",
+                "Props added to the summoning altar, on the flat capstone across the front of its kerb.");
+
+            // Necromancy: corpse-light, guttering candles and banners over the howe.
+            PropsBarrow = cfg.Bind("6 - Altar props", "Barrow",
+                "piece_groundtorch_green:-1.55,0,-1.75:0.9:0"
+                + ";piece_groundtorch_green:1.55,0,-1.75:0.9:0"
+                + ";Candle_resin:-0.55,0.95,-0.45:1:0"
+                + ";Candle_resin:0.55,0.95,-0.45:1:0"
+                + ";piece_banner07:-2.30,0,1.15:0.9:0"
+                + ";piece_banner07:2.30,0,1.15:0.9:0"
+                + ";itemstand:0,0.95,0.55:1:180",
+                "Props added to the barrow altar.");
+
+            AltarParts = cfg.Bind("2 - Thralls", "AltarParts",
+                "stone_floor_2x2:0,0,0:0.62:0"
+                + ";stone_floor_2x2:0,0.18,0:0.4:45"
+                + ";guard_stone:0,0.3,0:1.05:0"
+                + ";stone_pillar:-1.15,0,-0.15:0.7:0"
+                + ";stone_pillar:1.15,0,-0.15:0.7:0"
+                + ";piece_groundtorch:-1.15,1.35,-0.15:0.8:0"
+                + ";piece_groundtorch:1.15,1.35,-0.15:0.8:0",
+                "Fallback for the altar itself, used only if its model file is missing from disk. Each part is prefab:x,y,z:scale:yaw, separated by semicolons. Parts that do not exist are skipped. Empty leaves the altar wearing the plain borrowed model.");
+
+            BaseWorkSlots = cfg.Bind("2 - Thralls", "BaseWorkSlots", 1,
+                "How many thralls can be working at once with no station upgrades built near the altar.");
+            MaxWorkSlots = cfg.Bind("2 - Thralls", "MaxWorkSlots", 5,
+                "Hard ceiling on thralls working at once, however many upgrades you build.");
+            SlotSearchRange = cfg.Bind("2 - Thralls", "SlotSearchRange", 40f,
+                "How far from the altar station upgrades count towards your work slots.");
+
+            RequireTools = cfg.Bind("5 - Tools", "RequireTools", true,
+                "A thrall must be handed a tool before it will chop, mine or farm. Give it one from its page in the altar panel. Turn off to let them work bare handed as they used to.");
+            ToolsChop = cfg.Bind("5 - Tools", "ChopTools",
+                "AxeStone,AxeFlint,AxeBronze,AxeIron,AxeBlackMetal,AxeJotunBane,AxeBerzerkr",
+                "Items accepted as a chopping tool, by prefab name.");
+            ToolsMine = cfg.Bind("5 - Tools", "MineTools",
+                "PickaxeAntler,PickaxeStone,PickaxeBronze,PickaxeIron,PickaxeBlackMetal",
+                "Items accepted as a mining tool, by prefab name.");
+            ToolsFarm = cfg.Bind("5 - Tools", "FarmTools", "Cultivator,Hoe",
+                "Items accepted as a farming tool, by prefab name.");
+
+            ShowTools = cfg.Bind("5 - Tools", "ShowTools", true,
+                "Put the right tool in a thrall's hand for its job. Cosmetic only - it does not change what they hit for.");
+            ToolChop = cfg.Bind("5 - Tools", "ChopTool", "AxeBronze",
+                "Item prefab shown when chopping. AxeStone, AxeFlint, AxeBronze, AxeIron, AxeBlackMetal, AxeJotunBane.");
+            ToolMine = cfg.Bind("5 - Tools", "MineTool", "PickaxeBronze",
+                "Item prefab shown when mining. PickaxeAntler, PickaxeStone, PickaxeBronze, PickaxeIron, PickaxeBlackMetal.");
+            ToolFarm = cfg.Bind("5 - Tools", "FarmTool", "Cultivator",
+                "Item prefab shown when farming.");
+            ToolBuild = cfg.Bind("5 - Tools", "BuildTool", "Hammer",
+                "Item prefab shown when building or repairing.");
+
+            ShowKeybinds = cfg.Bind("4 - Misc", "ShowKeybinds", true,
+                "Show a small list of the mod's keys on screen. Handy while learning them, easy to switch off once they are muscle memory.");
+            Verbose = cfg.Bind("4 - Misc", "VerboseLogging", false, "Chatty logs, for when something misbehaves.");
+        }
+
+        /// <summary>Parses RecruitCost into prefab/amount pairs. Malformed entries are skipped, not fatal.</summary>
+        public static List<KeyValuePair<string, int>> ParseCost()
+        {
+            var result = new List<KeyValuePair<string, int>>();
+            var raw = RecruitCost.Value;
+            if (string.IsNullOrEmpty(raw)) return result;
+
+            foreach (var part in raw.Split(','))
+            {
+                var trimmed = part.Trim();
+                if (trimmed.Length == 0) continue;
+                var split = trimmed.Split(':');
+                if (split.Length != 2) continue;
+                int amount;
+                if (!int.TryParse(split[1].Trim(), out amount) || amount <= 0) continue;
+                result.Add(new KeyValuePair<string, int>(split[0].Trim(), amount));
+            }
+            return result;
+        }
+
+        public static string[] ExtraMineableNames()
+        {
+            var raw = MineablePrefabs.Value ?? "";
+            var parts = raw.Split(',');
+            var list = new List<string>(parts.Length);
+            foreach (var p in parts)
+            {
+                var t = p.Trim().ToLowerInvariant();
+                if (t.Length > 0) list.Add(t);
+            }
+            return list.ToArray();
+        }
+    }
+}
