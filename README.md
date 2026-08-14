@@ -1,35 +1,30 @@
 # Thralls
 
-A Valheim mod that lets you put workers to task. Recruit a thrall, point it at a forest,
-a copper vein or a berry patch, and it will work the area and haul what it gathers to a
-depot you build.
+A Valheim mod that lets you put workers to task. Bind a thrall at an altar, lead it to a
+forest, a copper vein or a berry patch, and tell it to work from there. It clears the
+ground around that spot and hauls what it gathers to a depot you build.
 
 Built against the installed game (Unity 6000.0.61, BepInEx 5.4.23.3, Harmony 2.9).
 
 ## Controls
 
-All keys are rebindable in the config. Defaults use the numpad.
+There are no keys for ordering thralls about. Everything is a menu:
+
+| What you want | Where |
+| --- | --- |
+| Bind a thrall, see the whole crew, raise the dead | press `E` on the altar |
+| Order one thrall — job, where it works, follow, release | press `E` on that thrall |
+| Somewhere to unload | build a depot |
+
+The keys that remain are building aids rather than thrall commands, and all four are
+rebindable in the config.
 
 | Key | What it does |
 | --- | --- |
-| `Numpad 0` | Recruit a thrall where you are looking |
-| `Numpad 1` | Assign a job at whatever you are pointing at |
-| `Numpad 3` | Toggle follow-me |
-| `Numpad 4` | Look at a thrall and dismiss it (it drops what it carries) |
-| `Numpad 5` | Open the nearest summoning altar's ledger |
-
-The job is inferred from what you point at:
-
-- tree, stump or fallen log → **chop**
-- ore vein or rock → **mine**
-- berry bush or mushroom on wild ground → **gather**
-- anything on tilled soil, or bare tilled soil → **farm**
-- anything you built → **repair**
-- other bare ground → **stand here**
-- an existing thrall → prints its status instead of giving an order
-
-Orders go to the nearest thrall within `CommandRadius`, preferring one that is idle.
-Point at a thrall to see its name, its job and how full its pack is.
+| `Numpad 7` | Step the time of day through dawn, midday, dusk and night |
+| `Numpad 8` | Level a wide circle of ground where you are looking |
+| `Numpad 9` | Toggle unlimited health and stamina |
+| `Numpad -` | Cycle the altar's light and motes, for diagnosing what you can see |
 
 ## Talking to a thrall
 
@@ -67,9 +62,14 @@ Thralls unload into a **depot**, a piece you build, and nowhere else.
 
 It is a chest underneath — a real container, six by four, that you can open and take from
 like any other. What it adds is a radius: any thrall whose *work base* is within
-`DepotRange` (60m) hauls its pack there, draws its seed there, and fetches build materials
-there. Nothing needs pointing at and nothing is stored on the thrall, so tearing the depot
-down and rebuilding it somewhere better re-points the whole crew at once.
+`DepotRange` (60m) hauls its pack there and draws its seed there. Nothing needs nominating
+and nothing is stored on the thrall, so tearing the depot down and rebuilding it somewhere
+better re-points the whole crew at once.
+
+**Build as many as you like.** A thrall walks to the nearest depot to the ground it works,
+and if that one is full it carries on to the next nearest instead of stopping. A second
+depot behind the first is overflow without being configured as overflow. Only when every
+one of them in range is full does a thrall say so and go back to standing by.
 
 It was a chest you nominated with a keypress, once per thrall, which was a chore repeated as
 many times as you had workers. Softening that with an auto-adopt made it worse in a
@@ -163,9 +163,9 @@ to the cultivator is sown too, at that plant's own seed cost.
 
 ## Repairing
 
-Point a thrall at anything you have built and it becomes the site foreman for that area: it
-finds the most damaged piece within its work radius, walks over, and repairs it, then moves
-on to the next worst. Repair costs nothing, exactly as it does when you swing the hammer
+Set a thrall to repair and it becomes the site foreman for that area: it finds the most
+damaged piece within its work radius, walks over, and repairs it, then moves on to the next
+worst. Repair costs nothing, exactly as it does when you swing the hammer
 yourself. Leave one posted at a base and it will quietly undo storm and raid wear.
 
 ## The altar's ledger
@@ -179,7 +179,7 @@ Press `E` on a summoning altar to open the ledger, which lists every thrall with
 - **Come**, to call it to the altar
 - **Release**, to dismiss it
 
-There is also **Recall all here**. The panel closes with its own button, `Numpad 5`, or by
+There is also **Recall all here**. The panel closes with its own button, with Escape, or by
 walking more than 8m away.
 
 The ledger is the crew view — everyone at once, and hiring. For one thrall where it stands,
@@ -214,7 +214,6 @@ needs no re-pointing.
 - `SeedsPerTrip` — seed drawn from the depot per visit, default 20. Set to 0 to stop them
   restocking, so they only sow what you hand them directly.
 - `WorkRadius` — how far from the assigned spot they will roam for more of the same resource.
-- `WorkerPrefab` — `Dverger` by default; `Skeleton_Friendly` also works.
 - `DepotRange` — how far a depot reaches, default 60. Measured from the thrall's work base,
   not from the thrall, so a crew spread along a treeline all agree on one store.
 - `DepotWidth` / `DepotHeight` — how much it holds, default 6 by 4. A full depot stops the

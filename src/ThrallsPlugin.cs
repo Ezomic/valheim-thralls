@@ -33,6 +33,7 @@ namespace Thralls
             // forget, and a patch that is simply never applied fails silently.
             _harmony.PatchAll(typeof(HoverPatches));
             _harmony.PatchAll(typeof(DepotHoverPatch));
+            _harmony.PatchAll(typeof(UnlockNotices));
 
             Log.LogInfo(PluginName + " " + PluginVersion + " by " + PluginAuthor + " - ready.");
 
@@ -77,24 +78,11 @@ namespace Thralls
 
             if (InputBlocked()) return;
 
-            if (AltarUI.IsOpen)
-            {
-                // While the ledger is open the only key that matters is the one that shuts it.
-                if (Hotkey.Down(ThrallConfig.KeySteward)) AltarUI.Close();
-                return;
-            }
+            // Both panels swallow every key while they are open. Only the site tools are
+            // left on keys, and none of them should fire at a window.
+            if (AltarUI.IsOpen || ThrallTalk.IsOpen) return;
 
-            // Same for a thrall's own orders panel: the hotkeys all act on "the nearest
-            // thrall", and firing one of those at a window that is already about a
-            // particular thrall is how you end up giving the order to somebody else.
-            if (ThrallTalk.IsOpen) return;
-
-            if (Hotkey.Down(ThrallConfig.KeySteward)) OpenAltar();
-            else if (Hotkey.Down(ThrallConfig.KeyRecruit)) Recruit();
-            else if (Hotkey.Down(ThrallConfig.KeyAssign)) Assign();
-            else if (Hotkey.Down(ThrallConfig.KeyFollow)) ToggleFollow();
-            else if (Hotkey.Down(ThrallConfig.KeyDismiss)) Dismiss();
-            else if (Hotkey.Down(ThrallConfig.KeyTimeOfDay)) SiteTools.CycleTimeOfDay();
+            if (Hotkey.Down(ThrallConfig.KeyTimeOfDay)) SiteTools.CycleTimeOfDay();
             else if (Hotkey.Down(ThrallConfig.KeyFlatten)) FlattenHere();
             else if (Hotkey.Down(ThrallConfig.KeyGodMode)) SiteTools.ToggleGodMode();
             else if (Hotkey.Down(ThrallConfig.KeyAltarEffects)) AltarDebug.Cycle();
@@ -117,26 +105,6 @@ namespace Thralls
         }
 
         // ------------------------------------------------------------------ commands
-
-        /// <summary>Hotkey hiring takes the best tier the player can currently pay for.</summary>
-        private void Recruit()
-        {
-            var inventory = Player.m_localPlayer.GetInventory();
-            var price = Mathf.Max(0, ThrallConfig.HeadsPerWorker.Value);
-
-            for (int tier = ThrallBreed.Count; tier >= 1; tier--)
-            {
-                if (!ThrallBreed.Unlocked(tier)) continue;
-                if (price == 0 || Trophies.Count(inventory, tier) >= price)
-                {
-                    Hire(tier, null);
-                    return;
-                }
-            }
-
-            Say("You need " + price + " trophies to bind a thrall. You have "
-                + Trophies.Count(inventory, 1) + ".");
-        }
 
         /// <summary>
         /// Binds one thrall of the given tier. Heads must match that tier or be better,
@@ -218,8 +186,8 @@ namespace Thralls
                 spot = player.transform.position + player.transform.forward * 2f;
 
             Spawn(prefab, spot, tier, 1, null);
-            Say(ThrallBreed.NameFor(tier) + " enters your service. Point at work and press "
-                + ThrallConfig.KeyAssign.Value + ".");
+            Say(ThrallBreed.NameFor(tier) + " enters your service. Walk up to it and press use "
+                + "to tell it what to do.");
             return true;
         }
 
@@ -318,94 +286,17 @@ namespace Thralls
             SiteTools.Flatten(spot, Mathf.Clamp(ThrallConfig.FlattenRadius.Value, 1f, 24f));
         }
 
-        /// <summary>Opens the nearest altar's panel without having to walk up and press use.</summary>
-        private void OpenAltar()
-        {
-            var altar = ThrallAltar.Within(ThrallConfig.AltarRange.Value);
-            if (altar == null)
-            {
-                Say("No " + ThrallConfig.AltarName.Value.ToLowerInvariant() + " within reach.");
-                return;
-            }
-            AltarUI.Toggle(altar);
-        }
-
-        private void Assign()
-        {
-            RaycastHit hit;
-            if (!LookAtCollider(60f, out hit))
-            {
-                Say("Look at a tree, a rock, a bush or the ground.");
-                return;
-            }
-
-            var pointed = Hovered() != null
-                ? Hovered().GetComponentInParent<Thrall>()
-                : hit.collider.GetComponentInParent<Thrall>();
-            if (pointed != null)
-            {
-                Say(pointed.StatusLine());
-                return;
-            }
-
-            var thrall = ThrallRegistry.Nearest(Player.m_localPlayer.transform.position,
-                ThrallConfig.CommandRadius.Value, true);
-            if (thrall == null)
-            {
-                Say("No thrall close enough to hear you.");
-                return;
-            }
-
-            var job = WorkNode.JobFor(hit.collider, hit.point, thrall.Power.ToolTier);
-
-            if (ThrallRegistry.IsWork(job) && !ThrallRegistry.HasFreeSlot(thrall))
-            {
-                Say(string.Format("Only {0} thralls can work at once. Build more station upgrades near the altar.",
-                    ThrallAltar.Slots));
-                return;
-            }
-
-            thrall.AssignJob(job, hit.point);
-
-            if (job == ThrallJob.None)
-                Say(thrall.ThrallName + " will wait here.");
-            else
-                Say(thrall.ThrallName + " starts " + WorkNode.JobName(job) + ".");
-        }
-
-        // The "look at a chest and press a key" command used to live here. It is gone with
-        // the chests: a thrall hauls to the nearest depot to its work base and there is
-        // nothing left to point at. Build the depot where you want the goods.
-
-        private void ToggleFollow()
-        {
-            var player = Player.m_localPlayer;
-            var thrall = ThrallRegistry.Nearest(player.transform.position, ThrallConfig.CommandRadius.Value, false);
-            if (thrall == null)
-            {
-                Say("No thrall close enough to hear you.");
-                return;
-            }
-
-            thrall.ToggleFollow(player.transform.position);
-            Say(thrall.Job == ThrallJob.Follow
-                ? thrall.ThrallName + " follows you."
-                : thrall.ThrallName + " stays put.");
-        }
-
-        private void Dismiss()
-        {
-            var thrall = LookingAt<Thrall>(20f);
-            if (thrall == null)
-            {
-                Say("Look at the thrall you want to dismiss.");
-                return;
-            }
-
-            var name = thrall.ThrallName;
-            thrall.Dismiss();
-            Say(name + " is released from service.");
-        }
+        // Assign, follow, dismiss and open-the-altar all used to be keys here.
+        //
+        // Every one of them is now a line in a menu: the first three in the panel you get
+        // by pressing use on the thrall itself, and the altar's ledger by pressing use on
+        // the altar. A key that duplicates a menu entry is a second thing to keep in step
+        // and a second thing to explain, and these four were the whole reason the mod
+        // needed a keybind reference card.
+        //
+        // What went with them is the job inference - pointing at a tree meant chop, at a
+        // vein meant mine - because it only ever existed to make one keypress carry two
+        // decisions. The panel asks for the job outright.
 
         // ------------------------------------------------------------------ helpers
 
@@ -420,36 +311,6 @@ namespace Thralls
 
             Say("You also need " + ItemCost.Missing(inventory, spec) + ".");
             return false;
-        }
-
-        private static readonly AccessTools.FieldRef<Player, GameObject> HoverRef =
-            AccessTools.FieldRefAccess<Player, GameObject>("m_hovering");
-
-        /// <summary>
-        /// Whatever the game itself says the crosshair is on. Using this means the mod agrees
-        /// with the hover text the player can see, and inherits vanilla's own handling of
-        /// interact range and awkward colliders.
-        /// </summary>
-        private static GameObject Hovered()
-        {
-            if (Player.m_localPlayer == null) return null;
-            try { return HoverRef(Player.m_localPlayer); }
-            catch { return null; }
-        }
-
-        /// <summary>Finds a component on whatever is under the crosshair, close range first.</summary>
-        private static T LookingAt<T>(float range) where T : Component
-        {
-            var hovered = Hovered();
-            if (hovered != null)
-            {
-                var found = hovered.GetComponentInParent<T>();
-                if (found != null) return found;
-            }
-
-            RaycastHit hit;
-            if (LookAtCollider(range, out hit)) return hit.collider.GetComponentInParent<T>();
-            return null;
         }
 
         /// <summary>

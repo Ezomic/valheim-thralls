@@ -57,30 +57,59 @@ namespace Thralls
         public static int Count { get { return All.Count; } }
 
         /// <summary>
-        /// The nearest usable depot to a point, or null.
+        /// Every usable depot within range of a point, nearest first.
         ///
-        /// A depot whose container has not woken up yet is skipped rather than returned -
-        /// a thrall handed one of those walks the whole way and then finds nowhere to put
+        /// A depot whose container has not woken up yet is skipped rather than listed - a
+        /// thrall handed one of those walks the whole way and then finds nowhere to put
         /// anything, which looks exactly like the pathing being broken.
         /// </summary>
-        public static ThrallDepot Nearest(Vector3 point, float range)
+        public static List<ThrallDepot> InRange(Vector3 point, float range)
         {
-            ThrallDepot best = null;
-            var bestDist = range;
+            var found = new List<ThrallDepot>();
 
             var depots = All;
             for (int i = 0; i < depots.Count; i++)
             {
-                var depot = depots[i];
-                if (!depot.Usable) continue;
-
-                var d = Vector3.Distance(point, depot.transform.position);
-                if (d > bestDist) continue;
-
-                bestDist = d;
-                best = depot;
+                if (!depots[i].Usable) continue;
+                if (Vector3.Distance(point, depots[i].transform.position) > range) continue;
+                found.Add(depots[i]);
             }
-            return best;
+
+            found.Sort((a, b) => Vector3.Distance(point, a.transform.position)
+                        .CompareTo(Vector3.Distance(point, b.transform.position)));
+            return found;
+        }
+
+        /// <summary>The nearest usable depot to a point, full or not, or null.</summary>
+        public static ThrallDepot Nearest(Vector3 point, float range)
+        {
+            var found = InRange(point, range);
+            return found.Count > 0 ? found[0] : null;
+        }
+
+        /// <summary>
+        /// Whether a load could be put down here.
+        ///
+        /// An empty slot is room for anything. Failing that, a stack that can be topped up
+        /// counts too, or a depot holding forty-nine of a fifty stack would be declared
+        /// full and the crew would walk past it. Only one item has to fit: Unload already
+        /// puts down what it can and keeps the rest, so a part-emptied pack is a normal
+        /// outcome rather than a failure.
+        /// </summary>
+        public bool HasRoomFor(Inventory load)
+        {
+            if (!Usable) return false;
+
+            var store = _container.GetInventory();
+            if (store == null) return false;
+            if (store.GetEmptySlots() > 0) return true;
+            if (load == null) return false;
+
+            var items = load.GetAllItems();
+            for (int i = 0; i < items.Count; i++)
+                if (store.CanAddItem(items[i], items[i].m_stack)) return true;
+
+            return false;
         }
 
         public bool Usable

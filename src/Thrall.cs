@@ -558,6 +558,30 @@ namespace Thralls
             return ThrallDepot.Nearest(_anchor, Mathf.Max(1f, ThrallConfig.DepotRange.Value));
         }
 
+        /// <summary>
+        /// Where to take the current load: the nearest depot with room in it.
+        ///
+        /// Nearest-and-only-nearest was the first version, and it stops a crew dead the
+        /// moment one store fills - which is precisely when they are working well. Walking
+        /// the list in distance order means a second depot behind the first is overflow
+        /// without being configured as overflow.
+        ///
+        /// When every one of them is full it still returns the nearest rather than null.
+        /// The thrall then walks over, fails to put anything down and says the depot is
+        /// full, which is the truth and is worth hearing; returning null here would have it
+        /// stand in the woods with a full pack saying there is no depot, which is not.
+        /// </summary>
+        private ThrallDepot HaulTarget()
+        {
+            var depots = ThrallDepot.InRange(_anchor, Mathf.Max(1f, ThrallConfig.DepotRange.Value));
+            if (depots.Count == 0) return null;
+
+            for (int i = 0; i < depots.Count; i++)
+                if (depots[i].HasRoomFor(_inventory)) return depots[i];
+
+            return depots[0];
+        }
+
         public bool HasDropOff { get { return DepotFor() != null; } }
 
         /// <summary>
@@ -679,15 +703,6 @@ namespace Thralls
             }
 
             DropEverything();
-        }
-
-        public string StatusLine()
-        {
-            var carried = _inventory.NrOfItems();
-            var slots = _inventory.GetWidth() * _inventory.GetHeight();
-            var what = _hauling ? "hauling to the chest" : WorkNode.JobName(_job);
-            return string.Format("{0} the {1}, level {2} [{3} xp] - {4} ({5}/{6} slots)",
-                _name, TierName, Rank, XpProgress, what, carried, slots);
         }
 
         // ------------------------------------------------------------------ think
@@ -1014,7 +1029,7 @@ namespace Thralls
 
         private void DoHaul(float dt)
         {
-            var depot = DepotFor();
+            var depot = HaulTarget();
 
             if (depot == null)
             {
@@ -1213,8 +1228,10 @@ namespace Thralls
             if (farming) _lastRestockTake = TakeSeed(chest);
             moved += _lastRestockTake;
 
+            // Only reachable when every depot in range was full, since the haul only ever
+            // walks to a full one after finding no other with room in it.
             if (moved > 0) SaveState();
-            else if (!farming) Announce(_name + " found the depot full.");
+            else if (!farming) Announce(_name + " could not fit its load in any depot.");
         }
 
         /// <summary>Draws a trip's worth of seed out of the drop-off chest.</summary>

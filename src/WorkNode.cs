@@ -304,25 +304,6 @@ namespace Thralls
             return null;
         }
 
-        /// <summary>
-        /// Job implied by whatever the player is pointing at. Anything growing on tilled
-        /// soil - or the bare soil itself - reads as farm work rather than foraging.
-        /// </summary>
-        public static ThrallJob JobFor(Collider col, Vector3 point, int toolTier)
-        {
-            if (col == null) return ThrallJob.None;
-            if (Classify(col, ThrallJob.Chop, toolTier) != null) return ThrallJob.Chop;
-            if (Classify(col, ThrallJob.Mine, toolTier) != null) return ThrallJob.Mine;
-            if (Classify(col, ThrallJob.Gather, toolTier) != null)
-                return IsCultivated(point) ? ThrallJob.Farm : ThrallJob.Gather;
-
-            // Anything the player built is upkeep work.
-            if (col.GetComponentInParent<WearNTear>() != null) return ThrallJob.Repair;
-
-            if (IsCultivated(point)) return ThrallJob.Farm;
-            return ThrallJob.None;
-        }
-
         public static bool IsCultivated(Vector3 point)
         {
             var heightmap = Heightmap.FindHeightmap(point);

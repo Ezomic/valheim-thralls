@@ -9,11 +9,6 @@ namespace Thralls
     internal static class ThrallConfig
     {
         // --- keys ---
-        public static ConfigEntry<KeyboardShortcut> KeyRecruit;
-        public static ConfigEntry<KeyboardShortcut> KeyAssign;
-        public static ConfigEntry<KeyboardShortcut> KeyFollow;
-        public static ConfigEntry<KeyboardShortcut> KeyDismiss;
-        public static ConfigEntry<KeyboardShortcut> KeySteward;
         public static ConfigEntry<KeyboardShortcut> KeyTimeOfDay;
         public static ConfigEntry<KeyboardShortcut> KeyFlatten;
         public static ConfigEntry<float> FlattenRadius;
@@ -26,7 +21,6 @@ namespace Thralls
         public static ConfigEntry<bool> GodMode;
 
         // --- thralls ---
-        public static ConfigEntry<string> WorkerPrefab;
         public static ConfigEntry<int> MaxThralls;
         public static ConfigEntry<string> RecruitCost;
         public static ConfigEntry<int> HeadsPerWorker;
@@ -84,8 +78,6 @@ namespace Thralls
         public static ConfigEntry<int> PackBaseSlots;
         public static ConfigEntry<int> PackPerTier;
         public static ConfigEntry<int> PackLevelsPerSlot;
-        public static ConfigEntry<int> CarryColumns;
-        public static ConfigEntry<int> CarryRows;
 
         // --- work ---
         public static ConfigEntry<float> WorkRadius;
@@ -170,15 +162,8 @@ namespace Thralls
         public static ConfigEntry<string> ToolFarm;
         public static ConfigEntry<string> ToolBuild;
 
-        public static ConfigEntry<bool> AltarIsStation;
-        public static ConfigEntry<string> AltarStationCopyFrom;
-        public static ConfigEntry<float> AltarStationRange;
 
-        public static ConfigEntry<bool> UpgradeLinks;
-        public static ConfigEntry<string> UpgradeLinkFrom;
-        public static ConfigEntry<float> UpgradeLinkHeight;
 
-        public static ConfigEntry<bool> ShowKeybinds;
         public static ConfigEntry<bool> Verbose;
         public static ConfigEntry<bool> TestMode;
 
@@ -274,16 +259,13 @@ namespace Thralls
 
         public static void Bind(ConfigFile cfg)
         {
-            KeyRecruit = cfg.Bind("1 - Keys", "Recruit", new KeyboardShortcut(KeyCode.Keypad0),
-                "Spawn a thrall where you are looking.");
-            KeyAssign = cfg.Bind("1 - Keys", "Assign", new KeyboardShortcut(KeyCode.Keypad1),
-                "Assign a job at whatever you are looking at (tree = chop, rock/ore = mine, berry/crop = gather, ground = stand guard).");
-            KeyFollow = cfg.Bind("1 - Keys", "FollowToggle", new KeyboardShortcut(KeyCode.Keypad3),
-                "Toggle follow-me for the nearest thrall.");
-            KeyDismiss = cfg.Bind("1 - Keys", "Dismiss", new KeyboardShortcut(KeyCode.Keypad4),
-                "Look at a thrall and dismiss it. It drops what it carries.");
-            KeySteward = cfg.Bind("1 - Keys", "OpenAltar", new KeyboardShortcut(KeyCode.Keypad5),
-                "Open the panel of the nearest summoning altar, and close it again.");
+            // Recruit, Assign, FollowToggle, Dismiss and OpenAltar were bound here.
+            //
+            // All five are menu entries now - the first four in the panel you get by
+            // pressing use on a thrall, and the altar's ledger by pressing use on the
+            // altar - and a key that shadows a menu entry is a second thing to keep in
+            // step. What is left on keys is only what no menu can reach: the site tools.
+            // The stale lines in an existing cfg do nothing.
             KeyTimeOfDay = cfg.Bind("1 - Keys", "TimeOfDay", new KeyboardShortcut(KeyCode.Keypad7),
                 "Step the time of day through dawn, midday, dusk and night, then back to normal.");
             KeyFlatten = cfg.Bind("1 - Keys", "FlattenGround", new KeyboardShortcut(KeyCode.Keypad8),
@@ -309,8 +291,6 @@ namespace Thralls
             FlattenRadius = cfg.Bind("3 - Work", "FlattenRadius", 5f,
                 "Radius of the ground levelling tool, so 5 gives a 10m circle.");
 
-            WorkerPrefab = cfg.Bind("2 - Thralls", "WorkerPrefab", "Goblin",
-                "Creature prefab used as the worker body. Use a MELEE creature - the work animation is the creature's own attack, so a ranged one will shoot at the tree instead of hitting it. Good: Goblin, Draugr, Skeleton_NoArcher, Greydwarf. Avoid: Dverger, GoblinArcher, Draugr_Ranged.");
             MaxThralls = cfg.Bind("2 - Thralls", "MaxThralls", 20,
                 "How many thralls you may keep in total. Only a few of them can be working at once - see WorkSlots.");
             RecruitCost = cfg.Bind("2 - Thralls", "RecruitCost", "",
@@ -465,8 +445,6 @@ namespace Thralls
             PackLevelsPerSlot = cfg.Bind("2 - Thralls", "PackLevelsPerSlot", 5,
                 "Levels between each extra pack slot. Note this only ever fires if MaxLevel is at least this high.");
 
-            CarryColumns = cfg.Bind("2 - Thralls", "CarryColumns", 4, "Unused for thralls now that pack size comes from tier and level. Kept so old configs still load.");
-            CarryRows = cfg.Bind("2 - Thralls", "CarryRows", 2, "Backpack height (slots).");
 
             WorkRadius = cfg.Bind("3 - Work", "WorkRadius", 25f,
                 "How far from its assigned spot a thrall looks for more of the same resource.");
@@ -709,42 +687,17 @@ namespace Thralls
             ToolBuild = cfg.Bind("5 - Tools", "BuildTool", "Hammer",
                 "Item prefab shown when building or repairing.");
 
-            AltarIsStation = cfg.Bind("2 - Thralls", "AltarIsStation", true,
-                "Make the altar a real crafting station. It binds creatures, which is a kind "
-                + "of crafting, and being a station is what lets the upgrades attach to it "
-                + "the way a chopping block attaches to a workbench - the connection line, "
-                + "the 'Requires' line in the build menu, the range circle and the repair "
-                + "radius all come from the game once this is on. Press E for the station, "
-                + "hold E for the thrall panel.");
+            // AltarIsStation, AltarStationCopyFrom, AltarStationRange, UpgradeLinks,
+            // UpgradeLinkFrom and UpgradeLinkHeight were bound here.
+            //
+            // All six drove code that was never called. AltarStation would have made the
+            // altar a real CraftingStation and hung the upgrades off it as extensions;
+            // UpgradeLink was the earlier, hand-rolled version of the same connection line.
+            // Neither was ever wired to anything, so both were settings for behaviour the
+            // mod did not have - and the station route is the one to stay away from
+            // regardless, because CraftingStation is an Interactable and would take the
+            // altar's use key, which is now how you open its ledger.
 
-            AltarStationCopyFrom = cfg.Bind("2 - Thralls", "AltarStationCopyFrom", "piece_workbench",
-                "Station whose CraftingStation component is copied onto the altar, field for "
-                + "field. Copied rather than configured by hand because several of that "
-                + "component's fields are used without a null check - m_roofCheckPoint among "
-                + "them - so a half-filled one throws the first time a player stands near "
-                + "it. The objects it points at are cloned, not shared.");
-
-            AltarStationRange = cfg.Bind("2 - Thralls", "AltarStationRange", 8f,
-                "How far the altar reaches as a station, in metres - how close an upgrade has "
-                + "to be raised, and how far its repair and build range extend.");
-
-            UpgradeLinks = cfg.Bind("2 - Thralls", "UpgradeLinks", true,
-                "Draw the sparkling line from an upgrade to the altar it belongs to, the way "
-                + "a chopping block draws one to its workbench. Shown when the upgrade is "
-                + "raised and every few seconds while you are standing near it.");
-
-            UpgradeLinkFrom = cfg.Bind("2 - Thralls", "UpgradeLinkFrom",
-                "vfx_guardstone_connection,vfx_ExtensionConnection,vfx_ExtensionConnection_mage",
-                "Effect prefabs to draw that line with, first one that resolves wins. The "
-                + "guard stone's own connection comes first because the altar is a guard "
-                + "stone underneath.");
-
-            UpgradeLinkHeight = cfg.Bind("2 - Thralls", "UpgradeLinkHeight", 0.9f,
-                "How far up from the foot of each piece the line is drawn, in metres. Too low "
-                + "and it disappears into the kerb at both ends.");
-
-            ShowKeybinds = cfg.Bind("4 - Misc", "ShowKeybinds", true,
-                "Show a small list of the mod's keys on screen. Handy while learning them, easy to switch off once they are muscle memory.");
             Verbose = cfg.Bind("4 - Misc", "VerboseLogging", false, "Chatty logs, for when something misbehaves.");
 
             TestMode = cfg.Bind("4 - Misc", "TestMode", false,

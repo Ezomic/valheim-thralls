@@ -78,7 +78,7 @@ namespace Thralls
             // Once, for the first altar that actually exists in the world. Everything so
             // far has been measured on the prefab, which cannot show anything a component
             // spawns at runtime - and something is drawing that the prefab does not have.
-            if (!_dumped)
+            if (!_dumped && ThrallConfig.AltarDiagnostics.Value)
             {
                 _dumped = true;
                 AltarPrefab.DumpLive(gameObject);
@@ -428,7 +428,7 @@ namespace Thralls
 
             AddToScene();
             AddToHammer();
-            Measure("piece_workbench");
+            if (ThrallConfig.AltarDiagnostics.Value) Measure("piece_workbench");
             return Ready;
         }
 
@@ -656,7 +656,7 @@ namespace Thralls
 
             _prefab = prefab;
             ThrallsPlugin.Log.LogInfo("Altar '" + label + "' built.");
-            DumpRenderers(prefab);
+            if (ThrallConfig.AltarDiagnostics.Value) DumpRenderers(prefab);
             return prefab;
         }
 
