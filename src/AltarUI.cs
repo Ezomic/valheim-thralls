@@ -975,7 +975,7 @@ namespace Thralls
                 : 0;
 
             GUI.Label(second, string.Format("{0}/{1} carried · {2}m{3}", carried, slots, distance,
-                thrall.HasDropOff ? "" : " · no chest"), right);
+                thrall.HasDropOff ? "" : " · no depot"), right);
 
             // Experience along the bottom edge of the card.
             var track = new Rect(card.x + pad, card.yMax - 11f, card.width - pad * 2f, 3f);
