@@ -1214,9 +1214,95 @@ def basin(name, x, y, z, radius=0.17, mat="darkstone"):
 
 # ----------------------------------------------------------------- candidate A
 
-def build_bindstone():
+def bone_bundle(name, x, y, top_z, drop, scale=1.0, count=3):
+    """
+    Bones hanging off a knot on their own cords, each a different length.
+
+    The three attempts before this all failed the same way - by hanging things from a
+    single rigid point so they came out as one solid silhouette. cord_and_charm packed
+    three identical bars under a wide iron plate and read as a pail; bone_cluster took
+    the plate off but splayed them outward, which gravity does not do, so it read as a
+    whisk. Separate cords, unequal drops and unequal thickness read as bone.
+    """
+    parts = [add_cyl(name + "_cord", 0.007, drop, (x, y, top_z - drop / 2.0),
+                        sides=5, mat="wood")]
+    parts.append(add_sphere(name + "_knot", (0.028, 0.024, 0.022),
+                               (x, y, top_z - drop), mat="wood"))
+
+    # Hung across the cord rather than in a line with it, so two of them are never
+    # exactly behind each other whichever side you walk round.
+    for i in range(count):
+        offset = (i - (count - 1) * 0.5) * 0.042
+        hang = (0.05 + 0.045 * ((i * 5) % 3)) * scale
+        length = (0.10 + 0.055 * ((i * 3) % 4) / 3.0) * scale
+        thick = 0.017 + 0.007 * ((i * 2) % 3)
+
+        parts.append(add_cyl("%s_tie_%d" % (name, i), 0.005, hang,
+                                (x + offset, y + offset * 0.3,
+                                 top_z - drop - hang * 0.5),
+                                sides=4, mat="wood", collide=False))
+        parts.append(add_block("%s_bone_%d" % (name, i), (thick, thick, length),
+                                  (x + offset, y + offset * 0.3,
+                                   top_z - drop - hang - length * 0.5),
+                                  rot_y=(i - 1) * 2.5, mat="bone", collide=False))
+    return parts
+
+
+def bone_tooth(name, x, y, top_z, drop, scale=1.0):
+    """
+    One heavy tooth on a cord. The most legible option by a distance: a single tapered
+    shape survives being forty pixels tall, where any bundle turns to mush.
+    """
+    return [
+        # 4.5 mm, not the 7 mm the other charms use: at 7 mm this reads as a dowel the
+        # tooth is skewered on rather than something it hangs from.
+        add_cyl(name + "_cord", 0.0045, drop, (x, y, top_z - drop / 2.0),
+                   sides=5, mat="wood"),
+        add_sphere(name + "_cap", (0.030, 0.026, 0.024), (x, y, top_z - drop),
+                      mat="iron"),
+        # Narrow radius first. add_taper passes it to primitive_cone_add as radius1,
+        # which is the BOTTOM of the cone - so the fat measurement in that slot hung the
+        # tooth point-upwards and made it a traffic cone standing on the shelf.
+        add_taper(name + "_tooth", 0.009 * scale, 0.038 * scale, 0.24 * scale,
+                     (x, y, top_z - drop - 0.12 * scale), sides=7, mat="palebone"),
+    ]
+
+
+def bone_cluster(name, x, y, top_z, drop, scale=1.0, count=4):
+    """
+    A handful of bones on a cord, hanging unevenly.
+
+    cord_and_charm puts a wide iron tie plate over three identical bars in a row, and
+    at altar scale that silhouette is a bucket hanging off a stick, not a charm. Uneven
+    lengths, a splay, and no plate across the top read as bone.
+    """
+    parts = [add_cyl(name + "_cord", 0.008, drop, (x, y, top_z - drop / 2.0),
+                        sides=5, mat="wood")]
+
+    for i in range(count):
+        spread = (i - (count - 1) * 0.5) * 0.028
+        length = (0.13 + 0.075 * ((i * 7) % 5) / 4.0) * scale
+        bone = add_block("%s_bone_%d" % (name, i), (0.022, 0.022, length),
+                            (x + spread, y + spread * 0.4,
+                             top_z - drop - length * 0.5 + 0.01),
+                            rot_y=(i - 1.5) * 7.0, mat="bone", collide=False)
+        parts.append(bone)
+
+    # A knot rather than a plate: just enough to say the cord gathers them.
+    parts.append(add_sphere(name + "_knot", (0.030, 0.026, 0.024),
+                               (x, y, top_z - drop), mat="wood"))
+    return parts
+
+
+def build_bindstone(tilt=26.0, ring_radius=0.235, runes="staves",
+                    charms="none",
+                    kerb="courses", body_skew=0.0, horn_mode="pair"):
     """
     A: the bindstone.
+
+    The keyword arguments exist so variations can be rendered side by side without a
+    second copy of this function drifting away from the shipped one. Every default
+    reproduces the shipped altar exactly - changing a default changes what ships.
 
     One rough block of stone, waist high, with its whole top cut away at an angle and
     the binding ring carved into the slope. Horns set into the back of the crown - hard
@@ -1227,72 +1313,135 @@ def build_bindstone():
     horn tips - shorter than the Galdr table and half the width of the bench it replaces.
     """
     parts = []
-    tilt = 26.0
     crown_half = 0.065
 
-    # Two courses of kerb, so the stone is bedded into the ground rather than set on it.
-    parts.append(add_block("kerb_0", (1.28, 0.90, 0.13), (0.0, 0.0, 0.065),
-                              rot_z=2.5, mat="darkstone"))
-    parts.append(add_block("kerb_1", (1.08, 0.74, 0.11), (0.0, 0.04, 0.185),
-                              rot_z=-3.5, mat="darkstone"))
+    # Every course is turned the same way, and only by about a degree between them.
+    #
+    # They used to alternate - +2.5, then -3.5 on the course directly above it, then
+    # +1.5, then -1.0 - so the yaw changed sign three times going up and the widest gap
+    # was six degrees. Off-square in one direction reads as a stone that has settled;
+    # off-square in a different direction on every layer reads as a badly stacked pile,
+    # which is what "crooked" means. The shelf takes the crown's angle too, rather than
+    # sitting square on a slab that is not.
+    if kerb == "rough":
+        # Broken stone piled round the foot instead of two dressed courses - the same
+        # vocabulary the upgrades use, and it stops the stack reading as masonry.
+        parts += rough_platform("kerb", 0.68, 0.50, 0.20, count=12)
+    else:
+        # Two courses of kerb, so the stone is bedded into the ground rather than set on it.
+        parts.append(add_block("kerb_0", (1.28, 0.90, 0.13), (0.0, 0.0, 0.065),
+                                  rot_z=2.4, mat="kerbstone"))
+        parts.append(add_block("kerb_1", (1.08, 0.74, 0.11), (0.0, 0.04, 0.185),
+                                  rot_z=1.8, mat="kerbstone"))
 
     # The block itself, canted a touch off square. Anything perfectly aligned reads as
     # dressed masonry, and this is meant to be a boulder worked on where it lay.
-    body = add_block("body", (0.96, 0.62, 0.50), (0.0, 0.02, 0.49), rot_z=1.5,
+    body = add_block("body", (0.96 + body_skew, 0.62, 0.50),
+                        (body_skew * 0.35, 0.02, 0.49), rot_z=1.5 + body_skew * 9.0,
                         mat="darkstone")
-    jitter(body, 0.012, 0.9)
+    jitter(body, 0.012 + abs(body_skew) * 0.09, 0.9)
     parts.append(body)
 
     # An iron band round the waist, and the ring bolts a bound thing is tied to.
     parts.append(add_block("band", (1.01, 0.67, 0.045), (0.0, 0.02, 0.58),
                               rot_z=1.5, mat="iron", collide=False))
+    # Named bolt, not ring: a local called "ring" here shadowed the ring_radius
+    # argument and handed sigil_on a mesh where it wanted a number.
     for i, x in enumerate((-0.46, 0.46)):
-        ring = add_ring("bolt_%d" % i, 0.055, 0.012, (x, -0.28, 0.42), sides=10,
+        bolt = add_ring("bolt_%d" % i, 0.055, 0.012, (x, -0.28, 0.42), sides=10,
                            mat="iron")
-        ring.rotation_euler[0] = math.radians(90.0)
-        parts.append(ring)
+        bolt.rotation_euler[0] = math.radians(90.0)
+        parts.append(bolt)
 
     # The crown: one thick slab, tipped forward so its top is a slope and not a counter.
     # No frame round it - a raised kerb on all four sides turned the face into a picture
     # frame, and a framed panel is a thing hung on furniture.
     pivot = (0.0, 0.02, 0.88)
-    parts.append(add_block("crown", (1.12, 0.76, 0.13), pivot, rot_x=tilt, rot_z=-1.0,
-                              mat="darkstone"))
+    parts.append(add_block("crown", (1.12, 0.76, 0.13), pivot, rot_x=tilt, rot_z=1.1,
+                              mat="crownstone"))
 
     # A lip along the low edge only, where the slope drains.
     lip = add_block("crown_lip", (1.12, 0.07, 0.06),
                        face_point(pivot, tilt, 0.0, -0.36, crown_half + 0.02),
-                       rot_z=-1.0, mat="darkstone", collide=False)
+                       rot_z=1.1, mat="crownstone", collide=False)
     parts.append(in_plane(lip, tilt))
 
-    parts += sigil_on("sigil", pivot, tilt, radius=0.235, lift=crown_half, mat="palebone")
+    parts += sigil_on("sigil", pivot, tilt, radius=ring_radius, lift=crown_half,
+                      mat="palebone")
+
     # Three staves, not a whole line of them. At four the strokes came out shorter than
-    # the gaps between them and the row read as chips scattered down the slope.
-    parts += runes_on("runes", face_point(pivot, tilt, 0.0, -0.25), tilt, span=0.54,
-                      count=3, height=0.17, lift=crown_half, mat="palebone")
+    # the gaps between them and the row read as chips scattered down the slope - and at
+    # three they still read as chips, which is what "none" and "bold" are here to test.
+    if runes == "staves":
+        parts += runes_on("runes", face_point(pivot, tilt, 0.0, -0.25), tilt, span=0.54,
+                          count=3, height=0.17, lift=crown_half, mat="palebone")
+    elif runes == "bold":
+        parts += runes_on("runes", face_point(pivot, tilt, 0.0, -0.27), tilt, span=0.44,
+                          count=2, height=0.26, lift=crown_half, mat="palebone")
 
     # A level shelf across the back of the crown: the one flat spot, and small - just
     # room for the candles the props recipe drops and the skull between them.
     shelf_z = face_point(pivot, tilt, 0.0, 0.38, crown_half)[2]
     parts.append(add_block("shelf", (1.00, 0.19, 0.09), (0.0, 0.27, shelf_z + 0.045),
-                              mat="darkstone"))
+                              rot_z=1.1, mat="crownstone"))
 
     # The focus. In game this is the vanilla skeleton trophy dropped on as a prop; it is
     # modelled here only so the mockup reads at a glance.
     parts += skull("focus", (0.0, 0.27, shelf_z + 0.09), yaw=4.0, scale=0.80, mat="palebone")
 
     # Centred and straddling the skull, so the crown is symmetric about the sigil.
-    parts += horns("horn", (0.0, 0.30, shelf_z + 0.07), reach=0.30, rise=0.46, gap=0.44,
-                   mat="palebone")
-
-    # Charms swinging off the horns - hung from points taken off the horn curve itself,
-    # so the cords start on the bone rather than near it.
     horn_centre = (0.0, 0.30, shelf_z + 0.07)
-    for side, tag, t, drop, scale in ((-1.0, "charm_l", 0.80, 0.14, 0.8),
-                                      (1.0, "charm_r", 0.68, 0.11, 0.7)):
+    all_horns = horns("horn", horn_centre, reach=0.30, rise=0.46, gap=0.44,
+                      mat="palebone")
+
+    if horn_mode == "single":
+        # One horn, the other broken off at the boss. Kills the symmetry the crown has
+        # had since the first draft.
+        # horns() names its parts with "%d" against a bool, so the positive side is
+        # "horn_1_*" and "horn_boss_1" - not "horn_True_*", which matched nothing and
+        # quietly left this variation identical to the shipped altar.
+        #
+        # And they have to be deleted, not just dropped from the list. horns() has
+        # already put them in the scene; leaving them out of the returned parts only
+        # keeps them out of the joined mesh, and the orphans carry on rendering beside
+        # it - which is why this still came out with two horns after the name fix.
+        doomed = [o for o in all_horns
+                  if o.name.startswith("horn_1_") or o.name == "horn_boss_1"]
+        keep = [o for o in all_horns if o not in doomed]
+        for dead in doomed:
+            bpy.data.objects.remove(dead, do_unlink=True)
+        all_horns = keep
+        all_horns.append(add_sphere("horn_stump", (0.13, 0.11, 0.07),
+                                       (0.22, horn_centre[1], horn_centre[2] + 0.02),
+                                       mat="palebone"))
+    parts += all_horns
+
+    # One tooth on the right horn and nothing on the left.
+    #
+    # Hung from points taken off the horn curve itself, so a cord starts on the bone
+    # rather than near it. The asymmetry is the point: it puts a mark of wear on a crown
+    # that was otherwise a mirror about the sigil, and it does that without breaking a
+    # horn off.
+    #
+    # One heavy shape rather than several small ones, because several small ones fused
+    # into a single silhouette every time it was tried - a pail, then a whisk, then a
+    # wind chime. A tooth still reads as bone at forty pixels.
+    styles = {"cluster": bone_cluster, "bundle": bone_bundle,
+              "tooth": bone_tooth, "hung": cord_and_charm}
+
+    left_style, right_style = charms if isinstance(charms, tuple) else (charms, charms)
+
+    sides = ((-1.0, "charm_l", 0.80, 0.14, 0.8),) if horn_mode == "single" else \
+            ((-1.0, "charm_l", 0.80, 0.14, 0.8), (1.0, "charm_r", 0.68, 0.13, 0.95))
+
+    for side, tag, t, drop, scale in sides:
+        style = right_style if side > 0 else left_style
+        if style == "none":
+            continue
+
         hx, hy, hz = horn_point((side * 0.22, horn_centre[1], horn_centre[2]), side, t,
                                 reach=0.30, rise=0.46, gap=0.44)
-        parts += cord_and_charm(tag, hx, hy, hz, drop, scale=scale)
+        parts += styles.get(style, cord_and_charm)(tag, hx, hy, hz, drop, scale=scale)
 
     # The basin, set into the kerb at the foot where the slope drains to.
     parts += basin("basin", 0.0, -0.56, 0.19)
@@ -2439,6 +2588,10 @@ def render_preview(name, altar=None, textures=None, shots=True):
     # sitting over the hole - add_cyl caps both ends - through every round of review it
     # went through. Anything read off an orbit view alone has not really been checked.
     shoot("_eye", (1.35, -3.6, 1.72), 0.95)
+    # Square on to the front. Whether the courses of a stack line up with each other is
+    # invisible from a three-quarter view and obvious from this one - the altar shipped
+    # with its yaw changing sign on every layer and nobody caught it in a preview.
+    shoot("_front", (0.0, -4.1, 1.05), 0.95)
     return path
 
 
@@ -2999,6 +3152,15 @@ SURFACES = {
     # substituting all along, so the icons show what actually ships.
     "darkstone": (tex_granite, (0.68, 0.67, 0.63), (0.30, 0.30, 0.28),
                   (0.26, 0.29, 0.20), 0),
+
+    # The altar's stone split three ways. Six blocks all wearing one material is what
+    # made it read as a single lump in game - AltarVanillaGroups hands each of these to
+    # a different piece of the game's own stonework instead. These sheets are only ever
+    # seen in the preview; the routing decides what ships.
+    "kerbstone": (tex_rock, (0.60, 0.59, 0.55), (0.24, 0.24, 0.23),
+                  (0.24, 0.26, 0.19), 0),
+    "crownstone": (tex_granite, (0.74, 0.73, 0.69), (0.34, 0.34, 0.32),
+                   (0.22, 0.25, 0.18), 0),
 
     # Bone rises with it. The preview showed a pale ring on grey stone, and that reading is
     # the point of the altar - lifting the stone alone would have put the ring darker than
