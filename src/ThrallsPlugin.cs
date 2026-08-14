@@ -28,7 +28,11 @@ namespace Thralls
             ThrallConfig.Bind(Config);
 
             _harmony = new Harmony(PluginGuid);
+            // Named one class at a time on purpose. PatchAll(Type) applies only the class
+            // it is handed, so every patch class has to be listed here - which is easy to
+            // forget, and a patch that is simply never applied fails silently.
             _harmony.PatchAll(typeof(HoverPatches));
+            _harmony.PatchAll(typeof(DepotHoverPatch));
 
             Log.LogInfo(PluginName + " " + PluginVersion + " by " + PluginAuthor + " - ready.");
 
@@ -45,6 +49,7 @@ namespace Thralls
         private void OnGUI()
         {
             AltarUI.Draw();
+            ThrallTalk.Draw();
         }
 
         private void Update()
@@ -66,6 +71,7 @@ namespace Thralls
 
             SiteTools.KeepAlive();
             AltarUI.Tick();
+            ThrallTalk.Tick();
             BuildPlans.Tick(Time.deltaTime);
             Fallen.Tick();
             Resting.Tick();
@@ -79,11 +85,15 @@ namespace Thralls
                 return;
             }
 
+            // Same for a thrall's own orders panel: the hotkeys all act on "the nearest
+            // thrall", and firing one of those at a window that is already about a
+            // particular thrall is how you end up giving the order to somebody else.
+            if (ThrallTalk.IsOpen) return;
+
             if (Hotkey.Down(ThrallConfig.KeySteward)) OpenAltar();
             else if (Hotkey.Down(ThrallConfig.KeyPlan)) MarkPlan();
             else if (Hotkey.Down(ThrallConfig.KeyRecruit)) Recruit();
             else if (Hotkey.Down(ThrallConfig.KeyAssign)) Assign();
-            else if (Hotkey.Down(ThrallConfig.KeyDeposit)) SetDropOff();
             else if (Hotkey.Down(ThrallConfig.KeyFollow)) ToggleFollow();
             else if (Hotkey.Down(ThrallConfig.KeyDismiss)) Dismiss();
             else if (Hotkey.Down(ThrallConfig.KeyTimeOfDay)) SiteTools.CycleTimeOfDay();
@@ -420,36 +430,9 @@ namespace Thralls
                 Say(thrall.ThrallName + " starts " + WorkNode.JobName(job) + ".");
         }
 
-        private void SetDropOff()
-        {
-            var container = LookingAt<Container>(60f);
-            if (container == null)
-            {
-                Say("Look at a chest.");
-                return;
-            }
-
-            // The whole crew, not the nearest one. Setting a chest per thrall meant
-            // walking round pointing at the same box once for each of them, and there is
-            // almost never a reason for two thralls to unload into different chests.
-            var crew = ThrallRegistry.All;
-            var set = 0;
-
-            for (int i = 0; i < crew.Count; i++)
-            {
-                if (crew[i] == null) continue;
-                crew[i].SetDropOff(container.transform.position);
-                set++;
-            }
-
-            if (set == 0)
-            {
-                Say("No thralls to send here.");
-                return;
-            }
-
-            Say(set == 1 ? "Your thrall will unload here." : "All " + set + " thralls will unload here.");
-        }
+        // The "look at a chest and press a key" command used to live here. It is gone with
+        // the chests: a thrall hauls to the nearest depot to its work base and there is
+        // nothing left to point at. Build the depot where you want the goods.
 
         private void ToggleFollow()
         {

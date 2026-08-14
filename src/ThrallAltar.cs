@@ -393,7 +393,12 @@ namespace Thralls
                 if (ZNetScene.instance == null || Built.Count == 0) return false;
                 foreach (var shape in Shapes())
                     if (ZNetScene.instance.GetPrefab(shape[0]) == null) return false;
-                return true;
+
+                // The depot is registered by this same pass, so it has to count towards
+                // "done" as well - otherwise the first call registers everything, reports
+                // ready, and the retry that would have caught a depot built a frame later
+                // never happens.
+                return DepotPrefab.Ready;
             }
         }
 
@@ -414,6 +419,12 @@ namespace Thralls
             }
 
             BuildUpgrades();
+
+            // The depot joins the same list, so it gets into ZNetScene, onto the hammer and
+            // through the unlock pass with the altars rather than needing its own copy of
+            // all three.
+            var depot = DepotPrefab.Build();
+            if (depot != null && !Built.Contains(depot)) Built.Add(depot);
 
             AddToScene();
             AddToHammer();
@@ -736,12 +747,18 @@ namespace Thralls
         /// the model. One box round the whole altar is far too crude for four shapes this
         /// different, and a concave mesh collider is both costly and horrible to walk on.
         /// </summary>
-        private static void AddColliders(GameObject prefab, string modelFile)
+        /// <remarks>
+        /// Internal rather than private because the depot is built by DepotPrefab and needs
+        /// the same three services - collision from a .col sidecar, the hand-modelled mesh
+        /// with its per-group skins, and the rendered icon. Copying them would mean two
+        /// places to fix the next time a sidecar gains a field.
+        /// </remarks>
+        internal static void AddColliders(GameObject prefab, string modelFile)
         {
             var dir = Path.GetDirectoryName(typeof(AltarPrefab).Assembly.Location);
             var path = Path.Combine(dir, Path.ChangeExtension(modelFile, ".col"));
 
-            var body = new GameObject("altar_collision");
+            var body = new GameObject("thrall_collision");
             body.transform.SetParent(prefab.transform, false);
 
             var pieceLayer = LayerMask.NameToLayer("piece");
@@ -809,7 +826,7 @@ namespace Thralls
         /// it takes the game's own shader, lighting, wetness and snow rather than looking
         /// like a foreign object dropped into the world.
         /// </summary>
-        private static bool AddModel(Transform parent, string modelFile)
+        internal static bool AddModel(Transform parent, string modelFile)
         {
             ModelData model;
             if (!Models.TryGetValue(modelFile, out model))
@@ -829,7 +846,7 @@ namespace Thralls
                 if (materials[i] == null) return false;
             }
 
-            var go = new GameObject("altar_model");
+            var go = new GameObject("thrall_model");
             go.transform.SetParent(parent, false);
 
             go.AddComponent<MeshFilter>().sharedMesh = model.Mesh;
@@ -852,7 +869,7 @@ namespace Thralls
         /// A missing file is not an error: the piece keeps the donor's icon, which is wrong
         /// but is at least a picture.
         /// </summary>
-        private static void AssignIcon(Piece piece, string modelFile)
+        internal static void AssignIcon(Piece piece, string modelFile)
         {
             if (piece == null || string.IsNullOrEmpty(modelFile)) return;
 
@@ -966,7 +983,7 @@ namespace Thralls
                 TileUvs(model, Mathf.Max(0.01f, ThrallConfig.AltarUvScale.Value));
 
             Skins[key] = skin;
-            ThrallsPlugin.Log.LogInfo("Altar skin built for " + key
+            ThrallsPlugin.Log.LogInfo("Skin built for " + key
                                       + " (" + texture.width + "x" + texture.height + ")");
             return skin;
         }

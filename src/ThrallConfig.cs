@@ -11,7 +11,6 @@ namespace Thralls
         // --- keys ---
         public static ConfigEntry<KeyboardShortcut> KeyRecruit;
         public static ConfigEntry<KeyboardShortcut> KeyAssign;
-        public static ConfigEntry<KeyboardShortcut> KeyDeposit;
         public static ConfigEntry<KeyboardShortcut> KeyFollow;
         public static ConfigEntry<KeyboardShortcut> KeyDismiss;
         public static ConfigEntry<KeyboardShortcut> KeySteward;
@@ -100,8 +99,20 @@ namespace Thralls
         public static ConfigEntry<int> ToolTier;
         public static ConfigEntry<float> PickupRadius;
         public static ConfigEntry<float> DepositRange;
-        public static ConfigEntry<bool> AutoDropOff;
-        public static ConfigEntry<float> AutoDropOffRange;
+
+        // --- the depot ---
+        public static ConfigEntry<string> DepotName;
+        public static ConfigEntry<string> DepotCost;
+        public static ConfigEntry<string> DepotBasePrefab;
+        public static ConfigEntry<string> DepotModel;
+        public static ConfigEntry<float> DepotScale;
+        public static ConfigEntry<float> DepotRange;
+        public static ConfigEntry<int> DepotWidth;
+        public static ConfigEntry<int> DepotHeight;
+
+        // --- talking to a thrall ---
+        public static ConfigEntry<bool> TalkOnUse;
+        public static ConfigEntry<float> TalkWalkAway;
         public static ConfigEntry<bool> WorkAtNight;
         public static ConfigEntry<string> MineablePrefabs;
         public static ConfigEntry<int> SeedsPerTrip;
@@ -228,6 +239,12 @@ namespace Thralls
             return TestMode.Value ? TestCost : AltarCost.Value;
         }
 
+        /// <summary>What the depot costs, honouring TestMode for the same reason.</summary>
+        public static string DepotCostNow()
+        {
+            return TestMode.Value ? TestCost : DepotCost.Value;
+        }
+
         /// <summary>What the numbered altar upgrade costs.</summary>
         public static string UpgradeCost(int level)
         {
@@ -263,8 +280,6 @@ namespace Thralls
                 "Spawn a thrall where you are looking.");
             KeyAssign = cfg.Bind("1 - Keys", "Assign", new KeyboardShortcut(KeyCode.Keypad1),
                 "Assign a job at whatever you are looking at (tree = chop, rock/ore = mine, berry/crop = gather, ground = stand guard).");
-            KeyDeposit = cfg.Bind("1 - Keys", "SetDropOff", new KeyboardShortcut(KeyCode.Keypad2),
-                "Look at a chest to make it the drop-off point for the nearest thrall.");
             KeyFollow = cfg.Bind("1 - Keys", "FollowToggle", new KeyboardShortcut(KeyCode.Keypad3),
                 "Toggle follow-me for the nearest thrall.");
             KeyDismiss = cfg.Bind("1 - Keys", "Dismiss", new KeyboardShortcut(KeyCode.Keypad4),
@@ -471,11 +486,39 @@ namespace Thralls
             ToolTier = cfg.Bind("3 - Work", "ToolTier", 1,
                 "Tool tier of a tier 1 thrall. Each breed above the first adds one, so a berserker works as tier 4 and a seeker as tier 5. Levels do NOT raise this - they only make a thrall hit harder and faster, so a rank 20 brute still cannot touch what a draugr can. 0 = flint/antler, 2 = bronze/iron, 4 = black metal.");
             PickupRadius = cfg.Bind("3 - Work", "PickupRadius", 10f, "How far a thrall reaches to pick up what it knocked loose.");
-            DepositRange = cfg.Bind("3 - Work", "DepositRange", 4f, "How close a thrall must be to a chest to unload.");
-            AutoDropOff = cfg.Bind("3 - Work", "AutoDropOff", true,
-                "A thrall with a full pack and no chest of its own claims the nearest one to the altar instead of standing there waiting to be told. Turn off if you want to place every drop-off by hand.");
-            AutoDropOffRange = cfg.Bind("3 - Work", "AutoDropOffRange", 30f,
-                "How far from the altar a thrall will look for a chest to adopt.");
+            DepositRange = cfg.Bind("3 - Work", "DepositRange", 4f, "How close a thrall must be to the depot to unload into it.");
+
+            // Where the chest settings used to be.
+            //
+            // A thrall unloads into a depot and nowhere else now. Pointing at a chest and
+            // pressing a key was a chore repeated once per thrall, and the auto-adopt that
+            // was added to soften it made the opposite problem - a thrall would quietly
+            // claim whatever box happened to be nearest the altar, including one you were
+            // keeping something else in. Building the store is a clearer instruction than
+            // either. AutoDropOff, AutoDropOffRange and the SetDropOff key are gone; the
+            // stale lines left behind in an existing cfg do nothing.
+
+            DepotName = cfg.Bind("7 - Depot", "DepotName", "Thrall depot",
+                "What the depot is called in the build menu and when you look at it.");
+            DepotCost = cfg.Bind("7 - Depot", "DepotCost", "Wood:20,RoundLog:6,LeatherScraps:4,Iron:2",
+                "What it takes to build a depot. Iron puts it at roughly the altar's own tier, so a crew that can be bound can be given somewhere to unload.");
+            DepotBasePrefab = cfg.Bind("7 - Depot", "DepotBasePrefab", "piece_chest_wood",
+                "Existing piece the depot is cloned from, for its components - the container, the network view, the wear-and-tear. Its own model is switched off and replaced, so this does NOT decide how the depot looks. It MUST be something carrying a Container or there is nowhere for the goods to go.");
+            DepotModel = cfg.Bind("7 - Depot", "DepotModel", "thrall_depot.obj",
+                "Model file sitting next to the plugin dll. Delete or rename it and the depot falls back to the donor chest's own model, which works but looks like a chest.");
+            DepotScale = cfg.Bind("7 - Depot", "DepotScale", 1f,
+                "Overall size of the depot. The mast stands 2.7m as modelled, which is deliberate - it is the landmark for its own radius.");
+            DepotRange = cfg.Bind("7 - Depot", "DepotRange", 60f,
+                "How far a depot reaches. A thrall whose work base is inside this hauls to it. Generous on purpose: the point of the depot is that a crew scattered across a treeline all bring their loads to the same place, and a radius smaller than the walk is just a thrall standing still with a full pack.");
+            DepotWidth = cfg.Bind("7 - Depot", "DepotWidth", 6,
+                "Columns of storage in the depot.");
+            DepotHeight = cfg.Bind("7 - Depot", "DepotHeight", 4,
+                "Rows of storage in the depot. Six by four is a large chest and a half: a crew of five fills a normal chest in an afternoon, and a full depot stops them working.");
+
+            TalkOnUse = cfg.Bind("7 - Depot", "TalkOnUse", true,
+                "Pressing use on a thrall opens its orders panel. Turn off to leave the key doing whatever the creature normally does with it.");
+            TalkWalkAway = cfg.Bind("7 - Depot", "TalkWalkAway", 8f,
+                "How far you can walk from a thrall before its orders panel closes itself. Matches the altar panel.");
 
             WorkAtNight = cfg.Bind("3 - Work", "WorkAtNight", true, "If false, thralls idle between dusk and dawn.");
             MineablePrefabs = cfg.Bind("3 - Work", "ExtraMineableNames", "rock,stone,copper,tin,silver,obsidian,flametal,mudpile,ore",

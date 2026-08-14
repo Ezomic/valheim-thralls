@@ -14,8 +14,10 @@ namespace Thralls
         public const string ZIs = "thrallIs";
         public const string ZJob = "thrallJob";
         public const string ZAnchor = "thrallAnchor";
-        public const string ZChest = "thrallChest";
-        public const string ZHasChest = "thrallHasChest";
+        // thrallChest / thrallHasChest used to live here. A thrall no longer remembers a
+        // drop-off at all: the depot is found from where it works, every time it needs one,
+        // so there is no stored spot that can go stale when you move the store. Existing
+        // saves still carry both keys; nothing reads them.
         public const string ZOwner = "thrallOwner";
         public const string ZOwnerName = "thrallOwnerName";
         public const string ZName = "thrallName";
@@ -41,8 +43,6 @@ namespace Thralls
 
         private ThrallJob _job;
         private Vector3 _anchor;
-        private Vector3 _chest;
-        private bool _hasChest;
         private string _name;
         private string _ownerName;
         private string _tool = "";
@@ -59,7 +59,7 @@ namespace Thralls
         private float _lastDistance = float.MaxValue;
         private int _swingsOnTarget;
         private bool _hauling;
-        private bool _warnedNoChest;
+        private bool _warnedNoDepot;
 
         private PlantRecipe _sowing;
         private Vector3 _sowSpot;
@@ -347,8 +347,6 @@ namespace Thralls
             var zdo = _nview.GetZDO();
             _job = (ThrallJob)zdo.GetInt(ZJob, 0);
             _anchor = zdo.GetVec3(ZAnchor, transform.position);
-            _chest = zdo.GetVec3(ZChest, Vector3.zero);
-            _hasChest = zdo.GetBool(ZHasChest, false);
             _name = zdo.GetString(ZName, "Thrall");
             _ownerName = zdo.GetString(ZOwnerName, "");
             _tool = zdo.GetString(ZTool, "");
@@ -407,9 +405,7 @@ namespace Thralls
             var zdo = _nview.GetZDO();
             zdo.Set(ZJob, (int)_job);
             zdo.Set(ZAnchor, _anchor);
-            zdo.Set(ZChest, _chest);
             zdo.Set(ZTool, _tool ?? "");
-            zdo.Set(ZHasChest, _hasChest);
             zdo.Set(ZName, _name ?? "Thrall");
             zdo.Set(ZRank, Rank);
             zdo.Set(ZTier, _tier);
@@ -431,7 +427,7 @@ namespace Thralls
             _target = null;
             _hauling = false;
             _restocking = false;
-            _warnedNoChest = false;
+            _warnedNoDepot = false;
             _sowing = null;
             _haveSowSpot = false;
             _nextRestock = 0f;
@@ -518,14 +514,73 @@ namespace Thralls
             AssignJob(ThrallJob.None, pos);
         }
 
-        public bool HasDropOff { get { return _hasChest; } }
-
-        public void SetDropOff(Vector3 pos)
+        /// <summary>
+        /// The depot this thrall hauls to, or null if there is none in reach.
+        ///
+        /// Measured from the work base rather than from the thrall's feet, so a crew strung
+        /// out along a treeline all agree on one store instead of each picking whatever is
+        /// nearest to the tree it happens to be felling - and so the answer does not change
+        /// while a thrall is walking towards it.
+        ///
+        /// Worked out fresh each time rather than remembered. A stored spot is a spot that
+        /// goes stale the moment you take the depot down and rebuild it somewhere better,
+        /// and the previous version of this - a chest position saved on the thrall - is
+        /// exactly what made moving your storage a chore.
+        /// </summary>
+        public ThrallDepot DepotFor()
         {
-            _chest = pos;
-            _hasChest = true;
-            _warnedNoChest = false;
+            return ThrallDepot.Nearest(_anchor, Mathf.Max(1f, ThrallConfig.DepotRange.Value));
+        }
+
+        public bool HasDropOff { get { return DepotFor() != null; } }
+
+        /// <summary>
+        /// Moves where it works from, keeping the job it already has.
+        ///
+        /// AssignJob would do this too, but it also clears the target, the sowing plan and
+        /// the give-up list - which is right when you are giving a new order and wrong when
+        /// you are only shifting the pitch. What does have to go is the current target: it
+        /// was chosen inside a radius that has now moved, and a thrall that keeps walking
+        /// back to the old one has not really been moved at all.
+        /// </summary>
+        public void MoveBase(Vector3 pos)
+        {
+            _anchor = pos;
+            _target = null;
+            _repairTarget = null;
+            _plan = null;
+            _haveSowSpot = false;
+            _searchTimer = 0f;
+            _warnedNoDepot = false;
+            _warnedNoSeed = false;
+            _warnedNoMaterials = false;
+
+            // A thrall told to work somewhere else stops following, or it would take the
+            // order and then walk straight back to your heel.
+            if (_job == ThrallJob.Follow) _job = ThrallJob.None;
+
             SaveState();
+        }
+
+        /// <summary>Where it works from, for the panel and the hover text.</summary>
+        public Vector3 Base { get { return _anchor; } }
+
+        /// <summary>
+        /// Sends it to unload now, rather than when its pack happens to fill.
+        ///
+        /// Useful before a move: a thrall re-based across the valley with a half-full pack
+        /// would otherwise carry an afternoon's ore to the far side and only then notice
+        /// there is no depot in reach. Returns false, and does nothing, when there is
+        /// nowhere to take it.
+        /// </summary>
+        public bool SendToDepot()
+        {
+            if (DepotFor() == null) return false;
+
+            _hauling = true;
+            _restocking = false;
+            _target = null;
+            return true;
         }
 
         public void ToggleFollow(Vector3 fallbackAnchor)
@@ -564,29 +619,29 @@ namespace Thralls
         }
 
         /// <summary>
-        /// A dismissed thrall hands its work in at the drop-off rather than tipping it on
-        /// the floor. Only what will not fit - or what has no chest to go to - gets dropped.
+        /// A dismissed thrall hands its work in at the depot rather than tipping it on the
+        /// floor. Only what will not fit - or what has no depot to go to - gets dropped.
         /// </summary>
         private void ReturnPack()
         {
             if (_inventory.NrOfItems() == 0) return;
 
-            if (_hasChest)
+            var depot = DepotFor();
+            if (depot != null && depot.Usable)
             {
-                var container = FindContainer(_chest);
-                var nview = container != null ? container.GetComponent<ZNetView>() : null;
+                var nview = depot.GetComponent<ZNetView>();
 
                 if (nview != null && nview.IsValid())
                 {
                     nview.ClaimOwnership();
-                    var chest = container.GetInventory();
-                    if (chest != null)
+                    var store = depot.Store.GetInventory();
+                    if (store != null)
                     {
                         var items = new List<ItemDrop.ItemData>(_inventory.GetAllItems());
                         foreach (var item in items)
                         {
-                            if (!chest.CanAddItem(item, item.m_stack)) continue;
-                            if (!chest.AddItem(item)) continue;
+                            if (!store.CanAddItem(item, item.m_stack)) continue;
+                            if (!store.AddItem(item)) continue;
                             _inventory.RemoveItem(item);
                         }
                     }
@@ -595,7 +650,7 @@ namespace Thralls
 
             if (_inventory.NrOfItems() == 0)
             {
-                Announce(_name + " left its load in the chest.");
+                Announce(_name + " left its load in the depot.");
                 return;
             }
 
@@ -663,7 +718,10 @@ namespace Thralls
 
             if (!ThrallConfig.WorkAtNight.Value && IsNight())
             {
-                WalkTo(_hasChest ? _chest : _anchor);
+                // Stands the night out at the depot if there is one, which puts the crew in
+                // one place at dusk rather than scattered across the treeline.
+                var shelter = DepotFor();
+                WalkTo(shelter != null ? shelter.transform.position : _anchor);
                 return;
             }
 
@@ -767,7 +825,7 @@ namespace Thralls
 
             if (!HasMaterialsFor(_plan))
             {
-                if (_hasChest && !_restocking && Time.time >= _nextRestock)
+                if (HasDropOff && !_restocking && Time.time >= _nextRestock)
                 {
                     _restocking = true;
                     _hauling = true;
@@ -896,9 +954,9 @@ namespace Thralls
 
             if (_sowing == null)
             {
-                // Out of seed. Visit the chest to restock, but only if a previous trip was
-                // not already a wasted journey - otherwise it paces to the chest forever.
-                if (_hasChest && !_restocking && Time.time >= _nextRestock)
+                // Out of seed. Visit the depot to restock, but only if a previous trip was
+                // not already a wasted journey - otherwise it paces to the depot forever.
+                if (HasDropOff && !_restocking && Time.time >= _nextRestock)
                 {
                     _restocking = true;
                     _hauling = true;
@@ -1019,7 +1077,7 @@ namespace Thralls
                 {
                     // Nothing left in range: bring the haul home, then stand by. Seed in a
                     // farmer's pack is stock in hand, not produce, so it is not worth a trip.
-                    if (_hasChest && CarriedProduce() > 0) _hauling = true;
+                    if (CarriedProduce() > 0 && HasDropOff) _hauling = true;
                     else WalkTo(_anchor);
                     return;
                 }
@@ -1073,19 +1131,18 @@ namespace Thralls
 
         private void DoHaul(float dt)
         {
-            // Nowhere to put it: go and find somewhere rather than standing there with a
-            // full pack waiting to be told. Pointing at a chest and pressing a key once
-            // per thrall was the whole chore, and a thrall stood next to your storage can
-            // work out where the storage is.
-            if (!_hasChest && ThrallConfig.AutoDropOff.Value) AdoptNearestChest();
+            var depot = DepotFor();
 
-            if (!_hasChest)
+            if (depot == null)
             {
-                if (!_warnedNoChest)
+                // Said once, not every frame: a crew with nowhere to unload would otherwise
+                // fill the screen with the same line five times over.
+                if (!_warnedNoDepot)
                 {
-                    _warnedNoChest = true;
-                    Announce(_name + " has a full pack and no chest within "
-                             + Mathf.RoundToInt(ThrallConfig.AutoDropOffRange.Value) + "m.");
+                    _warnedNoDepot = true;
+                    Announce(_name + " has a full pack and no depot within "
+                             + Mathf.RoundToInt(ThrallConfig.DepotRange.Value)
+                             + "m of where it works.");
                 }
                 _hauling = false;
                 _restocking = false;
@@ -1093,23 +1150,24 @@ namespace Thralls
                 return;
             }
 
-            WalkTo(_chest);
+            _warnedNoDepot = false;
 
-            if (Vector3.Distance(transform.position, _chest) > ThrallConfig.DepositRange.Value) return;
+            var spot = depot.transform.position;
+            WalkTo(spot);
 
-            var container = FindContainer(_chest);
-            if (container == null)
+            if (Vector3.Distance(transform.position, spot) > ThrallConfig.DepositRange.Value) return;
+
+            // Torn down while it was walking. Not an error worth announcing - the next pass
+            // finds the next nearest depot, or says there is none.
+            if (!depot.Usable)
             {
-                _hasChest = false;
-                Announce(_name + " cannot find the drop-off chest any more.");
-                SaveState();
                 _hauling = false;
                 return;
             }
 
-            Unload(container);
+            Unload(depot.Store);
 
-            // A chest that had nothing we needed means no point walking back for a while.
+            // A depot that had nothing we needed means no point walking back for a while.
             if ((_job == ThrallJob.Farm || _job == ThrallJob.Build) && _lastRestockTake == 0)
                 _nextRestock = Time.time + 120f;
 
@@ -1243,69 +1301,6 @@ namespace Thralls
                 if (_inventory.AddItem(drop.m_itemData))
                     nview.Destroy();
             }
-        }
-
-        /// <summary>
-        /// Claims the nearest chest as this thrall's drop-off.
-        ///
-        /// Searched from the altar rather than from the thrall, so a crew scattered across
-        /// a treeline all haul back to the same store instead of each adopting whatever
-        /// happens to be nearest to the tree it is felling.
-        /// </summary>
-        private void AdoptNearestChest()
-        {
-            if (Time.time < _nextChestHunt) return;
-            _nextChestHunt = Time.time + 5f;
-
-            var altar = ThrallAltar.Current;
-            var from = altar != null ? altar.transform.position : transform.position;
-
-            var hits = Physics.OverlapSphere(from,
-                Mathf.Max(1f, ThrallConfig.AutoDropOffRange.Value), Physics.DefaultRaycastLayers);
-
-            Container best = null;
-            var bestDist = float.MaxValue;
-
-            for (int i = 0; i < hits.Length; i++)
-            {
-                var container = hits[i].GetComponentInParent<Container>();
-                if (container == null) continue;
-
-                // Skip anything that is not really storage: a thrall should not try to
-                // stuff its pack into a smelter or another creature's inventory.
-                var nview = container.GetComponent<ZNetView>();
-                if (nview == null || !nview.IsValid()) continue;
-                if (container.GetInventory() == null) continue;
-
-                var d = Vector3.Distance(from, container.transform.position);
-                if (d >= bestDist) continue;
-
-                bestDist = d;
-                best = container;
-            }
-
-            if (best == null) return;
-
-            SetDropOff(best.transform.position);
-            _warnedNoChest = false;
-            Announce(_name + " will use the chest " + Mathf.RoundToInt(bestDist) + "m from the altar.");
-        }
-
-        private float _nextChestHunt;
-
-        private Container FindContainer(Vector3 near)
-        {
-            var hits = Physics.OverlapSphere(near, 3f, Physics.DefaultRaycastLayers);
-            Container best = null;
-            var bestDist = float.MaxValue;
-            for (int i = 0; i < hits.Length; i++)
-            {
-                var c = hits[i].GetComponentInParent<Container>();
-                if (c == null) continue;
-                var d = Vector3.Distance(near, c.transform.position);
-                if (d < bestDist) { bestDist = d; best = c; }
-            }
-            return best;
         }
 
         private void Unload(Container container)

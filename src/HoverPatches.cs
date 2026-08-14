@@ -32,7 +32,7 @@ namespace Thralls
 
             var carried = thrall.Carrying.NrOfItems();
             var slots = thrall.Carrying.GetWidth() * thrall.Carrying.GetHeight();
-            var doing = thrall.Hauling ? "hauling to the chest" : WorkNode.JobName(thrall.Job);
+            var doing = thrall.Hauling ? "hauling to the depot" : WorkNode.JobName(thrall.Job);
 
             var owner = thrall.OwnerName;
 
@@ -43,7 +43,13 @@ namespace Thralls
                        + "  <color=orange>" + thrall.TierName
                        + " lv" + thrall.Rank + "</color>"
                        + "\n<color=yellow>" + doing + "</color>"
-                       + "\npack " + carried + "/" + slots + "   xp " + thrall.XpProgress;
+                       + "\npack " + carried + "/" + slots + "   xp " + thrall.XpProgress
+                       // The prompt is the only thing that says the orders panel exists.
+                       // A creature you can talk to looks exactly like one you cannot
+                       // until you have tried it.
+                       + (ThrallConfig.TalkOnUse.Value
+                           ? "\n[<color=yellow><b>$KEY_Use</b></color>] talk to it"
+                           : "");
         }
 
         /// <summary>
@@ -85,10 +91,9 @@ namespace Thralls
         [HarmonyPatch(typeof(Menu), nameof(Menu.Show))]
         private static bool EscapeClosesAltar()
         {
-            if (!AltarUI.IsOpen) return true;
-
-            AltarUI.Close();
-            return false;
+            if (AltarUI.IsOpen) { AltarUI.Close(); return false; }
+            if (ThrallTalk.IsOpen) { ThrallTalk.Close(); return false; }
+            return true;
         }
 
         /// <summary>
@@ -102,11 +107,50 @@ namespace Thralls
             ThrallMapToggle.Build(__instance);
         }
 
+        /// <summary>
+        /// Either of the mod's windows. Both need the same four things doing - input
+        /// blocked, the look pinned, the controller ignored and the cursor freed - and a
+        /// window that gets three of the four is a window you can click while the
+        /// character swings an axe at whatever is in front of it.
+        /// </summary>
+        private static bool PanelOpen
+        {
+            get { return AltarUI.IsOpen || ThrallTalk.IsOpen; }
+        }
+
+        /// <summary>
+        /// Pressing use on a thrall opens its orders panel.
+        ///
+        /// Patched on Player.Interact rather than on an Interactable of our own, because
+        /// what a creature does with a use press depends on which components it happens to
+        /// carry: the game takes the first Interactable it finds with GetComponentInParent,
+        /// so a thrall built on a creature that has a Tameable would hand the press to that
+        /// instead, and one built on a creature without would have no Interactable at all
+        /// and swallow it. Catching it here is the same answer for every breed.
+        ///
+        /// Only a tap. A hold is left alone - that is the gesture the game reserves for a
+        /// piece's secondary action, and taking it would break anything a modded creature
+        /// does with it.
+        /// </summary>
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Player), "Interact",
+            new[] { typeof(GameObject), typeof(bool), typeof(bool) })]
+        private static bool TalkOnInteract(GameObject go, bool hold)
+        {
+            if (!ThrallConfig.TalkOnUse.Value || hold || go == null) return true;
+
+            var thrall = go.GetComponentInParent<Thrall>();
+            if (thrall == null) return true;
+
+            ThrallTalk.Toggle(thrall);
+            return false;
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), "TakeInput")]
         private static void BlockInput(ref bool __result)
         {
-            if (AltarUI.IsOpen) __result = false;
+            if (PanelOpen) __result = false;
         }
 
         /// <summary>
@@ -122,7 +166,7 @@ namespace Thralls
         [HarmonyPatch(typeof(PlayerController), "InInventoryEtc")]
         private static void HoldLookStill(ref bool __result)
         {
-            if (AltarUI.IsOpen) __result = true;
+            if (PanelOpen) __result = true;
         }
 
         /// <summary>
@@ -133,14 +177,14 @@ namespace Thralls
         [HarmonyPatch(typeof(PlayerController), "TakeInput")]
         private static void BlockControllerInput(ref bool __result)
         {
-            if (AltarUI.IsOpen) __result = false;
+            if (PanelOpen) __result = false;
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameCamera), nameof(GameCamera.UpdateMouseCapture))]
         private static void FreeCursor()
         {
-            if (!AltarUI.IsOpen) return;
+            if (!PanelOpen) return;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }

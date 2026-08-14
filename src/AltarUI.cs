@@ -120,7 +120,7 @@ namespace Thralls
         private static GUIStyle _cardNameStyle, _cardMetaStyle, _cardLockedStyle;
         private static GUIStyle _nameStyle, _footStyle, _disabledStyle, _disabledChip;
 
-        private static Texture2D Solid(Color color)
+        internal static Texture2D Solid(Color color)
         {
             var tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
             tex.SetPixel(0, 0, color);
@@ -129,7 +129,15 @@ namespace Thralls
             return tex;
         }
 
-        private static GUISkin Skin()
+        /// <summary>
+        /// The panel chrome, shared with the thrall's own orders panel.
+        ///
+        /// Internal rather than private so ThrallTalk can wear it. Two windows that are
+        /// meant to read as the same piece of furniture cannot each build their own skin
+        /// and stay in step - the first attempt at that was already a shade off on the
+        /// button hover before it was ever shown to anyone.
+        /// </summary>
+        internal static GUISkin Skin()
         {
             if (_skin != null) return _skin;
 
@@ -202,7 +210,7 @@ namespace Thralls
             return fallback;
         }
 
-        private static void EnsureStyles()
+        internal static void EnsureStyles()
         {
             if (_titleStyle != null) return;
             var skin = Skin();
@@ -292,7 +300,21 @@ namespace Thralls
         }
 
         /// <summary>A hairline across the current layout position.</summary>
-        private static void HairLine(float width)
+        // The styles and the two band textures, handed out so the thrall's orders panel
+        // draws with the same brush rather than a near-miss of it.
+        internal static GUIStyle TitleStyle { get { EnsureStyles(); return _titleStyle; } }
+        internal static GUIStyle MetaStyle { get { EnsureStyles(); return _metaStyle; } }
+        internal static GUIStyle SectionStyle { get { EnsureStyles(); return _sectionStyle; } }
+        internal static GUIStyle MutedStyle { get { EnsureStyles(); return _mutedStyle; } }
+        internal static GUIStyle LiveStyle { get { EnsureStyles(); return _liveStyle; } }
+        internal static GUIStyle RowNameStyle { get { EnsureStyles(); return _rowNameStyle; } }
+        internal static GUIStyle ChipStyle { get { EnsureStyles(); return _chipStyle; } }
+        internal static GUIStyle FootStyle { get { EnsureStyles(); return _footStyle; } }
+        internal static Texture2D StripTexture { get { Skin(); return _stripTex; } }
+        internal static Texture2D HairTexture { get { Skin(); return _hairTex; } }
+        internal static Color EdgeColour { get { return Edge; } }
+
+        internal static void HairLine(float width)
         {
             var r = GUILayoutUtility.GetRect(width, 1f, GUILayout.Height(1f));
             GUI.DrawTexture(r, _hairTex);
@@ -663,12 +685,12 @@ namespace Thralls
                     thrall.transform.position))
                 : 0;
 
-            Stat("Doing", thrall.Hauling ? "hauling to the chest" : WorkNode.JobName(thrall.Job));
+            Stat("Doing", thrall.Hauling ? "hauling to the depot" : WorkNode.JobName(thrall.Job));
             Stat("Pack", carried + " of " + slots + " slots");
             Stat("Experience", thrall.XpProgress);
             Stat("Chopping", power.Chop.ToString("0.#") + " per swing");
             Stat("Mining", power.Pickaxe.ToString("0.#") + " per swing");
-            Stat("Drop-off", thrall.HasDropOff ? "set" : "none - it will claim the nearest chest");
+            Stat("Depot", thrall.HasDropOff ? "in range of where it works" : "none within reach of its base");
             Stat("Distance", distance + "m away");
 
             GUILayout.Space(14f);
@@ -806,7 +828,7 @@ namespace Thralls
         }
 
         /// <summary>"AxeBronze" reads better as "Axe bronze" than as a prefab name.</summary>
-        private static string PrettyItem(string prefab)
+        internal static string PrettyItem(string prefab)
         {
             if (string.IsNullOrEmpty(prefab)) return "";
 
@@ -820,7 +842,7 @@ namespace Thralls
         }
 
         /// <summary>One labelled line of the stat block.</summary>
-        private static void Stat(string label, string value)
+        internal static void Stat(string label, string value)
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label(label, _mutedStyle, GUILayout.Width(150f));
@@ -942,7 +964,7 @@ namespace Thralls
 
             var second = new Rect(card.x + pad, card.y + 28f, card.width - pad * 2f, 18f);
 
-            var doing = thrall.Hauling ? "hauling to the chest" : WorkNode.JobName(thrall.Job);
+            var doing = thrall.Hauling ? "hauling to the depot" : WorkNode.JobName(thrall.Job);
             GUI.Label(second, doing, busy ? _liveStyle : _mutedStyle);
 
             var carried = thrall.Carrying.NrOfItems();
