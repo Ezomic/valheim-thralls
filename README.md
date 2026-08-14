@@ -84,20 +84,28 @@ using it.
 
 ## Tiers, levels and heads
 
-There are four kinds of thrall. They are **separate careers, not a ladder** — a brute never
+There are five kinds of thrall. They are **separate careers, not a ladder** — a brute never
 becomes a golem. You choose which to bind, and each is then trained on its own.
 
-| Tier | Body | Hired with | Tool tier |
-| --- | --- | --- | --- |
-| 1 | Greydwarf brute | black forest heads | 1 |
-| 2 | Draugr elite | swamp heads | 2 |
-| 3 | Stone golem | mountain heads | 3 |
-| 4 | Fuling berserker | plains heads | 4 |
+Each answers only once the boss of **its own** biome is down, so a breed arrives about when
+you start working the ground it came from.
+
+| Tier | Body | Answers after | Hired with | Tool tier |
+| --- | --- | --- | --- | --- |
+| 1 | Greydwarf brute | The Elder | black forest heads | 1 |
+| 2 | Draugr elite | Bonemass | swamp heads | 2 |
+| 3 | Stone golem | Moder | mountain heads | 3 |
+| 4 | Fuling berserker | Yagluth | plains heads | 4 |
+| 5 | Seeker brute | The Queen | mistlands heads | 5 |
+
+On top of the boss, each tier above the first wants one more upgrade raised beside the
+altar. Both gates are config: `TierNRequiresBoss` takes a world key, empty for no gate, and
+`UpgradesGateTiers` turns the upgrade requirement off.
 
 **Binding one** costs 10 heads of that tier or better. That is the only thing heads buy.
 
-**Levelling is earned, not bought.** A thrall gains experience by working, and levels up on
-its own at 150 / 450 / 1000 xp:
+**Levelling is earned, not bought.** A thrall gains experience by working and levels on its
+own, at 150 xp for level 2 and rising to 33,000 for level 20:
 
 | Doing | xp |
 | --- | --- |
@@ -105,21 +113,21 @@ its own at 150 / 450 / 1000 xp:
 | felling a tree, breaking a vein, picking a crop | 10 |
 | sowing a seed | 3 |
 | a repair | 3 |
-| raising a piece | 20 |
 
 So the thrall you actually put to work is the one that gets good at it, and a thrall left
-standing at the stones stays a novice no matter how many heads you have. All the values,
-and the level thresholds, are config.
+standing at the altar stays a novice no matter how many heads you have. All the values, and
+the level thresholds, are config.
 
 Tier sets the **tool tier**, which is the hard gate: a tier 1 thrall cannot fell an oak or
 mine silver however long you leave it, exactly as a flint axe cannot. Level never changes
 that — it only makes the thrall hit harder and swing faster:
 
 - each **tier** above the first: +50% damage, +12% speed
-- each **level** above the first: +25% damage, +8% speed
+- each **level** above the first: +8% damage, +3% speed
 
-So a tier 4 level 4 berserker works roughly four times as fast as a fresh brute, but a
-levelled brute still cannot touch silver.
+A fresh brute chops for 40 a swing every 1.6s; a fresh seeker for 120 every 0.83s, and at
+level 20 that same seeker hits for 302 every 0.32s. A levelled brute still cannot touch
+silver.
 
 ### The golem smashes
 
@@ -154,9 +162,10 @@ and level. Raise it from the altar's ledger for goods from its own biome:
 | 2 | 15 bloodbags, 5 iron scrap |
 | 3 | 10 crystal, 5 wolf pelt |
 | 4 | 15 black metal scrap, 10 needles |
+| 5 | 10 eitr, 2 black cores |
 
 It comes back at the level it died with, so the experience it earned is never lost — only
-the goods. All four costs are config. Without an altar there is nobody keeping the roll,
+the goods. All five costs are config. Without an altar there is nobody keeping the roll,
 and death is final.
 
 ## Farming

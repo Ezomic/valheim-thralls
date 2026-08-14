@@ -331,14 +331,25 @@ namespace Thralls
             Tier5Prefab = cfg.Bind("2 - Thralls", "Tier5Creature", "SeekerBrute",
                 "Creature hired as a tier 5 thrall (mistlands seeker). Must be melee - the plain Seeker throws, the brute closes.");
 
-            Tier1Key = cfg.Bind("2 - Thralls", "Tier1RequiresBoss", "defeated_eikthyr",
-                "World key that must be set before tier 1 can be bound. Empty means no gate.");
-            Tier2Key = cfg.Bind("2 - Thralls", "Tier2RequiresBoss", "defeated_gdking",
-                "The Elder must fall before swamp thralls will answer.");
-            Tier3Key = cfg.Bind("2 - Thralls", "Tier3RequiresBoss", "defeated_bonemass",
-                "Bonemass must fall before golems will answer.");
-            Tier4Key = cfg.Bind("2 - Thralls", "Tier4RequiresBoss", "defeated_dragon",
-                "Moder must fall before berserkers will answer.");
+            // Each breed answers once the boss of ITS OWN biome is down, not the boss
+            // before it. A greydwarf is a black forest creature, so it waits for the
+            // Elder; a draugr is of the swamp, so it waits for Bonemass, and so on. The
+            // ladder used to sit one boss earlier all the way up, which handed you black
+            // forest labour for killing a stag in the meadows. Tier 5 was already on this
+            // footing - the seeker waited for the Queen - so this is the other four
+            // catching up with it rather than a new rule.
+            //
+            // Key names are the game's own, read out of the GlobalKeys enum in
+            // assembly_valheim rather than remembered: defeated_eikthyr, defeated_gdking,
+            // defeated_bonemass, defeated_dragon, defeated_goblinking.
+            Tier1Key = cfg.Bind("2 - Thralls", "Tier1RequiresBoss", "defeated_gdking",
+                "The Elder must fall before black forest thralls will answer. Empty means no gate.");
+            Tier2Key = cfg.Bind("2 - Thralls", "Tier2RequiresBoss", "defeated_bonemass",
+                "Bonemass must fall before swamp thralls will answer.");
+            Tier3Key = cfg.Bind("2 - Thralls", "Tier3RequiresBoss", "defeated_dragon",
+                "Moder must fall before golems will answer.");
+            Tier4Key = cfg.Bind("2 - Thralls", "Tier4RequiresBoss", "defeated_goblinking",
+                "Yagluth must fall before berserkers will answer.");
             Tier5Key = cfg.Bind("2 - Thralls", "Tier5RequiresBoss", "defeated_queen",
                 "The Queen must fall before seekers will answer.");
 

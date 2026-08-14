@@ -77,14 +77,22 @@ namespace Thralls
             return "";
         }
 
+        /// <summary>
+        /// The boss standing in the way of this breed - the one that rules its own biome.
+        ///
+        /// Kept in step with the TierNRequiresBoss defaults by hand. If those are changed
+        /// in the config this goes on naming the default boss, which is the lesser of two
+        /// evils: the alternative is mapping arbitrary world keys back to display names and
+        /// getting "defeated_gdking must fall" on screen when somebody types one in.
+        /// </summary>
         public static string BossName(int tier)
         {
             switch (Clamp(tier))
             {
-                case 1: return "Eikthyr";
-                case 2: return "The Elder";
-                case 3: return "Bonemass";
-                case 4: return "Moder";
+                case 1: return "The Elder";
+                case 2: return "Bonemass";
+                case 3: return "Moder";
+                case 4: return "Yagluth";
                 default: return "The Queen";
             }
         }
