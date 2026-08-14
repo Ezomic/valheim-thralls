@@ -212,6 +212,33 @@ namespace Thralls
             }
         }
 
+        /// <summary>
+        /// The altar nearest an arbitrary point, rather than nearest the player.
+        ///
+        /// An upgrade piece needs this while it is still a ghost on the hammer, when there
+        /// is no sense in which the player is "at" an altar yet - what matters is which one
+        /// the piece is being raised beside. Compared squared, since the only use is
+        /// ordering and a square root per altar per frame buys nothing.
+        /// </summary>
+        public static ThrallAltar NearestTo(Vector3 point, float range)
+        {
+            Active.RemoveAll(a => a == null);
+
+            ThrallAltar best = null;
+            var bestSq = range * range;
+
+            for (int i = 0; i < Active.Count; i++)
+            {
+                var sq = (Active[i].transform.position - point).sqrMagnitude;
+                if (sq > bestSq) continue;
+
+                bestSq = sq;
+                best = Active[i];
+            }
+
+            return best;
+        }
+
         public static ThrallAltar Within(float range)
         {
             var altar = Current;
@@ -1438,6 +1465,18 @@ namespace Thralls
         private static Piece.Requirement[] Requirements()
         {
             return Requirements(ThrallConfig.AltarCostNow());
+        }
+
+        /// <summary>
+        /// The same cost parsing, opened up for the recipe builder.
+        ///
+        /// Recipes need a Requirement[] built from a cost string exactly as a piece does,
+        /// and duplicating the parse would mean two places to keep in step the next time a
+        /// cost gains a field.
+        /// </summary>
+        public static Piece.Requirement[] CostOf(string spec)
+        {
+            return Requirements(spec);
         }
 
         private static Piece.Requirement[] Requirements(string spec)

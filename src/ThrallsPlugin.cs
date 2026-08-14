@@ -44,7 +44,6 @@ namespace Thralls
 
         private void OnGUI()
         {
-            KeybindOverlay.Draw();
             AltarUI.Draw();
         }
 

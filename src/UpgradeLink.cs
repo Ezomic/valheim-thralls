@@ -6,11 +6,11 @@ namespace Thralls
     /// draws the sparkling line from an upgrade to the altar it belongs to, the way a
     /// chopping block draws one to its workbench.
     ///
-    /// not a StationExtension, though the effect is lifted straight from one. that
+    /// not a StationExtension, though the effect is lifted straight from one. That
     /// component resolves its target through CraftingStation.FindClosestStationInRange,
     /// so the altar would have to BE a CraftingStation - and CraftingStation implements
-    /// Hoverable and Interactable Both, which would take the altar's Hover Text and its
-    /// E key away from the thrall panel. the line is Worth having; the crafting UI
+    /// Hoverable and Interactable both, which would take the altar's Hover text and its
+    /// E key away from the thrall panel. The line is worth having; the crafting UI
     /// opening instead of the panel is not.
     ///
     /// the maths is StationExtension.StartConnectionEffect verbatim: Instantiate at the
@@ -39,15 +39,15 @@ namespace Thralls
             if (_nview == null || !_nview.IsValid()) return;
 
             // only while somebody is Close enough to see it, and only every few Seconds.
-            // vanilla's continuous extensions re-Poke on a 4 second repeat; This Matches
+            // vanilla's continuous extensions re-Poke on a 4 second repeat; this matches
             // that rather than holding a line up permanently.
             _timer -= Time.deltaTime;
             if (_timer > 0f) return;
             _timer = 4f;
 
-            var Player = Player.m_localPlayer;
-            if (Player == null) return;
-            if (Vector3.Distance(Player.transform.position, transform.position) > 14f) return;
+            var player = Player.m_localPlayer;
+            if (player == null) return;
+            if (Vector3.Distance(player.transform.position, transform.position) > 14f) return;
 
             Poke(4.5f);
         }
@@ -90,7 +90,7 @@ namespace Thralls
         }
 
         /// <summary>
-        /// the altar This upgrade answers to: the nearest one inside the same range the
+        /// the altar this upgrade answers to: the nearest one inside the same range the
         /// upgrade chain itself uses, so the line cannot claim a link the mod would not
         /// Count.
         /// </summary>

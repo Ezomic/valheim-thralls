@@ -10,7 +10,7 @@ namespace Thralls
     /// own body adds the recipe's item to the inventory and only then spends the
     /// resources - so letting it run and taking the item back afterwards would flash a
     /// thrall-shaped item through the player's pack, and would fail outright when the
-    /// pack is full. Handling ours here means No item is ever made.
+    /// pack is full. Handling ours here means no item is ever made.
     ///
     /// the requirement check and the spend are the game's own calls, so a thrall costs
     /// exactly what the crafting screen said it would.
@@ -35,7 +35,7 @@ namespace Thralls
             // hire is the panel's own path: it checks the Boss gate, the crew limit and
             // the altar, spends the tier cost and Spawns the creature. Calling it rather
             // than repeating any of that here is what keeps crafting and the panel from
-            // drifting apart - and why Nothing is consumed above. doing Both would charge
+            // drifting apart - and why nothing is consumed above. Doing both would charge
             // the cost twice.
             var altar = ThrallAltar.Current;
             var spot = altar != null ? altar.SummonSpot() : (Vector3?)null;

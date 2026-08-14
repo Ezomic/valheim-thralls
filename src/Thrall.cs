@@ -444,7 +444,7 @@ namespace Thralls
             SaveState();
         }
 
-        /// <summary>Items in the pack that are not seed, i.e. actually worth a trip to the chest.</summary>
+        /// <summary>Items in the pack that are not seed, i.e. Actually worth a trip to the chest.</summary>
         private int CarriedProduce()
         {
             var items = _inventory.GetAllItems();

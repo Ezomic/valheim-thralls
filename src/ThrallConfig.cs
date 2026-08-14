@@ -161,6 +161,14 @@ namespace Thralls
         public static ConfigEntry<string> ToolFarm;
         public static ConfigEntry<string> ToolBuild;
 
+        public static ConfigEntry<bool> AltarIsStation;
+        public static ConfigEntry<string> AltarStationCopyFrom;
+        public static ConfigEntry<float> AltarStationRange;
+
+        public static ConfigEntry<bool> UpgradeLinks;
+        public static ConfigEntry<string> UpgradeLinkFrom;
+        public static ConfigEntry<float> UpgradeLinkHeight;
+
         public static ConfigEntry<bool> ShowKeybinds;
         public static ConfigEntry<bool> Verbose;
         public static ConfigEntry<bool> TestMode;
@@ -662,6 +670,40 @@ namespace Thralls
                 "Item prefab shown when farming.");
             ToolBuild = cfg.Bind("5 - Tools", "BuildTool", "Hammer",
                 "Item prefab shown when building or repairing.");
+
+            AltarIsStation = cfg.Bind("2 - Thralls", "AltarIsStation", true,
+                "Make the altar a real crafting station. It binds creatures, which is a kind "
+                + "of crafting, and being a station is what lets the upgrades attach to it "
+                + "the way a chopping block attaches to a workbench - the connection line, "
+                + "the 'Requires' line in the build menu, the range circle and the repair "
+                + "radius all come from the game once this is on. Press E for the station, "
+                + "hold E for the thrall panel.");
+
+            AltarStationCopyFrom = cfg.Bind("2 - Thralls", "AltarStationCopyFrom", "piece_workbench",
+                "Station whose CraftingStation component is copied onto the altar, field for "
+                + "field. Copied rather than configured by hand because several of that "
+                + "component's fields are used without a null check - m_roofCheckPoint among "
+                + "them - so a half-filled one throws the first time a player stands near "
+                + "it. The objects it points at are cloned, not shared.");
+
+            AltarStationRange = cfg.Bind("2 - Thralls", "AltarStationRange", 8f,
+                "How far the altar reaches as a station, in metres - how close an upgrade has "
+                + "to be raised, and how far its repair and build range extend.");
+
+            UpgradeLinks = cfg.Bind("2 - Thralls", "UpgradeLinks", true,
+                "Draw the sparkling line from an upgrade to the altar it belongs to, the way "
+                + "a chopping block draws one to its workbench. Shown when the upgrade is "
+                + "raised and every few seconds while you are standing near it.");
+
+            UpgradeLinkFrom = cfg.Bind("2 - Thralls", "UpgradeLinkFrom",
+                "vfx_guardstone_connection,vfx_ExtensionConnection,vfx_ExtensionConnection_mage",
+                "Effect prefabs to draw that line with, first one that resolves wins. The "
+                + "guard stone's own connection comes first because the altar is a guard "
+                + "stone underneath.");
+
+            UpgradeLinkHeight = cfg.Bind("2 - Thralls", "UpgradeLinkHeight", 0.9f,
+                "How far up from the foot of each piece the line is drawn, in metres. Too low "
+                + "and it disappears into the kerb at both ends.");
 
             ShowKeybinds = cfg.Bind("4 - Misc", "ShowKeybinds", true,
                 "Show a small list of the mod's keys on screen. Handy while learning them, easy to switch off once they are muscle memory.");

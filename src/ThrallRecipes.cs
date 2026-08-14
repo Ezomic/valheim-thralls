@@ -11,10 +11,10 @@ namespace Thralls
     /// the costs are not new: they are the TierNCost strings the panel has always spent,
     /// trophies included, handed to the game's own requirement System instead of ours.
     ///
-    /// a Recipe must Name an ItemDrop - the crafting UI reads its icon, its Name and its
-    /// Max quality - even though Nothing is ever put in the player's inventory here. so
+    /// a Recipe must name an ItemDrop - the crafting UI reads its icon, its name and its
+    /// Max quality - even though nothing is ever put in the player's inventory here. So
     /// each tier gets an item of its own, cloned off that tier's Trophy so it arrives with
-    /// a working icon and mesh, then renamed. the craft itself is intercepted before the
+    /// a working icon and mesh, then renamed. The craft itself is intercepted before the
     /// item can be made; see ThrallCraftPatch.
     /// </summary>
     internal static class ThrallRecipes
@@ -23,7 +23,7 @@ namespace Thralls
         private static GameObject _holder;
         private static bool _done;
 
-        /// <summary>the tier a recipe summons, or 0 if it is not one of ours.</summary>
+        /// <summary>The tier a recipe summons, or 0 if it is not one of ours.</summary>
         public static int TierOf(Recipe recipe)
         {
             int tier;
@@ -45,7 +45,7 @@ namespace Thralls
                 if (item == null) continue;
 
                 var recipe = ScriptableObject.CreateInstance<Recipe>();
-                recipe.Name = "Recipe_thrall_tier" + tier;
+                recipe.name = "Recipe_thrall_tier" + tier;
                 recipe.m_item = item;
                 recipe.m_amount = 1;
                 recipe.m_minStationLevel = 1;
@@ -68,22 +68,22 @@ namespace Thralls
         /// the item that stands for a tier in the crafting menu.
         ///
         /// cloned off the Trophy already named in that tier's own cost string, so the
-        /// menu shows the creature's head and Nothing has to be drawn. its SharedData is
+        /// menu shows the creature's head and nothing has to be drawn. Its SharedData is
         /// copied field by field first - that Object is shared with the real Trophy, and
-        /// writing a Name onto it would rename every one of them in the game.
+        /// writing a name onto it would rename every one of them in the game.
         /// </summary>
         private static ItemDrop SummonItem(int tier, string cost)
         {
-            // the tier's own cost names the Trophy to wear. if it has been edited down to
-            // something with No Trophy in it - a Wood:1 test Value, say - the shipped
+            // the tier's own cost names the Trophy to wear. If it has been edited down to
+            // something with no Trophy in it - a Wood:1 test Value, say - the shipped
             // Default still names one, and an icon is all that is wanted here. Falling
             // back to it is the difference between four missing recipes and four working
             // ones with the right head on them.
             var donorName = FirstTrophy(cost) ?? FirstTrophy(DefaultCost(tier));
             if (donorName == null)
             {
-                ThrallsPlugin.Log.LogWarning("tier " + tier + " has No Trophy in its cost to take"
-                                             + " an icon from; No recipe for it.");
+                ThrallsPlugin.Log.LogWarning("tier " + tier + " has no Trophy in its cost to take"
+                                             + " an icon from; no recipe for it.");
                 return null;
             }
 
@@ -102,7 +102,7 @@ namespace Thralls
             try { clone = Object.Instantiate(donor, _holder.transform); }
             finally { ZNetView.m_forceDisableInit = false; }
 
-            clone.Name = "thrall_summon_tier" + tier;
+            clone.name = "thrall_summon_tier" + tier;
 
             var drop = clone.GetComponent<ItemDrop>();
             if (drop == null) { Object.Destroy(clone); return null; }
@@ -114,7 +114,7 @@ namespace Thralls
             drop.m_itemData.m_shared.m_maxStackSize = 1;
             drop.m_itemData.m_shared.m_maxQuality = 1;
 
-            // Registered so the menu can resolve it by Name, but never spawned - the craft
+            // Registered so the menu can resolve it by name, but never spawned - the craft
             // is intercepted before an item exists.
             //
             // m_itemByHash is private and rebuilt by UpdateRegisters, so the Hash table is
@@ -138,7 +138,7 @@ namespace Thralls
             return copy;
         }
 
-        /// <summary>the cost This tier ships with, whatever the Config has been changed to.</summary>
+        /// <summary>The cost this tier ships with, whatever the config has been changed to.</summary>
         private static string DefaultCost(int tier)
         {
             switch (tier)
@@ -147,7 +147,7 @@ namespace Thralls
                 case 2: return ThrallConfig.Tier2Cost.DefaultValue as string;
                 case 3: return ThrallConfig.Tier3Cost.DefaultValue as string;
                 case 4: return ThrallConfig.Tier4Cost.DefaultValue as string;
-                Default: return ThrallConfig.Tier5Cost.DefaultValue as string;
+                default: return ThrallConfig.Tier5Cost.DefaultValue as string;
             }
         }
 

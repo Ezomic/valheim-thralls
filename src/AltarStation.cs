@@ -13,20 +13,20 @@ namespace Thralls
     /// placing, counting how many are attached - Falls out of the game's own code once
     /// the altar is a station and they are extensions of it.
     ///
-    /// the component is copied off a vanilla station rather than added Blank. several of
+    /// the component is copied off a vanilla station rather than added Blank. Several of
     /// CraftingStation's fields are dereferenced without a null check - m_roofCheckPoint
     /// among them - so a hand-configured one throws the first time somebody stands near
     /// it. Copying a working station's Values and cloning the child objects it points at
-    /// leaves Nothing unset.
+    /// leaves nothing unset.
     /// </summary>
     internal static class AltarStation
     {
         private static CraftingStation _shared;
 
-        /// <summary>the station every upgrade attaches to. null until an altar is built.</summary>
+        /// <summary>The station every upgrade attaches to. Null until an altar is built.</summary>
         public static CraftingStation shared { get { return _shared; } }
 
-        /// <summary>child objects a station points at, which have to be cloned rather than shared.</summary>
+        /// <summary>Child objects a station points at, which have to be cloned rather than shared.</summary>
         private static readonly string[] OwnedFields =
         {
             "m_areaMarker", "m_roofCheckPoint", "m_connectionEffectPoint", "m_haveFireObject"
@@ -101,7 +101,7 @@ namespace Thralls
             if (original == null) return;
 
             var copy = Object.Instantiate(original, parent);
-            copy.Name = original.Name;
+            copy.name = original.name;
             copy.transform.localPosition = original.transform.localPosition;
             copy.transform.localRotation = original.transform.localRotation;
 
