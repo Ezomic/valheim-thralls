@@ -55,6 +55,12 @@ ICON_ANGLES = {
 # Below one, so each texel covers more surface and the boards read chunky.
 UV_SCALE = 0.5
 
+# What every file this script writes is called: thrall_altar_bindstone.obj, its .col, its
+# textures and its icon. A module global rather than a literal in four separate f-strings
+# because the depot builder imports this module and re-points it at "thrall_depot" to get
+# the whole pipeline - colliders, occlusion bake, surface textures, icon - for free.
+PREFIX = "thrall_altar"
+
 
 # ----------------------------------------------------------------- scene helpers
 
@@ -2054,7 +2060,7 @@ def write_colliders(parts, name):
     Blender is Z-up and the export is Y-up, so axes are swapped to match the mesh.
     """
     os.makedirs(OUT_DIR, exist_ok=True)
-    path = os.path.join(OUT_DIR, "thrall_altar_%s.col" % name)
+    path = os.path.join(OUT_DIR, "%s_%s.col" % (PREFIX, name))
 
     lines = ["# box  centre x y z  size x y z  qx qy qz qw   (metres, Y-up, Unity quat)"]
     for obj in parts:
@@ -2203,7 +2209,7 @@ def bake_occlusion(altar, samples=24, reach=1.6):
 
 def export(altar, name):
     os.makedirs(OUT_DIR, exist_ok=True)
-    path = os.path.join(OUT_DIR, "thrall_altar_%s.obj" % name)
+    path = os.path.join(OUT_DIR, "%s_%s.obj" % (PREFIX, name))
 
     bpy.ops.object.select_all(action="DESELECT")
     altar.select_set(True)
@@ -2485,7 +2491,7 @@ def render_icon(name, altar):
     scene.render.resolution_y = 128
     scene.render.film_transparent = True
 
-    path = os.path.join(OUT_DIR, "thrall_altar_%s_icon.png" % name)
+    path = os.path.join(OUT_DIR, "%s_%s_icon.png" % (PREFIX, name))
     scene.render.filepath = path
     try:
         bpy.ops.render.render(write_still=True)
@@ -3193,6 +3199,21 @@ SURFACES = {
     # Oxblood, not tan. Against the timber it hangs from, a tan hide was within a shade
     # of the pole and the ribbons disappeared into it.
     "hide":   (tex_bone, (0.86, 0.38, 0.23), (0.15, 0.06, 0.05), (0.24, 0.11, 0.07), 0),
+
+    # ---- the depot ----
+
+    # Coarse undyed sacking. Added because the depot's sacks were first cut from "rag",
+    # which is the pale sage the upgrade's ribbons are made of - at sack size and sack
+    # shape that read as a head of garlic rather than as cloth. Brown, low contrast, and
+    # duller than the timber it sits in so the load does not out-shout the piece.
+    "sackcloth": (tex_parchment, (0.56, 0.49, 0.36), (0.19, 0.16, 0.11),
+                  (0.30, 0.24, 0.15), 0),
+
+    # Wet field stone under moss, for the coffer. "darkstone" is the bindstone's own
+    # quarry and is deliberately bright - it has to survive Valheim's piece shader - but
+    # a metre-and-a-half slab of it with nothing growing on it reads as poured concrete.
+    # Green over grey is what makes it rock.
+    "mosstone": (tex_rock, (0.52, 0.55, 0.44), (0.17, 0.19, 0.15), (0.26, 0.36, 0.18), 0),
 }
 
 
@@ -3233,7 +3254,7 @@ def make_texture(name):
 
     rgb = PATTERNS[name](rng, TEX_SIZE, light, dark, tint)
     return _write_texture("altar_%s" % name, rgb,
-                          os.path.join(OUT_DIR, "thrall_altar_%s.png" % name))
+                          os.path.join(OUT_DIR, "%s_%s.png" % (PREFIX, name)))
 
 
 def make_surface_textures(name, kinds):
@@ -3261,11 +3282,11 @@ def make_surface_textures(name, kinds):
 
         written[kind] = _write_texture(
             "surface_%s_%s" % (name, kind), rgb,
-            os.path.join(OUT_DIR, "thrall_altar_%s_%s.png" % (name, kind)))
+            os.path.join(OUT_DIR, "%s_%s_%s.png" % (PREFIX, name, kind)))
 
     if kinds:
         shutil.copyfile(written[kinds[0]],
-                        os.path.join(OUT_DIR, "thrall_altar_%s.png" % name))
+                        os.path.join(OUT_DIR, "%s_%s.png" % (PREFIX, name)))
 
     return written
 
