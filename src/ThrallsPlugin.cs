@@ -12,7 +12,7 @@ namespace Thralls
     [BepInProcess("valheim.exe")]
     public class ThrallsPlugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "robbin.valheim.thralls";
+        public const string PluginGuid = "ezomic.valheim.thralls";
         public const string PluginName = "Thralls";
         public const string PluginVersion = "1.0.0";
         public const string PluginAuthor = "Robbin Thijssen";
