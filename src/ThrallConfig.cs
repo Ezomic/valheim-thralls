@@ -81,7 +81,6 @@ namespace Thralls
 
         // --- work ---
         public static ConfigEntry<float> WorkRadius;
-        public static ConfigEntry<float> CommandRadius;
         public static ConfigEntry<float> HarvestRange;
         public static ConfigEntry<float> SwingInterval;
         public static ConfigEntry<float> ChopDamage;
@@ -448,8 +447,6 @@ namespace Thralls
 
             WorkRadius = cfg.Bind("3 - Work", "WorkRadius", 25f,
                 "How far from its assigned spot a thrall looks for more of the same resource.");
-            CommandRadius = cfg.Bind("3 - Work", "CommandRadius", 40f,
-                "How far away a thrall can be and still hear your orders.");
             HarvestRange = cfg.Bind("3 - Work", "HarvestRange", 4.5f,
                 "How close a thrall must be to swing at its target.");
             SwingInterval = cfg.Bind("3 - Work", "SwingInterval", 1.6f,
