@@ -1189,6 +1189,36 @@ namespace Thralls
             }
         }
 
+        /// <summary>
+        /// How much of one dropped stack a smasher keeps, carrying the remainder forward.
+        ///
+        /// Rounding each stack on its own does not work, and the first version of this got
+        /// it wrong in both directions. A felled tree does not drop one pile: it drops a
+        /// handful of small stacks, often of one or two. Rounding those up keeps a fifth of
+        /// nothing and a whole log of everything, so the penalty barely bit; rounding them
+        /// down throws every stack below three away and the golem comes home empty for
+        /// hours.
+        ///
+        /// So the fraction is banked instead. Each stack takes its exact share plus
+        /// whatever was left over last time, keeps the whole part and carries the rest, and
+        /// over a morning's work the total lands on the yield it is supposed to.
+        /// </summary>
+        private int Waste(int stack, float yield)
+        {
+            if (yield <= 0f) return 0;
+            if (yield >= 1f) return stack;
+
+            _smashCarry += stack * yield;
+
+            var keep = Mathf.FloorToInt(_smashCarry);
+            _smashCarry -= keep;
+
+            return Mathf.Clamp(keep, 0, stack);
+        }
+
+        /// <summary>Fraction of a log owed to the thrall from previous smashed stacks.</summary>
+        private float _smashCarry;
+
         private void CollectDrops()
         {
             var hits = Physics.OverlapSphere(transform.position, ThrallConfig.PickupRadius.Value,
@@ -1209,14 +1239,7 @@ namespace Thralls
                 if (nview == null || !nview.IsValid()) continue;
 
                 var keep = drop.m_itemData.m_stack;
-                if (wasting)
-                {
-                    // Rounded up, so a single log is not silently rounded out of existence
-                    // and a thrall chopping saplings does not come home with nothing at all
-                    // however long it works.
-                    keep = Mathf.Max(1, Mathf.CeilToInt(keep * yield_));
-                    if (yield_ <= 0f) keep = 0;
-                }
+                if (wasting) keep = Waste(keep, yield_);
 
                 if (keep > 0 && !_inventory.CanAddItem(drop.m_itemData, keep)) continue;
 
