@@ -1064,6 +1064,10 @@ namespace Thralls
             else
             {
                 thrall.ReassignHere(job);
+
+                if (job == ThrallJob.Chop && thrall.Smashes)
+                    ThrallsPlugin.Say(thrall.ThrallName + " will knock trees down rather than "
+                                      + "cut them, so expect little wood.");
             }
         }
 

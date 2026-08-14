@@ -121,6 +121,21 @@ that — it only makes the thrall hit harder and swing faster:
 So a tier 4 level 4 berserker works roughly four times as fast as a fresh brute, but a
 levelled brute still cannot touch silver.
 
+### The golem smashes
+
+The golem is the one breed that does not use an axe. Set it to chopping with empty hands
+and it walks at trees and knocks them down, which makes it far and away the fastest way to
+clear a treeline.
+
+It keeps **a fifth of what the tree drops** and wastes the rest, and the wasted part does
+not fall on the ground for you to pick up either — it is gone. So the golem is a tool for
+clearing ground, not for getting wood. If you want the wood, send something with an axe.
+
+Both halves are config. `SmashTiers` lists which breeds work this way, so you can hand the
+trait to another one or take it off the golem, and `SmashYield` sets how much survives:
+1 removes the penalty and leaves only the no-axe part, 0 means it brings back nothing at
+all. Handing a golem an axe anyway is still allowed and changes nothing.
+
 Sacrifices always spend the *cheapest* acceptable heads first, so hiring never quietly eats
 a boss trophy.
 
@@ -220,6 +235,8 @@ needs no re-pointing.
   crew working, so this is a larger chest and a half rather than a chest.
 - `DepotCost` — what it takes to build, default wood, log, scraps and 2 iron.
 - `TalkOnUse` — whether pressing use on a thrall opens its orders panel. On by default.
+- `SmashTiers` / `SmashYield` — which breeds fell trees bare-handed, and how much of the
+  tree survives it. Defaults to the golem keeping a fifth.
 
 ## Safety rails
 
@@ -248,4 +265,4 @@ single-player so far — treat dedicated-server use as untested.
 ## Author
 
 Thralls is an original mod by **Robbin Thijssen** (Thijssen Software).
-Copyright (c) 2026 Robbin Thijssen. See `LICENSE`.
+Copyright (c) 2026 Robbin Thijssen. MIT licensed — see `LICENSE`.

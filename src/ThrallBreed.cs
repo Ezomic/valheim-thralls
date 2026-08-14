@@ -141,7 +141,8 @@ namespace Thralls
                 case 3:
                     return "A mountain golem, woken up and given a job. Slow to start "
                            + "and slow to stop, but rock does not tire and does not "
-                           + "argue. Whatever it picks up, it picks up all of.";
+                           + "argue. Needs no axe: it walks at a tree and the tree "
+                           + "stops being there. Very little of it is wood afterwards.";
 
                 case 4:
                     return "A fuling berserker, still holding both clubs. Nobody has "
@@ -178,6 +179,41 @@ namespace Thralls
         public static float ReachBonus(int tier)
         {
             return (Clamp(tier) - 1) * 0.75f;
+        }
+
+        /// <summary>
+        /// Whether this breed knocks trees down rather than cutting them.
+        ///
+        /// A stone golem holding a flint axe was always a slightly silly picture, and
+        /// making it carry one to be useful was worse: the thing is two metres of rock and
+        /// the tree is in its way. A smasher needs no axe and fells anything its tool tier
+        /// covers - and gets almost nothing back for it, because what it leaves is
+        /// splinters. That is the trade: it is a way to clear ground quickly, not a way to
+        /// get wood, and the two would be the same feature without the loss.
+        /// </summary>
+        public static bool Smashes(int tier)
+        {
+            var wanted = Clamp(tier);
+
+            foreach (var entry in (ThrallConfig.SmashTiers.Value ?? "").Split(','))
+            {
+                int listed;
+                if (int.TryParse(entry.Trim(), out listed) && listed == wanted) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// The share of a smashed tree that survives being smashed, 0 to 1.
+        ///
+        /// Applied to what the thrall picks up rather than to the tree's own drop table:
+        /// the table belongs to the game and is shared with every other way a tree can
+        /// fall, so reaching into it would quietly change what a player gets for their own
+        /// axe swing too.
+        /// </summary>
+        public static float SmashYield
+        {
+            get { return Mathf.Clamp01(ThrallConfig.SmashYield.Value); }
         }
     }
 }

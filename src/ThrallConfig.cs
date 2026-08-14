@@ -39,6 +39,8 @@ namespace Thralls
         public static ConfigEntry<float> TierSpeedStep;
         public static ConfigEntry<float> LevelDamageStep;
         public static ConfigEntry<float> LevelSpeedStep;
+        public static ConfigEntry<string> SmashTiers;
+        public static ConfigEntry<float> SmashYield;
 
         public static ConfigEntry<string> Tier1Prefab;
         public static ConfigEntry<string> Tier2Prefab;
@@ -436,6 +438,19 @@ namespace Thralls
                 "Extra work damage per level above the first, as a fraction.");
             LevelSpeedStep = cfg.Bind("2 - Thralls", "LevelSpeedStep", 0.03f,
                 "How much faster each level swings, as a fraction of the base interval.");
+
+            SmashTiers = cfg.Bind("2 - Thralls", "SmashTiers", "3",
+                "Tiers that fell trees by hand instead of with an axe, comma separated. A "
+                + "breed listed here needs no axe to be set to chopping and will not be "
+                + "offered one, and in exchange it keeps only SmashYield of what the tree "
+                + "drops. The golem is the one that fits: it is a walking boulder, so it "
+                + "clears a treeline faster than anything else you can bind and leaves you "
+                + "splinters for it. Empty means every breed has to be handed an axe.");
+            SmashYield = cfg.Bind("2 - Thralls", "SmashYield", 0.2f,
+                "What share of a smashed tree survives, from 0 to 1. At the default a "
+                + "thrall keeps one log in five and the rest is wasted. Set to 1 to remove "
+                + "the penalty and leave only the no-axe part, or to 0 for a breed that "
+                + "clears ground and brings back nothing at all.");
 
             PackBaseSlots = cfg.Bind("2 - Thralls", "PackBaseSlots", 1,
                 "Pack slots a tier one thrall carries. A greydwarf brute is not a pack mule.");

@@ -161,7 +161,12 @@ namespace Thralls
             Line("Base", Mathf.RoundToInt(Vector3.Distance(thrall.transform.position,
                                                            thrall.Base)) + "m from here", false);
 
-            Line("Tool", thrall.Tool.Length == 0 ? "empty handed" : AltarUI.PrettyItem(thrall.Tool),
+            // A smasher at a tree is empty handed on purpose, and saying only "empty
+             // handed" reads as a thrall waiting to be given something.
+            Line("Tool",
+                 thrall.Tool.Length > 0 ? AltarUI.PrettyItem(thrall.Tool)
+                 : thrall.Smashes ? "bare hands"
+                 : "empty handed",
                  false);
 
             Line("Experience", thrall.XpProgress, false);
@@ -307,7 +312,11 @@ namespace Thralls
             }
 
             thrall.AssignJob(job, thrall.Base);
-            ThrallsPlugin.Say(thrall.ThrallName + " starts " + WorkNode.JobName(job) + ".");
+
+            ThrallsPlugin.Say(thrall.ThrallName + " starts " + WorkNode.JobName(job) + "."
+                + (job == ThrallJob.Chop && thrall.Smashes
+                    ? " It will knock them down rather than cut them, so expect little wood."
+                    : ""));
             Close();
         }
 

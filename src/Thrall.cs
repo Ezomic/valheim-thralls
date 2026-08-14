@@ -107,6 +107,9 @@ namespace Thralls
         public int Rank { get { return Levels.LevelFor(_xp); } }
 
         public int Tier { get { return _tier; } }
+
+        /// <summary>Whether it fells trees by hand, and wastes most of them doing it.</summary>
+        public bool Smashes { get { return ThrallBreed.Smashes(_tier); } }
         public string TierName { get { return ThrallBreed.NameFor(_tier); } }
         public WorkPower Power { get { return WorkPower.For(_tier, Rank); } }
 
@@ -159,6 +162,12 @@ namespace Thralls
         {
             if (!ThrallConfig.RequireTools.Value) return true;
             if (!NeedsTool(job)) return true;
+
+            // A smasher brings its own hands to a tree. Checked before the tool is looked
+            // at rather than after, so a golem handed an axe by mistake is still allowed
+            // to chop with it - the trait is about what it does not need, not a ban.
+            if (job == ThrallJob.Chop && ThrallBreed.Smashes(_tier)) return true;
+
             if (string.IsNullOrEmpty(_tool)) return false;
 
             foreach (var name in ToolsFor(job).Split(','))
@@ -1133,6 +1142,10 @@ namespace Thralls
             // see which axe it is carrying rather than a generic one.
             if (!string.IsNullOrEmpty(_tool)) return _tool;
 
+            // A smasher is shown empty handed at a tree, because it is. Putting the
+            // stand-in axe in its fist would say the opposite of what the breed does.
+            if (_job == ThrallJob.Chop && ThrallBreed.Smashes(_tier)) return null;
+
             switch (_job)
             {
                 case ThrallJob.Chop: return ThrallConfig.ToolChop.Value;
@@ -1181,6 +1194,11 @@ namespace Thralls
             var hits = Physics.OverlapSphere(transform.position, ThrallConfig.PickupRadius.Value,
                 Physics.DefaultRaycastLayers);
 
+            // What a smasher leaves of a tree is splinters, so most of the pile never
+            // reaches its pack.
+            var wasting = _job == ThrallJob.Chop && ThrallBreed.Smashes(_tier);
+            var yield_ = ThrallBreed.SmashYield;
+
             for (int i = 0; i < hits.Length; i++)
             {
                 var drop = hits[i].GetComponentInParent<ItemDrop>();
@@ -1190,11 +1208,31 @@ namespace Thralls
                 var nview = drop.GetComponent<ZNetView>();
                 if (nview == null || !nview.IsValid()) continue;
 
-                if (!_inventory.CanAddItem(drop.m_itemData, drop.m_itemData.m_stack)) continue;
+                var keep = drop.m_itemData.m_stack;
+                if (wasting)
+                {
+                    // Rounded up, so a single log is not silently rounded out of existence
+                    // and a thrall chopping saplings does not come home with nothing at all
+                    // however long it works.
+                    keep = Mathf.Max(1, Mathf.CeilToInt(keep * yield_));
+                    if (yield_ <= 0f) keep = 0;
+                }
+
+                if (keep > 0 && !_inventory.CanAddItem(drop.m_itemData, keep)) continue;
 
                 nview.ClaimOwnership();
                 if (!nview.IsOwner()) continue;
 
+                // The whole pile leaves the world either way. Taking a share and leaving
+                // the rest lying there would hand the wood straight back to the player and
+                // there would be no cost to smashing at all.
+                if (keep <= 0)
+                {
+                    nview.Destroy();
+                    continue;
+                }
+
+                drop.m_itemData.m_stack = keep;
                 if (_inventory.AddItem(drop.m_itemData))
                     nview.Destroy();
             }
