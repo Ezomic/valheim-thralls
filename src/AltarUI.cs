@@ -713,7 +713,6 @@ namespace Thralls
             GUILayout.BeginHorizontal();
             JobChip(thrall, ThrallJob.Farm, "Farm");
             JobChip(thrall, ThrallJob.Repair, "Repair");
-            JobChip(thrall, ThrallJob.Build, "Build");
             JobChip(thrall, ThrallJob.Follow, "Follow");
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -1082,15 +1081,6 @@ namespace Thralls
                 for (int i = 0; i < thralls.Count; i++)
                     if (thralls[i] != null)
                         thralls[i].SummonTo(_altar.SummonSpot());
-            }
-
-            GUILayout.Space(8f);
-
-            if (BuildPlans.Count > 0
-                && GUILayout.Button("Cancel " + BuildPlans.Count + " build orders", _footStyle,
-                    GUILayout.Width(176f), GUILayout.Height(26f)))
-            {
-                BuildPlans.Clear();
             }
 
             GUILayout.FlexibleSpace();

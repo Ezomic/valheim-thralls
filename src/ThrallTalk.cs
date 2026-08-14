@@ -281,7 +281,6 @@ namespace Thralls
             GUILayout.BeginHorizontal();
             JobChip(thrall, ThrallJob.Farm, "Farm");
             JobChip(thrall, ThrallJob.Repair, "Repair");
-            JobChip(thrall, ThrallJob.Build, "Build");
             GUILayout.EndHorizontal();
             GUILayout.Space(9f);
 

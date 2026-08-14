@@ -6,8 +6,8 @@ using UnityEngine;
 namespace Thralls
 {
     /// <summary>
-    /// The summoning altar. Replaces the wandering steward: it is a piece you build, it
-    /// keeps the build ledger and the roll of the dead on its own ZDO, and being a piece it
+    /// The summoning altar. Replaces the wandering steward it was built to retire: it is a
+    /// piece you build, it keeps the roll of the dead on its own ZDO, and being a piece it
     /// simply cannot be killed by a raid.
     /// </summary>
     internal class ThrallAltar : MonoBehaviour, Hoverable, Interactable

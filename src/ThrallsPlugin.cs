@@ -72,7 +72,6 @@ namespace Thralls
             SiteTools.KeepAlive();
             AltarUI.Tick();
             ThrallTalk.Tick();
-            BuildPlans.Tick(Time.deltaTime);
             Fallen.Tick();
             Resting.Tick();
 
@@ -91,7 +90,6 @@ namespace Thralls
             if (ThrallTalk.IsOpen) return;
 
             if (Hotkey.Down(ThrallConfig.KeySteward)) OpenAltar();
-            else if (Hotkey.Down(ThrallConfig.KeyPlan)) MarkPlan();
             else if (Hotkey.Down(ThrallConfig.KeyRecruit)) Recruit();
             else if (Hotkey.Down(ThrallConfig.KeyAssign)) Assign();
             else if (Hotkey.Down(ThrallConfig.KeyFollow)) ToggleFollow();
@@ -306,61 +304,6 @@ namespace Thralls
             if (go.GetComponent<Thrall>() == null) go.AddComponent<Thrall>();
 
             return go;
-        }
-
-        private static readonly AccessTools.FieldRef<Player, GameObject> GhostRef =
-            AccessTools.FieldRefAccess<Player, GameObject>("m_placementGhost");
-
-        private static readonly AccessTools.FieldRef<Player, Player.PlacementStatus> StatusRef =
-            AccessTools.FieldRefAccess<Player, Player.PlacementStatus>("m_placementStatus");
-
-        /// <summary>
-        /// Turns the hammer's current placement preview into a build order. Reading the
-        /// vanilla ghost means the spot has already passed every check the game makes,
-        /// so a thrall is never sent to build somewhere the game would refuse.
-        /// </summary>
-        private void MarkPlan()
-        {
-            var player = Player.m_localPlayer;
-
-            if (!BuildPlans.HasLedger)
-            {
-                Say("Build a " + ThrallConfig.AltarName.Value.ToLowerInvariant() + " first - it keeps the build orders.");
-                return;
-            }
-
-            GameObject ghost;
-            Player.PlacementStatus status;
-            try
-            {
-                ghost = GhostRef(player);
-                status = StatusRef(player);
-            }
-            catch (Exception e)
-            {
-                Log.LogError("Cannot read the placement ghost: " + e.Message);
-                return;
-            }
-
-            if (ghost == null || !ghost.activeInHierarchy)
-            {
-                Say("Take out a hammer and pick a piece first.");
-                return;
-            }
-
-            if (status != Player.PlacementStatus.Valid)
-            {
-                Say("That is not a spot the piece can go.");
-                return;
-            }
-
-            if (!BuildPlans.Add(ghost.name, ghost.transform.position, ghost.transform.rotation))
-            {
-                Say("The altar is not listening.");
-                return;
-            }
-
-            Say("Build order noted (" + BuildPlans.Count + " pending).");
         }
 
         private void FlattenHere()

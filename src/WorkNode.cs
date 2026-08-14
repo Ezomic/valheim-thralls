@@ -14,8 +14,12 @@ namespace Thralls
         Gather = 3,
         Follow = 4,
         Farm = 5,
-        Repair = 6,
-        Build = 7
+        Repair = 6
+
+        // 7 was Build, and it is retired rather than reused. The job is written to the
+        // creature's ZDO as a plain int, so handing 7 to a new job would silently put
+        // every thrall that was building when the feature was removed into that job
+        // instead. Thrall.LoadState maps anything it does not recognise back to None.
     }
 
     /// <summary>How hard a particular thrall hits, which now depends on its rank.</summary>
@@ -315,9 +319,6 @@ namespace Thralls
             // Anything the player built is upkeep work.
             if (col.GetComponentInParent<WearNTear>() != null) return ThrallJob.Repair;
 
-            // Bare ground with orders pending on it means a building site.
-            if (BuildPlans.AnyNear(point, ThrallConfig.WorkRadius.Value)) return ThrallJob.Build;
-
             if (IsCultivated(point)) return ThrallJob.Farm;
             return ThrallJob.None;
         }
@@ -346,7 +347,6 @@ namespace Thralls
                 case ThrallJob.Gather: return "gathering";
                 case ThrallJob.Farm: return "farming";
                 case ThrallJob.Repair: return "repairing";
-                case ThrallJob.Build: return "building";
                 case ThrallJob.Follow: return "following you";
                 default: return "idle";
             }

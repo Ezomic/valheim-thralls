@@ -15,8 +15,8 @@ namespace Thralls
     }
 
     /// <summary>
-    /// The steward's roll of the dead. Kept on the steward's ZDO next to the build ledger,
-    /// so it belongs to the world and cannot be lost with the body.
+    /// The altar's roll of the dead. Kept on the altar's own ZDO, so it belongs to the
+    /// world and cannot be lost with the body.
     /// </summary>
     internal static class Fallen
     {

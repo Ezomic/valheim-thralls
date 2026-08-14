@@ -14,7 +14,6 @@ namespace Thralls
         public static ConfigEntry<KeyboardShortcut> KeyFollow;
         public static ConfigEntry<KeyboardShortcut> KeyDismiss;
         public static ConfigEntry<KeyboardShortcut> KeySteward;
-        public static ConfigEntry<KeyboardShortcut> KeyPlan;
         public static ConfigEntry<KeyboardShortcut> KeyTimeOfDay;
         public static ConfigEntry<KeyboardShortcut> KeyFlatten;
         public static ConfigEntry<float> FlattenRadius;
@@ -35,7 +34,6 @@ namespace Thralls
         public static ConfigEntry<float> XpPerSwing;
         public static ConfigEntry<float> XpPerHarvest;
         public static ConfigEntry<float> XpPerPlant;
-        public static ConfigEntry<float> XpPerBuild;
         public static ConfigEntry<float> XpPerRepair;
         // Named for the key it binds. It was MaxTier, which is the one thing it is not:
         // this caps the rank a thrall trains to, and tier is the breed you hired.
@@ -286,8 +284,6 @@ namespace Thralls
                 "Look at a thrall and dismiss it. It drops what it carries.");
             KeySteward = cfg.Bind("1 - Keys", "OpenAltar", new KeyboardShortcut(KeyCode.Keypad5),
                 "Open the panel of the nearest summoning altar, and close it again.");
-            KeyPlan = cfg.Bind("1 - Keys", "MarkBuildPlan", new KeyboardShortcut(KeyCode.Keypad6),
-                "With a hammer out and a piece selected, records the current placement as a build order for your thralls instead of building it yourself.");
             KeyTimeOfDay = cfg.Bind("1 - Keys", "TimeOfDay", new KeyboardShortcut(KeyCode.Keypad7),
                 "Step the time of day through dawn, midday, dusk and night, then back to normal.");
             KeyFlatten = cfg.Bind("1 - Keys", "FlattenGround", new KeyboardShortcut(KeyCode.Keypad8),
@@ -331,7 +327,6 @@ namespace Thralls
             XpPerHarvest = cfg.Bind("2 - Thralls", "XpPerHarvest", 10f,
                 "Experience for finishing something off - a tree felled, a vein broken, a crop picked.");
             XpPerPlant = cfg.Bind("2 - Thralls", "XpPerPlant", 3f, "Experience for sowing a seed.");
-            XpPerBuild = cfg.Bind("2 - Thralls", "XpPerBuild", 20f, "Experience for raising a piece.");
             XpPerRepair = cfg.Bind("2 - Thralls", "XpPerRepair", 3f, "Experience for a repair.");
 
             Tier2Trophies = cfg.Bind("2 - Thralls", "Rank2Trophies",
@@ -524,7 +519,7 @@ namespace Thralls
             MineablePrefabs = cfg.Bind("3 - Work", "ExtraMineableNames", "rock,stone,copper,tin,silver,obsidian,flametal,mudpile,ore",
                 "Extra name fragments treated as mineable, on top of proper ore veins. Comma separated, case insensitive.");
             SeedsPerTrip = cfg.Bind("3 - Work", "SeedsPerTrip", 20,
-                "How much seed a farming thrall draws from its drop-off chest per visit. 0 stops them restocking, so they only sow what you hand them.");
+                "How much seed a farming thrall draws from the depot per visit. 0 stops them restocking, so they only sow what you hand them directly.");
 
             SwingAnimation = cfg.Bind("3 - Work", "SwingAnimation", "",
                 "Animator trigger played when a thrall works. Empty picks the first one the creature has. Set to 'none' for no animation at all if your chosen creature does something silly.");

@@ -73,8 +73,6 @@ namespace Thralls
 
         private string _currentTool;
         private WearNTear _repairTarget;
-        private BuildPlan _plan;
-        private bool _warnedNoMaterials;
 
         private readonly Dictionary<int, float> _giveUpList = new Dictionary<int, float>();
 
@@ -342,10 +340,40 @@ namespace Thralls
 
         // ------------------------------------------------------------------ state
 
+        /// <summary>
+        /// A saved job this build still recognises, or None.
+        ///
+        /// Enum.IsDefined would do the same and is avoided on purpose: it boxes and reflects
+        /// on every thrall that loads, and this runs on every ZDO the scene brings back.
+        /// </summary>
+        private static ThrallJob KnownJob(ThrallJob job)
+        {
+            switch (job)
+            {
+                case ThrallJob.None:
+                case ThrallJob.Chop:
+                case ThrallJob.Mine:
+                case ThrallJob.Gather:
+                case ThrallJob.Follow:
+                case ThrallJob.Farm:
+                case ThrallJob.Repair:
+                    return job;
+                default:
+                    return ThrallJob.None;
+            }
+        }
+
         private void LoadState()
         {
             var zdo = _nview.GetZDO();
-            _job = (ThrallJob)zdo.GetInt(ZJob, 0);
+
+            // The job is a plain int in the ZDO, so a value this build no longer has a name
+            // for has to be caught here rather than left to fall through every switch as an
+            // unnamed enum. That is exactly what a thrall saved mid-build would be now that
+            // the build job is gone: it would dispatch to nothing, find no work, and stand
+            // there looking broken with no way to tell why.
+            _job = KnownJob((ThrallJob)zdo.GetInt(ZJob, 0));
+
             _anchor = zdo.GetVec3(ZAnchor, transform.position);
             _name = zdo.GetString(ZName, "Thrall");
             _ownerName = zdo.GetString(ZOwnerName, "");
@@ -432,9 +460,7 @@ namespace Thralls
             _haveSowSpot = false;
             _nextRestock = 0f;
             _warnedNoSeed = false;
-            _warnedNoMaterials = false;
             _repairTarget = null;
-            _plan = null;
             _giveUpList.Clear();
             UpdateTool();
             SaveState();
@@ -548,12 +574,10 @@ namespace Thralls
             _anchor = pos;
             _target = null;
             _repairTarget = null;
-            _plan = null;
             _haveSowSpot = false;
             _searchTimer = 0f;
             _warnedNoDepot = false;
             _warnedNoSeed = false;
-            _warnedNoMaterials = false;
 
             // A thrall told to work somewhere else stops following, or it would take the
             // order and then walk straight back to your heel.
@@ -726,7 +750,6 @@ namespace Thralls
             }
 
             if (_job == ThrallJob.Repair) { DoRepair(dt); return; }
-            if (_job == ThrallJob.Build) { DoBuild(dt); return; }
 
             DoWork(dt);
 
@@ -801,146 +824,6 @@ namespace Thralls
                 best = wnt;
             }
             return best;
-        }
-
-        // ------------------------------------------------------------------ building
-
-        private void DoBuild(float dt)
-        {
-            if (_plan != null && !BuildPlans.All.Contains(_plan)) _plan = null;
-
-            if (_plan == null)
-            {
-                _searchTimer -= dt;
-                if (_searchTimer > 0f) { WalkTo(_anchor); return; }
-                _searchTimer = 1.5f;
-
-                _plan = BuildPlans.Nearest(_anchor, ThrallConfig.WorkRadius.Value);
-                if (_plan == null) { WalkTo(_anchor); return; }
-
-                _warnedNoMaterials = false;
-                _stuckTimer = 0f;
-                _lastDistance = float.MaxValue;
-            }
-
-            if (!HasMaterialsFor(_plan))
-            {
-                if (HasDropOff && !_restocking && Time.time >= _nextRestock)
-                {
-                    _restocking = true;
-                    _hauling = true;
-                }
-                else if (!_warnedNoMaterials)
-                {
-                    _warnedNoMaterials = true;
-                    Announce(_name + " lacks materials for " + PlanLabel(_plan) + ".");
-                }
-                return;
-            }
-
-            WalkTo(_plan.Position);
-
-            var dist = Vector3.Distance(transform.position, _plan.Position);
-            if (dist > Reach)
-            {
-                if (dist >= _lastDistance - 0.25f) _stuckTimer += dt; else _stuckTimer = 0f;
-                _lastDistance = dist;
-                if (_stuckTimer > 15f)
-                {
-                    // Cannot get to it. Leave the order standing and try a different one.
-                    _plan = null;
-                }
-                return;
-            }
-
-            _swingTimer -= dt;
-            if (_swingTimer > 0f) return;
-            _swingTimer = Mathf.Max(0.5f, SwingSeconds);
-
-            FaceTarget(_plan.Position);
-            PlaySwing();
-            Raise(_plan);
-        }
-
-        private void Raise(BuildPlan plan)
-        {
-            var piece = plan.Piece;
-            var player = Player.m_localPlayer;
-            if (piece == null || player == null)
-            {
-                BuildPlans.Remove(plan);
-                _plan = null;
-                return;
-            }
-
-            if (!SpendMaterialsFor(plan)) { _plan = null; return; }
-
-            // The vanilla routine handles creator, private areas, wear and the placement effects.
-            player.PlacePiece(piece, plan.Position, plan.Rotation, false);
-            AddXp(ThrallConfig.XpPerBuild.Value);
-
-            BuildPlans.Remove(plan);
-            _plan = null;
-            SaveState();
-        }
-
-        private static string PlanLabel(BuildPlan plan)
-        {
-            var piece = plan.Piece;
-            return piece != null && !string.IsNullOrEmpty(piece.m_name) ? piece.m_name : plan.PrefabName;
-        }
-
-        private bool HasMaterialsFor(BuildPlan plan)
-        {
-            var piece = plan.Piece;
-            if (piece == null || piece.m_resources == null) return true;
-
-            foreach (var req in piece.m_resources)
-            {
-                if (req == null || req.m_resItem == null || req.m_amount <= 0) continue;
-                var name = req.m_resItem.m_itemData.m_shared.m_name;
-                if (CountByName(name) < req.m_amount) return false;
-            }
-            return true;
-        }
-
-        private bool SpendMaterialsFor(BuildPlan plan)
-        {
-            var piece = plan.Piece;
-            if (piece == null || piece.m_resources == null) return true;
-            if (!HasMaterialsFor(plan)) return false;
-
-            foreach (var req in piece.m_resources)
-            {
-                if (req == null || req.m_resItem == null || req.m_amount <= 0) continue;
-                RemoveByName(req.m_resItem.m_itemData.m_shared.m_name, req.m_amount);
-            }
-            return true;
-        }
-
-        private int CountByName(string sharedName)
-        {
-            var total = 0;
-            var items = _inventory.GetAllItems();
-            for (int i = 0; i < items.Count; i++)
-                if (items[i].m_shared != null && items[i].m_shared.m_name == sharedName)
-                    total += items[i].m_stack;
-            return total;
-        }
-
-        private void RemoveByName(string sharedName, int amount)
-        {
-            var remaining = amount;
-            var items = new List<ItemDrop.ItemData>(_inventory.GetAllItems());
-            foreach (var item in items)
-            {
-                if (remaining <= 0) break;
-                if (item.m_shared == null || item.m_shared.m_name != sharedName) continue;
-
-                var take = Mathf.Min(remaining, item.m_stack);
-                _inventory.RemoveItem(item, take);
-                remaining -= take;
-            }
         }
 
         /// <summary>Sows one seed at a time from the pack, fetching more from the chest when empty.</summary>
@@ -1168,7 +1051,7 @@ namespace Thralls
             Unload(depot.Store);
 
             // A depot that had nothing we needed means no point walking back for a while.
-            if ((_job == ThrallJob.Farm || _job == ThrallJob.Build) && _lastRestockTake == 0)
+            if (_job == ThrallJob.Farm && _lastRestockTake == 0)
                 _nextRestock = Time.time + 120f;
 
             _hauling = false;
@@ -1240,7 +1123,6 @@ namespace Thralls
                 case ThrallJob.Chop: return ThrallConfig.ToolChop.Value;
                 case ThrallJob.Mine: return ThrallConfig.ToolMine.Value;
                 case ThrallJob.Farm: return ThrallConfig.ToolFarm.Value;
-                case ThrallJob.Build:
                 case ThrallJob.Repair: return ThrallConfig.ToolBuild.Value;
                 default: return null; // idling or foraging keeps whatever it was holding
             }
@@ -1313,15 +1195,13 @@ namespace Thralls
             if (chest == null) return;
 
             var farming = _job == ThrallJob.Farm;
-            var building = _job == ThrallJob.Build;
             var moved = 0;
             var items = new List<ItemDrop.ItemData>(_inventory.GetAllItems());
             foreach (var item in items)
             {
-                // Stock in hand for the current job stays in the pack rather than being
-                // handed back and immediately drawn again.
+                // Seed in a farmer's pack is stock in hand, not produce - handing it back
+                // and drawing it again on the same visit is a wasted round trip.
                 if (farming && FarmPlanner.IsSeed(item)) continue;
-                if (building && _plan != null && NeededByPlan(_plan, item)) continue;
 
                 if (!chest.CanAddItem(item, item.m_stack)) continue;
                 if (!chest.AddItem(item)) continue;
@@ -1331,59 +1211,10 @@ namespace Thralls
 
             _lastRestockTake = 0;
             if (farming) _lastRestockTake = TakeSeed(chest);
-            else if (building && _plan != null) _lastRestockTake = TakeMaterials(chest, _plan);
             moved += _lastRestockTake;
 
             if (moved > 0) SaveState();
-            else if (!farming && !building) Announce(_name + " found the chest full.");
-        }
-
-        private static bool NeededByPlan(BuildPlan plan, ItemDrop.ItemData item)
-        {
-            var piece = plan.Piece;
-            if (piece == null || piece.m_resources == null || item.m_shared == null) return false;
-
-            foreach (var req in piece.m_resources)
-                if (req != null && req.m_resItem != null
-                    && req.m_resItem.m_itemData.m_shared.m_name == item.m_shared.m_name)
-                    return true;
-            return false;
-        }
-
-        /// <summary>Draws exactly what the current order is short of out of the chest.</summary>
-        private int TakeMaterials(Inventory chest, BuildPlan plan)
-        {
-            var piece = plan.Piece;
-            if (piece == null || piece.m_resources == null) return 0;
-
-            var taken = 0;
-            foreach (var req in piece.m_resources)
-            {
-                if (req == null || req.m_resItem == null || req.m_amount <= 0) continue;
-
-                var wanted = req.m_resItem.m_itemData.m_shared.m_name;
-                var short_ = req.m_amount - CountByName(wanted);
-                if (short_ <= 0) continue;
-
-                var stock = new List<ItemDrop.ItemData>(chest.GetAllItems());
-                foreach (var item in stock)
-                {
-                    if (short_ <= 0) break;
-                    if (item.m_shared == null || item.m_shared.m_name != wanted) continue;
-
-                    var amount = Mathf.Min(item.m_stack, short_);
-                    var portion = item.Clone();
-                    portion.m_stack = amount;
-
-                    if (!_inventory.CanAddItem(portion, amount)) break;
-                    if (!_inventory.AddItem(portion)) break;
-
-                    chest.RemoveItem(item, amount);
-                    short_ -= amount;
-                    taken += amount;
-                }
-            }
-            return taken;
+            else if (!farming) Announce(_name + " found the depot full.");
         }
 
         /// <summary>Draws a trip's worth of seed out of the drop-off chest.</summary>

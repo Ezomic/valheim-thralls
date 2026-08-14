@@ -16,8 +16,7 @@ All keys are rebindable in the config. Defaults use the numpad.
 | `Numpad 1` | Assign a job at whatever you are pointing at |
 | `Numpad 3` | Toggle follow-me |
 | `Numpad 4` | Look at a thrall and dismiss it (it drops what it carries) |
-| `Numpad 5` | Post the steward where you are looking, or move the one you have |
-| `Numpad 6` | Record the hammer's current placement as a build order |
+| `Numpad 5` | Open the nearest summoning altar's ledger |
 
 The job is inferred from what you point at:
 
@@ -26,7 +25,6 @@ The job is inferred from what you point at:
 - berry bush or mushroom on wild ground → **gather**
 - anything on tilled soil, or bare tilled soil → **farm**
 - anything you built → **repair**
-- ground with build orders pending nearby → **build**
 - other bare ground → **stand here**
 - an existing thrall → prints its status instead of giving an order
 
@@ -126,14 +124,14 @@ levelled brute still cannot touch silver.
 Sacrifices always spend the *cheapest* acceptable heads first, so hiring never quietly eats
 a boss trophy.
 
-Hire from the steward's panel, which shows the head price per tier and lights up when you
+Hire from the altar's ledger, which shows the head price per tier and lights up when you
 can afford it. The recruit hotkey binds the best tier you can currently pay for. Experience
 shows in the panel and in hover text.
 
 ## Death and raising
 
-A thrall that dies is written into the steward's roll of the dead, keeping its name, tier
-and level. Raise it from the steward's panel for goods from its own biome:
+A thrall that dies is written into the altar's roll of the dead, keeping its name, tier
+and level. Raise it from the altar's ledger for goods from its own biome:
 
 | Tier | Cost to raise |
 | --- | --- |
@@ -143,7 +141,7 @@ and level. Raise it from the steward's panel for goods from its own biome:
 | 4 | 15 black metal scrap, 10 needles |
 
 It comes back at the level it died with, so the experience it earned is never lost — only
-the goods. All four costs are config. Without a steward there is nobody keeping the roll,
+the goods. All four costs are config. Without an altar there is nobody keeping the roll,
 and death is final.
 
 ## Farming
@@ -170,43 +168,22 @@ finds the most damaged piece within its work radius, walks over, and repairs it,
 on to the next worst. Repair costs nothing, exactly as it does when you swing the hammer
 yourself. Leave one posted at a base and it will quietly undo storm and raid wear.
 
-## Building
+## The altar's ledger
 
-Building runs on **orders**, not guesswork.
-
-1. Take out a hammer and line up a piece the way you normally would.
-2. Instead of clicking, press `Numpad 6`. The placement is recorded as a build order and a
-   translucent ghost stays behind to show what goes there.
-3. Point a thrall at the site. It fetches the materials from the depot, walks over and
-   raises the piece.
-
-Orders are only accepted when the game itself says the placement is valid — the mod reads
-the hammer's own placement ghost and its status, so a thrall is never sent to build
-somewhere the game would have refused you. The piece is then placed through the game's own
-`PlacePiece` routine, so creator, ward setup, wear and placement effects all behave normally.
-
-Materials come out of the depot and are consumed at the piece's real build cost. A thrall
-short on materials says so once and stops making the trip for two minutes rather than
-pacing back and forth to an empty depot.
-
-Orders live on the steward, so you need one posted before you can plan. The steward panel
-shows how many are pending and can cancel them all.
-
-## The steward
-
-`Numpad 5` posts a steward — a stationary NPC who keeps your books. Walk up and press `E`
-to open the ledger, which lists every thrall with:
+Press `E` on a summoning altar to open the ledger, which lists every thrall with:
 
 - a rename field
 - what it is doing, how full its pack is, how far away it is, and whether a depot is in
   reach of where it works
-- job buttons that put it to work where it stands, including repair and build
-- **Come**, to call it to the steward
+- job buttons that put it to work where it stands
+- **Come**, to call it to the altar
 - **Release**, to dismiss it
 
-There is also **Recall all here** and, when any are pending, **Cancel build orders**. The
-panel closes with its own button, `Numpad 5`, or by walking more than 8m away. You only ever
-have one steward; pressing the key again moves it.
+There is also **Recall all here**. The panel closes with its own button, `Numpad 5`, or by
+walking more than 8m away.
+
+The ledger is the crew view — everyone at once, and hiring. For one thrall where it stands,
+talk to it instead.
 
 ## How it works
 
@@ -236,7 +213,6 @@ needs no re-pointing.
 - `ChopDamage` / `PickaxeDamage` / `SwingInterval` — how fast they work.
 - `SeedsPerTrip` — seed drawn from the depot per visit, default 20. Set to 0 to stop them
   restocking, so they only sow what you hand them directly.
-- `StewardPrefab` — `DvergerMageSupport` by default, so the steward looks distinct from the workers.
 - `WorkRadius` — how far from the assigned spot they will roam for more of the same resource.
 - `WorkerPrefab` — `Dverger` by default; `Skeleton_Friendly` also works.
 - `DepotRange` — how far a depot reaches, default 60. Measured from the thrall's work base,
