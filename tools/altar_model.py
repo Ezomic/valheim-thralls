@@ -2462,25 +2462,45 @@ def render_icon(name, altar):
     previous_film = scene.render.film_transparent
     previous_exposure = scene.view_settings.exposure
 
-    # Lit harder than the preview. The scene is exposed at -0.45 for a shape standing in
-    # a landscape, and hiding the ground takes away the bounce it was throwing back up
-    # into the model - so at the preview's exposure every icon came out a silhouette.
+    # The lights stay on.
     #
-    # Raised from 1.15 when darkstone stopped being the near-white sheet: against real
-    # granite the same exposure left every icon at mean luminance 0.27, which is muddy on
-    # the build menu's dark panel. An icon is a UI element shown as-is with no lighting
-    # over it, so the PNG's own numbers are the thing to judge - no capture bias to argue
-    # about here, unlike a shot taken in the world.
-    scene.view_settings.exposure = 1.85
+    # This loop used to hide every object that was not the model or the camera, which
+    # included the sun and the fill - so each icon was lit by nothing but flat world
+    # ambient, and came out an evenly grey clay model with no lit side and no shadow
+    # side. Measured against icons that do sit right on the build menu, ours had 9% of
+    # their pixels in real shadow against about 30%, and two of the six had none at all:
+    # not one pixel below luminance 60. That reads as modded from across the panel
+    # whatever the shape is doing.
+    #
+    # The exposure was pushed to 1.85 to rescue the brightness that the missing sun cost,
+    # which bleached what little modelling was left. With the sun back it comes down to
+    # where the render can be judged on its own numbers again.
+    scene.view_settings.exposure = 0.35
 
-    # Everything except the model itself goes out of shot.
+    # Ambient is pulled right down for the same reason. A world lighting the model evenly
+    # from every side is exactly what fills the shadows in.
+    world = scene.world
+    background = world.node_tree.nodes.get("Background") if world and world.use_nodes else None
+    previous_ambient = background.inputs[1].default_value if background else None
+    if background:
+        background.inputs[1].default_value = 0.25
+
+    # And the broad fill is dimmed to a rim. It is a 8 m area lamp meant to keep a shape
+    # readable against a landscape; at icon distance it wraps the whole model.
+    previous_fill = {}
+    for obj in scene.objects:
+        if obj.type == "LIGHT" and obj.data.type == "AREA":
+            previous_fill[obj] = obj.data.energy
+            obj.data.energy = obj.data.energy * 0.22
+
+    # Everything else goes out of shot.
     #
     # film_transparent only makes the *world* transparent, not geometry, and by the time
     # this runs render_preview has already laid down a 26 m ground plane - so the first
     # batch of icons came out fully opaque with the ground photographed behind them.
     hidden = []
     for obj in scene.objects:
-        if obj is altar or obj.type == "CAMERA":
+        if obj is altar or obj.type == "CAMERA" or obj.type == "LIGHT":
             continue
         if not obj.hide_render:
             obj.hide_render = True
@@ -2503,6 +2523,11 @@ def render_icon(name, altar):
     scene.render.resolution_x, scene.render.resolution_y = previous_x, previous_y
     scene.render.film_transparent = previous_film
     scene.view_settings.exposure = previous_exposure
+
+    if background and previous_ambient is not None:
+        background.inputs[1].default_value = previous_ambient
+    for obj, energy in previous_fill.items():
+        obj.data.energy = energy
     for obj in hidden:
         obj.hide_render = False
 
