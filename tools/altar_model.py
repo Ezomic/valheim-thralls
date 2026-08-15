@@ -44,7 +44,13 @@ ACTIVE = ["bindstone", "upgrade1", "upgrade2", "upgrade3", "upgrade4"]
 # the three leaning stakes cross straight over it - at 128 pixels the whole thing turned
 # into a pale blob with a face in it. Standing further round the front and lower puts the
 # ring against the slab and leaves the stakes at the edges where they belong.
-ICON_MARGIN = 1.16
+# How much air is left around an icon, as a multiple of the model's own silhouette.
+#
+# Set from the game's own icons rather than by eye. Thirteen vanilla pieces ripped out of
+# the running game average a bounding box filling 0.92 of the frame and 0.38 of its pixels;
+# at 1.16 ours sat at 0.87 and 0.29, which reads as a small object floating in a tile next
+# to pieces that fill theirs. 1.16 * (0.87/0.92) is where that lands.
+ICON_MARGIN = 1.10
 ICON_ANGLES = {
     None: mathutils.Vector((0.72, -1.0, 0.62)).normalized(),
     "upgrade1": mathutils.Vector((0.26, -1.0, 0.30)).normalized(),
@@ -2475,7 +2481,11 @@ def render_icon(name, altar):
     # The exposure was pushed to 1.85 to rescue the brightness that the missing sun cost,
     # which bleached what little modelling was left. With the sun back it comes down to
     # where the render can be judged on its own numbers again.
-    scene.view_settings.exposure = 0.35
+    # Set by measurement, not by feel. With the key at 1.7x, 0.35 put the batch at mean
+    # luminance 104 against the 84 the game's own icons average; exposure is in stops, so
+    # log2(84/104) is a third of one. The view transform compresses rather than
+    # scaling, so that first step landed at 94 and this is the second measured step.
+    scene.view_settings.exposure = -0.16
 
     # Ambient is pulled right down for the same reason. A world lighting the model evenly
     # from every side is exactly what fills the shadows in.
@@ -2483,15 +2493,22 @@ def render_icon(name, altar):
     background = world.node_tree.nodes.get("Background") if world and world.use_nodes else None
     previous_ambient = background.inputs[1].default_value if background else None
     if background:
-        background.inputs[1].default_value = 0.25
+        background.inputs[1].default_value = 0.12
 
     # And the broad fill is dimmed to a rim. It is a 8 m area lamp meant to keep a shape
     # readable against a landscape; at icon distance it wraps the whole model.
+    # The broad fill is dimmed to a rim and the key is pushed up. Vanilla icons carry a
+    # luminance spread of about 30 against the 24 this pass managed with the sun merely
+    # switched back on: they are lit hard from one side, not evenly.
     previous_fill = {}
     for obj in scene.objects:
-        if obj.type == "LIGHT" and obj.data.type == "AREA":
-            previous_fill[obj] = obj.data.energy
-            obj.data.energy = obj.data.energy * 0.22
+        if obj.type != "LIGHT":
+            continue
+        previous_fill[obj] = obj.data.energy
+        if obj.data.type == "AREA":
+            obj.data.energy = obj.data.energy * 0.18
+        elif obj.data.type == "SUN":
+            obj.data.energy = obj.data.energy * 1.7
 
     # Everything else goes out of shot.
     #
