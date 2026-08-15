@@ -9,7 +9,9 @@ using UnityEngine;
 namespace Thralls
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
-    [BepInProcess("valheim.exe")]
+    // No BepInProcess. It is a whitelist, and a dedicated server runs valheim_server.exe.
+    // Thralls are creatures whose AI and ZDOs the server owns once nobody is nearby, and the
+    // prefabs must resolve there or ZNetScene discards them.
     public class ThrallsPlugin : BaseUnityPlugin
     {
         public const string PluginGuid = "ezomic.valheim.thralls";
