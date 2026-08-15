@@ -1200,7 +1200,20 @@ namespace Thralls
                 // to re-check between the game's own passes - it runs that list on
                 // inventory changes, and a piece added to the table mid-session would
                 // otherwise wait for the next one.
-                if (!player.HaveRequirements(piece, Player.RequirementMode.IsKnown)) continue;
+                if (!player.HaveRequirements(piece, Player.RequirementMode.IsKnown))
+                {
+                    // Say which gate stopped it, because a piece that never appears in the
+                    // build menu is otherwise completely silent - the depot sat unteachable
+                    // for two sessions behind an inherited crafting station and nothing
+                    // anywhere said so.
+                    if (ThrallConfig.Verbose.Value)
+                        ThrallsPlugin.Log.LogInfo(string.Format(
+                            "Not teaching '{0}' yet: {1}", piece.m_name,
+                            piece.m_craftingStation != null
+                                ? "needs station '" + piece.m_craftingStation.m_name + "'"
+                                : "a material has not been seen yet"));
+                    continue;
+                }
 
                 // Through the game's own method where possible. Adding the name straight to
                 // the set - which is all this used to do - leaves the player with no idea

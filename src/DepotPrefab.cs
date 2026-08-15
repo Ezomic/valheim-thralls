@@ -204,6 +204,23 @@ namespace Thralls
             piece.m_category = Piece.PieceCategory.Crafting;
             piece.m_resources = AltarPrefab.CostOf(ThrallConfig.DepotCostNow());
 
+            // No workbench needed, and this is why the depot was missing from the build
+            // menu entirely rather than sitting in the wrong tab.
+            //
+            // The donor is a chest, and a chest requires a workbench, so the clone came
+            // with m_craftingStation pointing at one. Player.HaveRequirements checks that
+            // field FIRST and returns false when the station is not in m_knownStations -
+            // before it looks at a single resource - and the mod's own Teach pass gates on
+            // exactly that call. So the piece was registered, in the hammer's table and
+            // correctly categorised, and still never became a known recipe. The altar is
+            // cloned from a guard stone, which has no station, which is why it taught
+            // itself perfectly well and the depot did not.
+            //
+            // Clearing it is also the right answer on its own terms: the depot belongs out
+            // at the treeline where the crew is working, and a piece you can only raise
+            // within range of a workbench cannot go there.
+            piece.m_craftingStation = null;
+
             // The mast has a wide plank bin and a post standing out of the middle of it, so
             // its collision is a scatter of boxes rather than one solid mass. The overlap
             // test reads that as blocked against almost anything, which is the same
