@@ -418,7 +418,8 @@ namespace Thralls
                 var detail = !unlocked
                     ? ThrallBreed.Blocker(tier)
                     : !paid ? "not enough materials"
-                    : price == 0 ? "ready" : Mathf.Min(have, price) + " of " + price + " heads";
+                    : price == 0 ? "materials ready"
+                    : Mathf.Min(have, price) + " of " + price + " heads";
 
                 TierCard(tier, ThrallBreed.NameFor(tier), detail, unlocked, affordable);
                 GUILayout.Space(6f);
@@ -547,8 +548,8 @@ namespace Thralls
                 unlocked ? _cardMetaStyle : _cardLockedStyle);
 
             // The card opens the breed's own page rather than binding on the spot. A
-            // single click that spends ten heads with no chance to read what you are
-            // getting is a click people regret.
+            // single click that spends silver and a golem's head with no chance to read
+            // what you are getting is a click people regret.
             if (GUI.Button(card, GUIContent.none, GUIStyle.none))
             {
                 _breed = tier;

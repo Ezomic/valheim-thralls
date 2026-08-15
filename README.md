@@ -135,10 +135,10 @@ On top of the boss, each tier above the first wants one more upgrade raised besi
 altar. Both gates are config: `TierNRequiresBoss` takes a world key, empty for no gate, and
 `UpgradesGateTiers` turns the upgrade requirement off.
 
-**Binding one** costs a single head of that tier or better, plus the breed's own price in
-goods from its biome — which includes one head of that breed in particular.
+**Binding one** costs the breed's own price and nothing else — goods from its biome, and
+one head of that creature in particular.
 
-| Tier | Breed price, on top of the head |
+| Tier | What it costs |
 | --- | --- |
 | 1 | 5 bronze, 20 resin, 10 greydwarf eyes, 25 round logs, 25 stone, 1 greydwarf brute trophy |
 | 2 | 5 iron, 20 entrails, 10 bloodbags, 25 ancient bark, 25 flint, 1 draugr elite trophy |
@@ -146,9 +146,10 @@ goods from its biome — which includes one head of that breed in particular.
 | 4 | 10 black metal, 50 coins, 25 fine wood, 25 obsidian, 1 goblin brute trophy |
 | 5 | 20 black marble, 15 eitr, 20 soft tissue, 15 carapace, 1 seeker brute trophy |
 
-The generic head and the named one are counted separately, so binding a golem wants two
-stone golem heads if that is all you are carrying — one to pay the head price and one for
-the breed's. `RecruitCost` adds a further price on all five and is empty by default.
+The head in each line is the point of it: a golem's head to wake a golem. There used to be a
+second, separate trophy price on top — any head of the tier or better, from a mechanism
+older than these lists — and it charged alongside them so every thrall quietly wanted two
+trophies. It is off (`HeadsPerWorker = 0`) and these lists are the whole cost.
 
 **Levelling is earned, not bought.** A thrall gains experience by working and levels on its
 own, at 150 xp for level 2 and rising to 33,000 for level 20:

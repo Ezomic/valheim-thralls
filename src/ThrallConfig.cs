@@ -301,8 +301,8 @@ namespace Thralls
                 "How many thralls you may keep in total. Only a few of them can be working at once - see WorkSlots.");
             RecruitCost = cfg.Bind("2 - Thralls", "RecruitCost", "",
                 "Cost per thrall, as PrefabName:Amount, comma separated. Empty means free. Set to something like Coins:50 if you want recruiting to bite.");
-            HeadsPerWorker = cfg.Bind("2 - Thralls", "HeadsPerWorker", 1,
-                "Heads sacrificed to hire a thrall. They must match the tier being hired, or be better. One, not a pile: ten meant saving up a whole biome's worth of kills for a single labourer, and the breed's own cost in TierNCost is where the real price lives. 0 recruits for nothing.");
+            HeadsPerWorker = cfg.Bind("2 - Thralls", "HeadsPerWorker", 0,
+                "A SECOND trophy price, on top of the breed's own cost, taking any head of the tier being hired or better. Off by default because there should be one price, not two: TierNCost already names the head it wants - a golem's head to wake a golem - and that is the cost with meaning in it. This one was a separate mechanic that predated the breed prices and quietly charged alongside them. Set it above 0 to bring it back.");
             MaxLevel = cfg.Bind("2 - Thralls", "MaxLevel", 20,
                 "Highest rank a thrall can train to. This is rank, not tier: it does not change which breed you can hire or what tools they can use, only how far the one you hired can be pushed.");
 
