@@ -505,9 +505,17 @@ namespace Thralls
 
             var level = _altar != null ? _altar.Upgrades : 0;
 
-            if (level >= 3)
+            // Counted off the breeds on offer rather than hardwired to three. Each upgrade
+            // opens the breed above it, so two breeds need one upgrade and the altar is
+            // finished at one - not at three, which left the card promising two more
+            // upgrades that the build menu no longer carried.
+            var needed = ThrallBreed.Count - 1;
+
+            if (level >= needed)
             {
-                GUILayout.Label("Finished. All four answer it.", _mutedStyle);
+                GUILayout.Label(needed == 0
+                    ? "Nothing more to build."
+                    : "Finished. All " + ThrallBreed.Count + " answer it.", _mutedStyle);
                 GUILayout.Space(4f);
                 return;
             }

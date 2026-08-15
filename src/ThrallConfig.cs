@@ -22,6 +22,7 @@ namespace Thralls
 
         // --- thralls ---
         public static ConfigEntry<int> MaxThralls;
+        public static ConfigEntry<int> Breeds;
         public static ConfigEntry<string> RecruitCost;
         public static ConfigEntry<string> LevelThresholds;
         public static ConfigEntry<float> XpPerSwing;
@@ -293,6 +294,8 @@ namespace Thralls
             FlattenRadius = cfg.Bind("3 - Work", "FlattenRadius", 5f,
                 "Radius of the ground levelling tool, so 5 gives a 10m circle.");
 
+            Breeds = cfg.Bind("2 - Thralls", "Breeds", 2,
+                "How many of the five kinds of thrall this release offers, counting up from the greydwarf brute. Two ships the brute and the draugr, which are a whole game each rather than the bottom of a ladder. The other three are finished and their pieces stay registered - raise this to 3, 4 or 5 to turn the golem, the berserker and the seeker back on without losing anything already built.");
             MaxThralls = cfg.Bind("2 - Thralls", "MaxThralls", 20,
                 "How many thralls you may keep in total. Only a few of them can be working at once - see WorkSlots.");
             RecruitCost = cfg.Bind("2 - Thralls", "RecruitCost", "",
@@ -464,7 +467,7 @@ namespace Thralls
                 "How much faster each level swings, as a fraction of the base interval.");
 
             SmashTiers = cfg.Bind("2 - Thralls", "SmashTiers", "3",
-                "Tiers that fell trees by hand instead of with an axe, comma separated. A "
+                "Tiers that fell trees by hand instead of with an axe, comma separated. Does nothing at the shipped Breeds of 2 - the golem is tier 3 - so this waits for the release that turns the golem on. A "
                 + "breed listed here needs no axe to be set to chopping and will not be "
                 + "offered one, and in exchange it keeps only SmashYield of what the tree "
                 + "drops. The golem is the one that fits: it is a walking boulder, so it "

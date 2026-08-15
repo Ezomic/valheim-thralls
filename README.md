@@ -76,9 +76,6 @@ free storage, and you would bind five, rest four, and swap whichever you needed 
 | --- | --- | --- |
 | 1 | 10 greydwarf eyes, 10 wood | 20 greydwarf eyes, 20 wood |
 | 2 | 8 bloodbags, 2 iron scrap | 15 bloodbags, 5 iron scrap |
-| 3 | 5 crystal, 2 wolf pelt | 10 crystal, 5 wolf pelt |
-| 4 | 8 black metal scrap, 5 needles | 15 black metal scrap, 10 needles |
-| 5 | 5 eitr, 1 black core | 10 eitr, 2 black cores |
 
 Both are config, and an empty recall cost makes calling back free again.
 
@@ -117,8 +114,9 @@ using it.
 
 ## Tiers and levels
 
-There are five kinds of thrall. They are **separate careers, not a ladder** — a brute never
-becomes a golem. You choose which to bind, and each is then trained on its own.
+This release ships **two** kinds of thrall. They are **separate careers, not a ladder** —
+a brute never becomes a draugr. You choose which to bind, and each is then trained on its
+own.
 
 Each answers only once the boss of **its own** biome is down, so a breed arrives about when
 you start working the ground it came from.
@@ -127,13 +125,14 @@ you start working the ground it came from.
 | --- | --- | --- | --- |
 | 1 | Greydwarf brute | The Elder | 1 |
 | 2 | Draugr elite | Bonemass | 2 |
-| 3 | Stone golem | Moder | 3 |
-| 4 | Fuling berserker | Yagluth | 4 |
-| 5 | Seeker brute | The Queen | 5 |
 
-On top of the boss, each tier above the first wants one more upgrade raised beside the
-altar. Both gates are config: `TierNRequiresBoss` takes a world key, empty for no gate, and
-`UpgradesGateTiers` turns the upgrade requirement off.
+The golem, the berserker and the seeker are built and waiting behind `Breeds`. Set it to
+3, 4 or 5 to turn them on — their pieces stay registered whatever it is set to, so nothing
+already standing in a world is lost either way.
+
+On top of the boss, the draugr wants one upgrade raised beside the altar. Both gates are
+config: `TierNRequiresBoss` takes a world key, empty for no gate, and `UpgradesGateTiers`
+turns the upgrade requirement off.
 
 **Binding one** costs the breed's own price and nothing else — goods from its biome, and
 one head of that creature in particular.
@@ -142,11 +141,8 @@ one head of that creature in particular.
 | --- | --- |
 | 1 | 5 bronze, 20 resin, 10 greydwarf eyes, 25 round logs, 25 stone, 1 greydwarf brute trophy |
 | 2 | 5 iron, 20 entrails, 10 bloodbags, 25 ancient bark, 25 flint, 1 draugr elite trophy |
-| 3 | 5 silver, 10 crystal, 15 round logs, 15 ancient bark, 15 stone, 15 flint, 1 stone golem trophy |
-| 4 | 10 black metal, 50 coins, 25 fine wood, 25 obsidian, 1 goblin brute trophy |
-| 5 | 20 black marble, 15 eitr, 20 soft tissue, 15 carapace, 1 seeker brute trophy |
 
-The head in each line is the point of it: a golem's head to wake a golem. There used to be a
+The head in each line is the point of it: a draugr's head to raise a draugr. There used to be a
 second trophy price on top, taking any head of the tier or better, from a mechanism older
 than these lists — so every thrall quietly wanted two trophies. That mechanism is gone and
 these lists are the whole cost.
@@ -172,11 +168,14 @@ that — it only makes the thrall hit harder and swing faster:
 - each **tier** above the first: +50% damage, +12% speed
 - each **level** above the first: +8% damage, +3% speed
 
-A fresh brute chops for 40 a swing every 1.6s; a fresh seeker for 120 every 0.83s, and at
-level 20 that same seeker hits for 302 every 0.32s. A levelled brute still cannot touch
-silver.
+A fresh brute chops for 40 a swing every 1.6s; a fresh draugr for 60 every 1.41s, and at
+level 20 that same draugr hits for 151 every 0.87s. A levelled brute still cannot fell an
+oak — tier fixes the tool, and no amount of experience moves it.
 
-### The golem smashes
+### The golem smashes (not in this release)
+
+The golem is tier 3, so this waits for the release that turns it on — it is written and
+works, and raising `Breeds` above 2 brings it with the golem.
 
 The golem is the one breed that does not use an axe. Set it to chopping with empty hands
 and it walks at trees and knocks them down, which makes it far and away the fastest way to
@@ -204,9 +203,6 @@ and level. Raise it from the altar's ledger for goods from its own biome:
 | --- | --- |
 | 1 | 20 greydwarf eyes, 20 wood |
 | 2 | 15 bloodbags, 5 iron scrap |
-| 3 | 10 crystal, 5 wolf pelt |
-| 4 | 15 black metal scrap, 10 needles |
-| 5 | 10 eitr, 2 black cores |
 
 It comes back at the level it died with, so the experience it earned is never lost — only
 the goods. All five costs are config. Without an altar there is nobody keeping the roll,
@@ -273,6 +269,7 @@ needs no re-pointing.
 
 `BepInEx/config/ezomic.valheim.thralls.cfg`, written on first run.
 
+- `Breeds` — how many kinds this release offers, default 2. Raise to 5 for all of them.
 - `TierNCost` — what each breed costs to bind, materials and its own head.
 - `RecruitCost` — an *extra* cost on every breed, e.g. `Coins:50`. Empty by default.
 - `MaxThralls` — default 5.
@@ -288,7 +285,7 @@ needs no re-pointing.
 - `DepotCost` — what it takes to build, default wood, log, scraps and 2 iron.
 - `TalkOnUse` — whether pressing use on a thrall opens its orders panel. On by default.
 - `SmashTiers` / `SmashYield` — which breeds fell trees bare-handed, and how much of the
-  tree survives it. Defaults to the golem keeping a fifth.
+  tree survives it. Set to the golem, so dormant until `Breeds` reaches 3.
 
 ## Safety rails
 

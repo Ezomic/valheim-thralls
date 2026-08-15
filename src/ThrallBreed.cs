@@ -9,8 +9,26 @@ namespace Thralls
     /// </summary>
     internal static class ThrallBreed
     {
-        // Five careers, not four rungs of one: a brute never becomes a seeker.
-        public const int Count = 5;
+        /// <summary>
+        /// Every breed the mod has code and art for. Not the same as how many it offers.
+        ///
+        /// The prefabs for all of these are registered whatever Breeds is set to, and that
+        /// is deliberate rather than tidy: ZNetScene keys saved pieces on a prefab name and
+        /// discards any ZDO whose name no longer resolves, so quietly dropping the mountain
+        /// cairn would delete every one already standing in somebody's world. Registered
+        /// and not offered costs a little memory. Unregistered costs their base.
+        /// </summary>
+        public const int Max = 5;
+
+        /// <summary>
+        /// How many are actually offered, newest release first. Careers, not rungs - a
+        /// brute never becomes a draugr, so shipping two is shipping two whole things
+        /// rather than the bottom of a ladder.
+        /// </summary>
+        public static int Count
+        {
+            get { return Mathf.Clamp(ThrallConfig.Breeds.Value, 1, Max); }
+        }
 
         public static string PrefabFor(int tier)
         {
@@ -51,6 +69,9 @@ namespace Thralls
 
         public static bool Unlocked(int tier)
         {
+            // Above the cap is not "locked behind a boss", it is not in this release.
+            if (tier > Count) return false;
+
             // The altar has to have been built up far enough. Tier one needs nothing;
             // each tier above it wants one more upgrade on the altar.
             if (ThrallConfig.UpgradesGateTiers.Value
@@ -136,9 +157,17 @@ namespace Thralls
             }
         }
 
+        /// <summary>
+        /// Clamped to Max, not to Count.
+        ///
+        /// A thrall bound while five breeds were on offer still has its tier on its ZDO
+        /// after the cap comes down to two, and clamping to Count here would load a golem
+        /// as a draugr - reporting the wrong breed, the wrong tool tier and the wrong pack
+        /// size for a body that is plainly still a golem.
+        /// </summary>
         public static int Clamp(int tier)
         {
-            return Mathf.Clamp(tier, 1, Count);
+            return Mathf.Clamp(tier, 1, Max);
         }
 
         /// <summary>Bigger bodies need more room to swing, or they stall out of reach.</summary>

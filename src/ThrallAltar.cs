@@ -1174,7 +1174,7 @@ namespace Thralls
 
             foreach (var prefab in Built)
             {
-                if (prefab == null) continue;
+                if (prefab == null || !Offered(prefab)) continue;
                 var piece = prefab.GetComponent<Piece>();
                 if (piece == null || string.IsNullOrEmpty(piece.m_name)) continue;
 
@@ -1250,6 +1250,22 @@ namespace Thralls
         private static readonly System.Reflection.MethodInfo AddKnownPieceRef =
             AccessTools.Method(typeof(Player), "AddKnownPiece", new[] { typeof(Piece) });
 
+        /// <summary>
+        /// Whether a built piece is on sale in this release.
+        ///
+        /// An upgrade exists to open the breed above it, so the fourth one is pointless
+        /// when only two breeds are offered - and worse than pointless in the build menu,
+        /// where it reads as content you have failed to unlock. It stays registered so the
+        /// ones already standing in a world keep resolving; it simply is not offered.
+        /// </summary>
+        private static bool Offered(GameObject prefab)
+        {
+            var upgrade = prefab.GetComponent<AltarUpgrade>();
+            if (upgrade == null) return true;
+
+            return upgrade.Level <= ThrallBreed.Count - 1;
+        }
+
         private static void AddToScene()
         {
             var scene = ZNetScene.instance;
@@ -1277,8 +1293,17 @@ namespace Thralls
             if (table == null || table.m_pieces == null) return;
 
             foreach (var prefab in Built)
-                if (prefab != null && !table.m_pieces.Contains(prefab))
-                    table.m_pieces.Add(prefab);
+            {
+                if (prefab == null) continue;
+
+                if (!Offered(prefab))
+                {
+                    table.m_pieces.Remove(prefab);
+                    continue;
+                }
+
+                if (!table.m_pieces.Contains(prefab)) table.m_pieces.Add(prefab);
+            }
         }
     }
 }
