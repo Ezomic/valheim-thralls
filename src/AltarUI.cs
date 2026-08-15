@@ -436,16 +436,26 @@ namespace Thralls
                 var resting = new List<RestingThrall>(Resting.All);
                 foreach (var entry in resting)
                 {
-                    var card = GUILayoutUtility.GetRect(RailW, 44f, GUILayout.Height(44f));
-                    GUI.DrawTexture(card, _cardOffTex);
-                    Outline(card, Hair);
+                    // Same card as the fallen below, because waking one now costs goods
+                    // too: it says the price and lights up when you can pay, rather than
+                    // offering a button that refuses.
+                    var cost = ThrallBreed.RecallCost(entry.Tier);
+                    var free = string.IsNullOrEmpty(cost);
+                    var affordable = free
+                        || (player != null && ItemCost.CanPay(player.GetInventory(), cost));
+
+                    var card = GUILayoutUtility.GetRect(RailW, 54f, GUILayout.Height(54f));
+                    GUI.DrawTexture(card, affordable ? _cardOnTex : _cardOffTex);
+                    Outline(card, affordable ? new Color(0.49f, 0.56f, 0.35f) : Hair);
 
                     GUI.Label(new Rect(card.x, card.y, card.width, 20f),
-                        entry.Name, _cardNameStyle);
-                    GUI.Label(new Rect(card.x, card.y + 17f, card.width, 18f),
-                        entry.TierName + " lv" + entry.Level, _cardLockedStyle);
+                        entry.Name + "  ·  " + entry.TierName + " lv" + entry.Level,
+                        _cardNameStyle);
+                    GUI.Label(new Rect(card.x, card.y + 18f, card.width, 18f),
+                        free ? "free" : ItemCost.Describe(cost),
+                        affordable ? _cardMetaStyle : _cardLockedStyle);
 
-                    if (GUI.Button(new Rect(card.xMax - 78f, card.y + 22f, 68f, 16f),
+                    if (GUI.Button(new Rect(card.x + 9f, card.y + 34f, 84f, 16f),
                             "Call back", _chipStyle) && _altar != null)
                     {
                         ThrallsPlugin.Recall(entry, _altar.SummonSpot());

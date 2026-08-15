@@ -238,6 +238,27 @@ namespace Thralls
             var prefab = ZNetScene.instance.GetPrefab(ThrallBreed.PrefabFor(entry.Tier));
             if (prefab == null) return false;
 
+            // Paid before the body exists, and only then removed from the roll: a failure
+            // between those two is a thrall that is neither resting nor standing up.
+            var cost = ThrallBreed.RecallCost(entry.Tier);
+            var inventory = player.GetInventory();
+
+            if (!string.IsNullOrEmpty(cost))
+            {
+                if (!ItemCost.CanPay(inventory, cost))
+                {
+                    Say("Waking " + entry.Name + " needs "
+                        + ItemCost.Missing(inventory, cost) + ".");
+                    return false;
+                }
+
+                if (!ItemCost.Pay(inventory, cost))
+                {
+                    Say("The offering was refused.");
+                    return false;
+                }
+            }
+
             var go = SpawnAt(prefab, at, entry.Tier, entry.Level, entry.Name);
 
             // Its experience and its tool come back with it, not just its name and breed.

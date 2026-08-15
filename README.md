@@ -64,8 +64,23 @@ Three different things, and all three keep the thrall's name, level and tool.
 | You want | Where | Cost |
 | --- | --- | --- |
 | **Put one away** | its own panel — *Send it to rest* | nothing; it hands its load in first |
-| **Bring that one back** | altar ledger — **Resting**, *Call back* | nothing |
+| **Bring that one back** | altar ledger — **Resting**, *Call back* | biome goods, about half a raise |
 | **Raise one that died** | altar ledger — **Fallen**, *Bring back* | biome goods, below |
+
+Putting one away is free and waking it is not, on purpose. Resting is you deciding you have
+too many mouths at the treeline, and charging for tidying up only teaches people to leave
+thralls standing in a field instead. Waking is the other half: without a price the roll is
+free storage, and you would bind five, rest four, and swap whichever you needed for nothing.
+
+| Tier | To call back | To raise from the dead |
+| --- | --- | --- |
+| 1 | 10 greydwarf eyes, 10 wood | 20 greydwarf eyes, 20 wood |
+| 2 | 8 bloodbags, 2 iron scrap | 15 bloodbags, 5 iron scrap |
+| 3 | 5 crystal, 2 wolf pelt | 10 crystal, 5 wolf pelt |
+| 4 | 8 black metal scrap, 5 needles | 15 black metal scrap, 10 needles |
+| 5 | 5 eitr, 1 black core | 10 eitr, 2 black cores |
+
+Both are config, and an empty recall cost makes calling back free again.
 
 Resting and dying are not the same list. A thrall you sent away is waiting; a thrall that
 was killed is on the roll of the dead and costs goods to raise. Either way it returns at

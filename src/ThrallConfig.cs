@@ -77,6 +77,11 @@ namespace Thralls
         public static ConfigEntry<string> Tier3Revive;
         public static ConfigEntry<string> Tier4Revive;
         public static ConfigEntry<string> Tier5Revive;
+        public static ConfigEntry<string> Tier1Recall;
+        public static ConfigEntry<string> Tier2Recall;
+        public static ConfigEntry<string> Tier3Recall;
+        public static ConfigEntry<string> Tier4Recall;
+        public static ConfigEntry<string> Tier5Recall;
         public static ConfigEntry<int> PackBaseSlots;
         public static ConfigEntry<int> PackPerTier;
         public static ConfigEntry<int> PackLevelsPerSlot;
@@ -440,6 +445,25 @@ namespace Thralls
                 "Plains goods to raise a fallen tier 4 thrall.");
             Tier5Revive = cfg.Bind("2 - Thralls", "Tier5ReviveCost", "Eitr:10,BlackCore:2",
                 "Mistlands goods to raise a fallen tier 5 thrall.");
+
+            // Calling a resting thrall back costs about half what raising a dead one does.
+            //
+            // Sending one to rest is free and always will be - it is you deciding you have
+            // too many mouths at the treeline, and charging for tidying up is the sort of
+            // rule that makes people leave thralls standing in a field instead. Waking one
+            // is the other half of that bargain, and it wants a price or the roll becomes
+            // free storage: bind five, rest four, and swap whichever you need for nothing.
+            // Cheaper than a raise, because the thrall did not die - you put it away.
+            Tier1Recall = cfg.Bind("2 - Thralls", "Tier1RecallCost", "GreydwarfEye:10,Wood:10",
+                "Black forest goods to call a resting tier 1 thrall back. Empty means free.");
+            Tier2Recall = cfg.Bind("2 - Thralls", "Tier2RecallCost", "Bloodbag:8,IronScrap:2",
+                "Swamp goods to call a resting tier 2 thrall back. Empty means free.");
+            Tier3Recall = cfg.Bind("2 - Thralls", "Tier3RecallCost", "Crystal:5,WolfPelt:2",
+                "Mountain goods to call a resting tier 3 thrall back. Empty means free.");
+            Tier4Recall = cfg.Bind("2 - Thralls", "Tier4RecallCost", "BlackMetalScrap:8,Needle:5",
+                "Plains goods to call a resting tier 4 thrall back. Empty means free.");
+            Tier5Recall = cfg.Bind("2 - Thralls", "Tier5RecallCost", "Eitr:5,BlackCore:1",
+                "Mistlands goods to call a resting tier 5 thrall back. Empty means free.");
 
             TierDamageStep = cfg.Bind("2 - Thralls", "TierDamageStep", 0.5f,
                 "Extra work damage per tier above the first, as a fraction.");

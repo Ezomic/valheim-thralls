@@ -123,6 +123,19 @@ namespace Thralls
             }
         }
 
+        /// <summary>What waking a resting thrall costs, as PrefabName:Amount pairs.</summary>
+        public static string RecallCost(int tier)
+        {
+            switch (Clamp(tier))
+            {
+                case 1: return ThrallConfig.Tier1Recall.Value;
+                case 2: return ThrallConfig.Tier2Recall.Value;
+                case 3: return ThrallConfig.Tier3Recall.Value;
+                case 4: return ThrallConfig.Tier4Recall.Value;
+                default: return ThrallConfig.Tier5Recall.Value;
+            }
+        }
+
         public static int Clamp(int tier)
         {
             return Mathf.Clamp(tier, 1, Count);
