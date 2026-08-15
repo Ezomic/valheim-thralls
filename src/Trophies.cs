@@ -60,6 +60,47 @@ namespace Thralls
             return 1;
         }
 
+        /// <summary>
+        /// Tier of a head by prefab name.
+        ///
+        /// TierOf works off an ItemData's m_dropPrefab, which is set on an item lying in an
+        /// inventory but not on the one hanging off a prefab in ObjectDB - so asking it
+        /// about a cost line would call every named trophy tier 1.
+        /// </summary>
+        public static int TierOfName(string prefabName)
+        {
+            if (string.IsNullOrEmpty(prefabName)) return 0;
+
+            int tier;
+            if (Tiers.TryGetValue(prefabName.ToLowerInvariant(), out tier)) return tier;
+            return 1;
+        }
+
+        /// <summary>
+        /// How many heads of this tier or better a cost line will take for itself.
+        ///
+        /// The breed prices name trophies outright - three stone golem heads for a golem -
+        /// and those same trophies also satisfy the head price, which asks only for
+        /// "tier 3 or better". Counting them once for each is how you get told you can
+        /// afford a thrall and then find you cannot, a head poorer.
+        /// </summary>
+        public static int ClaimedBy(string spec, int minTier)
+        {
+            if (string.IsNullOrEmpty(spec) || ObjectDB.instance == null) return 0;
+
+            var total = 0;
+            foreach (var entry in ItemCost.Parse(spec))
+            {
+                var prefab = ObjectDB.instance.GetItemPrefab(entry.Key);
+                var drop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
+                if (drop == null || !IsTrophy(drop.m_itemData)) continue;
+
+                var tier = TierOfName(entry.Key);
+                if (tier >= minTier && tier > 0) total += entry.Value;
+            }
+            return total;
+        }
+
         public static int Count(Inventory inventory, int minTier)
         {
             if (inventory == null) return 0;
