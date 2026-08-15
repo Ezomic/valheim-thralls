@@ -103,7 +103,8 @@ On top of the boss, each tier above the first wants one more upgrade raised besi
 altar. Both gates are config: `TierNRequiresBoss` takes a world key, empty for no gate, and
 `UpgradesGateTiers` turns the upgrade requirement off.
 
-**Binding one** costs 10 heads of that tier or better. That is the only thing heads buy.
+**Binding one** costs a single head of that tier or better, plus the breed's own price in
+biome goods. That head is the only thing heads buy.
 
 **Levelling is earned, not bought.** A thrall gains experience by working and levels on its
 own, at 150 xp for level 2 and rising to 33,000 for level 20:
@@ -230,7 +231,7 @@ needs no re-pointing.
 
 `BepInEx/config/ezomic.valheim.thralls.cfg`, written on first run.
 
-- `HeadsPerWorker` / `HeadsPerUpgrade` — default 10 each. Set to 0 to recruit for nothing.
+- `HeadsPerWorker` — heads per thrall, default 1. Set to 0 to recruit for nothing.
 - `Rank2Trophies` / `Rank3Trophies` / `Rank4Trophies` — which heads count as what.
 - `RecruitCost` — an *extra* cost on top of the heads, e.g. `Coins:50`. Empty by default.
 - `MaxThralls` — default 5.
