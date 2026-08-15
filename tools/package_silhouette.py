@@ -108,12 +108,96 @@ def render_mask(name, builders):
     print("THRALLS_MASK %s" % path)
 
 
+def plain_grey(model):
+    """
+    One matte grey on everything, so the render carries form and nothing else.
+    
+    The shipped textures are deliberately left off. They are busy at icon size and their
+    own light and dark would be read as shape by the posteriser, which is exactly the
+    noise a flat mark is trying to lose.
+    """
+    mat = bpy.data.materials.new("plain")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs["Base Color"].default_value = (0.78, 0.76, 0.72, 1.0)
+    bsdf.inputs["Roughness"].default_value = 0.85
+
+    model.data.materials.clear()
+    model.data.materials.append(mat)
+
+
+def render_shaded(name, builders):
+    """
+    The same framing as the silhouette, but lit - so the alpha is still the exact
+    outline while the RGB carries the modelling that tells you what the thing is.
+    """
+    am.clear_scene()
+
+    import mathutils
+    models = []
+    for build, at_x in builders:
+        parts = build()
+        model = am.finish(parts, name + str(len(models)))
+        model.location.x = at_x
+        plain_grey(model)
+        models.append(model)
+
+    am.setup_lighting()
+
+    xs, zs = [], []
+    for m in models:
+        for c in m.bound_box:
+            w = m.matrix_world @ mathutils.Vector(c)
+            xs.append(w.x); zs.append(w.z)
+
+    cx = (min(xs) + max(xs)) / 2.0
+    cz = (min(zs) + max(zs)) / 2.0
+    span = max(max(xs) - min(xs), max(zs) - min(zs))
+
+    scene = bpy.context.scene
+
+    cam_data = bpy.data.cameras.new("shade_cam")
+    cam_data.type = "ORTHO"
+    cam_data.ortho_scale = span * 1.10
+    cam = bpy.data.objects.new("shade_cam", cam_data)
+    bpy.context.collection.objects.link(cam)
+
+    # Straight on, matching the silhouette pass. Turning it three-quarter would read
+    # better as an object and worse as a mark - the outline stops being symmetrical and
+    # the horns cross the body.
+    cam.location = (cx, -40.0, cz)
+    cam.rotation_euler = (1.5708, 0.0, 0.0)
+
+    scene.camera = cam
+    scene.render.resolution_x = MASK
+    scene.render.resolution_y = MASK
+    scene.render.film_transparent = True
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.exposure = 0.2
+
+    for candidate in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):
+        try:
+            scene.render.engine = candidate
+            break
+        except TypeError:
+            continue
+
+    os.makedirs(OUT, exist_ok=True)
+    path = os.path.join(OUT, "shade_" + name + ".png")
+    scene.render.filepath = path
+    bpy.ops.render.render(write_still=True)
+    print("THRALLS_SHADE %s" % path)
+
+
 def main():
     import random
     random.seed(20260814)
 
     render_mask("altar", [(am.build_bindstone, 0.0)])
     render_mask("both", [(am.build_bindstone, -0.85), (dm.build_mast, 1.25)])
+
+    random.seed(20260814)
+    render_shaded("altar", [(am.build_bindstone, 0.0)])
     print("THRALLS_MASK_DIR %s" % OUT)
 
 
