@@ -39,7 +39,7 @@ you can tell it down the right.
 | Show me its pack | lists what it is carrying, with a **Take** button per stack |
 | Take your load in | sends it to the depot now rather than when its pack fills |
 | Wait here | stands where you are, doing nothing |
-| Go free | released, and kept on the altar's roll so it can be called back |
+| Send it to rest | hands its load in and steps onto the altar's roll, name, level and tool intact |
 
 The left rail carries the two numbers you walked over to find out: how far the depot is, and
 how far its base is. A thrall standing next to you with its base three hundred metres away
@@ -56,6 +56,23 @@ the spot in order to say it, so that is the spot you meant.
 Changing the job does **not** move the base, and moving the base does not change the job.
 Keeping those two apart is what stops a crew drifting towards the player every time somebody
 is retasked.
+
+## Sending one away and getting it back
+
+Three different things, and all three keep the thrall's name, level and tool.
+
+| You want | Where | Cost |
+| --- | --- | --- |
+| **Put one away** | its own panel — *Send it to rest* | nothing; it hands its load in first |
+| **Bring that one back** | altar ledger — **Resting**, *Call back* | nothing |
+| **Raise one that died** | altar ledger — **Fallen**, *Bring back* | biome goods, below |
+
+Resting and dying are not the same list. A thrall you sent away is waiting; a thrall that
+was killed is on the roll of the dead and costs goods to raise. Either way it returns at
+the level it had, so experience is never lost — only the goods are.
+
+Without an altar there is no roll, so a thrall released in the field is released for good.
+The panel says which of the two it did.
 
 ## The depot
 

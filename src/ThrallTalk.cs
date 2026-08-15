@@ -263,13 +263,22 @@ namespace Thralls
                 Close();
             }
 
-            if (Order("Go free"))
+            // Named for what it does, not for what it sounds like.
+            //
+            // This was "Go free", which reads as letting a thrall go for good - so nobody
+            // used it, and the way to put a thrall away and call it back later went unseen.
+            // It does the opposite of permanent: the thrall hands its load in, steps onto
+            // the altar's resting roll with its name, level and tool, and the ledger's
+            // "Call back" returns the same one for nothing.
+            if (Order("Send it to rest"))
             {
                 var name = thrall.ThrallName;
-                // Kept, not thrown out: it goes onto the altar's resting roll with its
-                // name, level and tool, exactly as the ledger's own release does.
                 thrall.Dismiss();
-                ThrallsPlugin.Say(name + " is released from service.");
+
+                ThrallsPlugin.Say(Resting.HasLedger
+                    ? name + " rests at the altar. Call it back from the ledger."
+                    : name + " is released for good - with no altar there is no roll to "
+                           + "keep it on.");
                 Close();
             }
 

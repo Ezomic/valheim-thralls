@@ -39,6 +39,15 @@ namespace Thralls
             return altar != null && altar.Usable ? altar.View : null;
         }
 
+        /// <summary>
+        /// Whether there is an altar to keep the roll on.
+        ///
+        /// Asked before sending a thrall to rest, because without one there is nowhere to
+        /// write it down and "rest" quietly becomes "gone". The panel says which of the two
+        /// it is rather than reporting the same cheerful line either way.
+        /// </summary>
+        public static bool HasLedger { get { return Ledger() != null; } }
+
         public static void Tick()
         {
             if (ThrallAltar.Current == _boundTo) return;
