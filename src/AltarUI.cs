@@ -522,9 +522,15 @@ namespace Thralls
             GUI.Label(new Rect(card.x, card.y, card.width, 20f),
                 ThrallConfig.UpgradeName(level + 1), LockedName());
 
+            // Says what the piece descriptions used to, now that those are two words each
+            // to match the game's. The chain part earns its place: LevelNear counts only
+            // an unbroken run back to the altar, so an upgrade raised on its own does
+            // nothing whatsoever and nothing else anywhere says so.
             var wrapped = new GUIStyle(_cardLockedStyle) { wordWrap = true };
             GUI.Label(new Rect(card.x, card.y + 19f, card.width, 44f),
-                "Build it beside the altar with your hammer.", wrapped);
+                "Opens " + ThrallBreed.NameFor(level + 2) + " thralls. Build it with your "
+                + "hammer, touching the altar" + (level > 0 ? " and the one before it." : "."),
+                wrapped);
 
             GUILayout.Space(6f);
         }

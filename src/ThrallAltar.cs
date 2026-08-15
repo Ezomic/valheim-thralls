@@ -547,15 +547,16 @@ namespace Thralls
                 var piece = built.GetComponent<Piece>();
                 if (piece != null)
                 {
-                    // Says what it opens and what it has to stand next to. The chain part
-                    // is not decoration: AltarUpgrade.LevelNear only counts an unbroken
-                    // run, so a mountain cairn raised on its own does nothing at all and
-                    // nothing in the game was telling anyone that.
-                    piece.m_description = "Raised beside " + ThrallConfig.AltarName.Value.ToLowerInvariant()
-                                          + (level > 1
-                                             ? " and its " + ThrallConfig.UpgradeName(level - 1).ToLowerInvariant()
-                                             : "")
-                                          + ". Opens " + ThrallBreed.NameFor(level + 1) + " thralls.";
+                    // The wording the game uses for its own station extensions: a
+                    // chopping block is a "Workbench improvement" and nothing more.
+                    //
+                    // What this used to say - which breed it opens, and that it has to
+                    // touch an unbroken run back to the altar - was real information, and
+                    // AltarUpgrade.LevelNear does silently ignore a cairn raised on its
+                    // own. It has moved to the ledger's own upgrade card rather than being
+                    // dropped, because that is the mod's UI and can say more than two
+                    // words without looking foreign.
+                    piece.m_description = ThrallConfig.AltarName.Value + " improvement";
                     piece.m_resources = Requirements(ThrallConfig.UpgradeCost(level));
 
                     // The star the build menu draws on chopping blocks and tanning racks.
@@ -612,8 +613,7 @@ namespace Thralls
             if (piece == null) piece = prefab.AddComponent<Piece>();
 
             piece.m_name = label;
-            piece.m_description = "Binds thralls and sets them to work. Upgrades raised "
-                                  + "beside it open stronger breeds.";
+            piece.m_description = "Binds thralls";
             // Cleared here and set again by BuildUpgrades for the four that are upgrades,
             // so whatever the donor prefab happened to carry does not leak through.
             piece.m_isUpgrade = false;

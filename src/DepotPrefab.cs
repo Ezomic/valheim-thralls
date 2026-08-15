@@ -197,9 +197,9 @@ namespace Thralls
             if (piece == null) piece = prefab.AddComponent<Piece>();
 
             piece.m_name = ThrallConfig.DepotName.Value;
-            piece.m_description = "A store your thralls haul their work to. Any thrall working "
-                                  + "within " + Mathf.RoundToInt(ThrallConfig.DepotRange.Value)
-                                  + "m brings its pack here.";
+            // Two words, like the game's own. What it does and how far it reaches is on
+            // the piece when you look at it, which is where a range belongs anyway.
+            piece.m_description = "Thrall storage";
             piece.m_isUpgrade = false;
             piece.m_category = Piece.PieceCategory.Crafting;
             piece.m_resources = AltarPrefab.CostOf(ThrallConfig.DepotCostNow());
