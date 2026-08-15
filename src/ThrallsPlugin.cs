@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using BepInEx;
 using BepInEx.Logging;
+using Ezomic.Core;
 using HarmonyLib;
 using UnityEngine;
 
 namespace Thralls
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
+    [BepInDependency("ezomic.valheim.core", BepInDependency.DependencyFlags.HardDependency)]
     // No BepInProcess. It is a whitelist, and a dedicated server runs valheim_server.exe.
     // Thralls are creatures whose AI and ZDOs the server owns once nobody is nearby, and the
     // prefabs must resolve there or ZNetScene discards them.
@@ -28,6 +30,11 @@ namespace Thralls
         {
             Log = Logger;
             ThrallConfig.Bind(Config);
+            // Everyone, not HostOnly. Both ends have to agree about this mod, and the
+            // disagreement is silent when they do not: a client that cannot resolve a prefab
+            // hash discards the ZDO rather than erroring - destroying what is already standing
+            // in the world - and item data that differs desyncs inventories.
+            Suite.Register(PluginGuid, PluginName, PluginVersion, Config);
 
             _harmony = new Harmony(PluginGuid);
             // Named one class at a time on purpose. PatchAll(Type) applies only the class
