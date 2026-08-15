@@ -420,19 +420,19 @@ namespace Thralls
                 "Model file for the fourth altar upgrade. Empty falls back to Upgrade4Parts.");
 
             Tier1Cost = cfg.Bind("2 - Thralls", "Tier1Cost",
-                "Bronze:5,Resin:20,GreydwarfEye:10,RoundLog:25,Stone:25,TrophyGreydwarfBrute:3",
+                "Bronze:5,Resin:20,GreydwarfEye:10,RoundLog:25,Stone:25,TrophyGreydwarfBrute:1",
                 "What it costs to raise a greydwarf brute, as PrefabName:Amount separated by commas.");
             Tier2Cost = cfg.Bind("2 - Thralls", "Tier2Cost",
-                "Iron:5,Entrails:20,Bloodbag:10,ElderBark:25,Flint:25,TrophyDraugrElite:3",
+                "Iron:5,Entrails:20,Bloodbag:10,ElderBark:25,Flint:25,TrophyDraugrElite:1",
                 "What it costs to raise a swamp elite.");
             Tier3Cost = cfg.Bind("2 - Thralls", "Tier3Cost",
-                "Silver:5,Crystal:10,RoundLog:15,ElderBark:15,Stone:15,Flint:15,TrophySGolem:3",
+                "Silver:5,Crystal:10,RoundLog:15,ElderBark:15,Stone:15,Flint:15,TrophySGolem:1",
                 "What it costs to raise a mountain golem.");
             Tier5Cost = cfg.Bind("2 - Thralls", "Tier5Cost",
-                "BlackMarble:20,Eitr:15,Softtissue:20,Carapace:15,TrophySeekerBrute:3",
+                "BlackMarble:20,Eitr:15,Softtissue:20,Carapace:15,TrophySeekerBrute:1",
                 "What it costs to raise a mistlands seeker.");
             Tier4Cost = cfg.Bind("2 - Thralls", "Tier4Cost",
-                "BlackMetal:10,Coins:50,FineWood:25,Obsidian:25,TrophyGoblinBrute:3",
+                "BlackMetal:10,Coins:50,FineWood:25,Obsidian:25,TrophyGoblinBrute:1",
                 "What it costs to raise a fuling berserker.");
 
             Tier1Revive = cfg.Bind("2 - Thralls", "Tier1ReviveCost", "GreydwarfEye:20,Wood:20",

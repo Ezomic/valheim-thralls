@@ -136,7 +136,19 @@ altar. Both gates are config: `TierNRequiresBoss` takes a world key, empty for n
 `UpgradesGateTiers` turns the upgrade requirement off.
 
 **Binding one** costs a single head of that tier or better, plus the breed's own price in
-biome goods. That head is the only thing heads buy.
+goods from its biome — which includes one head of that breed in particular.
+
+| Tier | Breed price, on top of the head |
+| --- | --- |
+| 1 | 5 bronze, 20 resin, 10 greydwarf eyes, 25 round logs, 25 stone, 1 greydwarf brute trophy |
+| 2 | 5 iron, 20 entrails, 10 bloodbags, 25 ancient bark, 25 flint, 1 draugr elite trophy |
+| 3 | 5 silver, 10 crystal, 15 round logs, 15 ancient bark, 15 stone, 15 flint, 1 stone golem trophy |
+| 4 | 10 black metal, 50 coins, 25 fine wood, 25 obsidian, 1 goblin brute trophy |
+| 5 | 20 black marble, 15 eitr, 20 soft tissue, 15 carapace, 1 seeker brute trophy |
+
+The generic head and the named one are counted separately, so binding a golem wants two
+stone golem heads if that is all you are carrying — one to pay the head price and one for
+the breed's. `RecruitCost` adds a further price on all five and is empty by default.
 
 **Levelling is earned, not bought.** A thrall gains experience by working and levels on its
 own, at 150 xp for level 2 and rising to 33,000 for level 20:
