@@ -148,18 +148,11 @@ namespace Thralls
             }
 
             var inventory = player.GetInventory();
-            var price = Mathf.Max(0, ThrallConfig.HeadsPerWorker.Value);
             var raise = ThrallBreed.RaiseCost(tier);
             var extra = ThrallConfig.RecruitCost.Value;
 
-            // Everything is checked before anything is taken.
-            //
-            // The heads used to be consumed first and the breed's own price checked after,
-            // so a player short of one bloodbag paid a trophy and got nothing back. Worse,
-            // the two costs overlap: the head price wants "tier 3 or better" and the golem
-            // price names three stone golem heads, which are themselves tier 3 - so paying
-            // the head could eat one of the three and leave the breed price short, from an
-            // inventory that genuinely held enough a moment earlier.
+            // Checked before anything is taken, so being one bloodbag short cannot spend
+            // the rest of the price first.
             if (!string.IsNullOrEmpty(raise) && !ItemCost.CanPay(inventory, raise))
             {
                 Say("You are missing " + ItemCost.Missing(inventory, raise) + ".");
@@ -172,22 +165,6 @@ namespace Thralls
                 return false;
             }
 
-            // Heads left over once the named costs have taken theirs.
-            var have = Trophies.Count(inventory, tier)
-                       - Trophies.ClaimedBy(raise, tier)
-                       - Trophies.ClaimedBy(extra, tier);
-
-            if (price > 0 && have < price)
-            {
-                Say(string.Format("Needs {0} more tier {1} head{2} on top of the breed's price. "
-                                  + "You have {3} to spare.",
-                    price, tier, price == 1 ? "" : "s", Mathf.Max(0, have)));
-                return false;
-            }
-
-            // Named costs first, heads last. The named lines take exact prefabs; the head
-            // takes whatever qualifying trophy is cheapest, so letting it go last means it
-            // cannot swallow something a named line still needed.
             if (!string.IsNullOrEmpty(raise) && !ItemCost.Pay(inventory, raise))
             {
                 Say("The offering was refused.");
@@ -195,12 +172,6 @@ namespace Thralls
             }
 
             if (!PayExtra()) return false;
-
-            if (price > 0 && !Trophies.Consume(inventory, tier, price))
-            {
-                Say("The sacrifice was refused.");
-                return false;
-            }
 
             Vector3 spot;
             if (at.HasValue) spot = at.Value;

@@ -23,7 +23,6 @@ namespace Thralls
         // --- thralls ---
         public static ConfigEntry<int> MaxThralls;
         public static ConfigEntry<string> RecruitCost;
-        public static ConfigEntry<int> HeadsPerWorker;
         public static ConfigEntry<string> LevelThresholds;
         public static ConfigEntry<float> XpPerSwing;
         public static ConfigEntry<float> XpPerHarvest;
@@ -32,9 +31,6 @@ namespace Thralls
         // Named for the key it binds. It was MaxTier, which is the one thing it is not:
         // this caps the rank a thrall trains to, and tier is the breed you hired.
         public static ConfigEntry<int> MaxLevel;
-        public static ConfigEntry<string> Tier2Trophies;
-        public static ConfigEntry<string> Tier3Trophies;
-        public static ConfigEntry<string> Tier4Trophies;
         public static ConfigEntry<float> TierDamageStep;
         public static ConfigEntry<float> TierSpeedStep;
         public static ConfigEntry<float> LevelDamageStep;
@@ -301,8 +297,11 @@ namespace Thralls
                 "How many thralls you may keep in total. Only a few of them can be working at once - see WorkSlots.");
             RecruitCost = cfg.Bind("2 - Thralls", "RecruitCost", "",
                 "Cost per thrall, as PrefabName:Amount, comma separated. Empty means free. Set to something like Coins:50 if you want recruiting to bite.");
-            HeadsPerWorker = cfg.Bind("2 - Thralls", "HeadsPerWorker", 0,
-                "A SECOND trophy price, on top of the breed's own cost, taking any head of the tier being hired or better. Off by default because there should be one price, not two: TierNCost already names the head it wants - a golem's head to wake a golem - and that is the cost with meaning in it. This one was a separate mechanic that predated the breed prices and quietly charged alongside them. Set it above 0 to bring it back.");
+            // HeadsPerWorker and the Tier2/3/4Trophies lists that classified heads by
+            // tier were removed here. They were a whole second currency - any head of the
+            // tier or better - charged alongside the breed prices, which already name the
+            // head they want. One price, and it is the named one.
+
             MaxLevel = cfg.Bind("2 - Thralls", "MaxLevel", 20,
                 "Highest rank a thrall can train to. This is rank, not tier: it does not change which breed you can hire or what tools they can use, only how far the one you hired can be pushed.");
 
@@ -314,16 +313,6 @@ namespace Thralls
                 "Experience for finishing something off - a tree felled, a vein broken, a crop picked.");
             XpPerPlant = cfg.Bind("2 - Thralls", "XpPerPlant", 3f, "Experience for sowing a seed.");
             XpPerRepair = cfg.Bind("2 - Thralls", "XpPerRepair", 3f, "Experience for a repair.");
-
-            Tier2Trophies = cfg.Bind("2 - Thralls", "Rank2Trophies",
-                "TrophyDraugr,TrophyDraugrElite,TrophyDraugrFem,TrophyBlob,TrophyLeech,TrophySurtling,TrophyBonemass,TrophyWraith,TrophySkeletonPoison,TrophyAbomination,TrophyForestTroll",
-                "Heads worth tier 2, for hiring a draugr. Anything not listed anywhere counts as tier 1. Tier is the breed you hire; rank is the level it trains to, and these do not affect rank.");
-            Tier3Trophies = cfg.Bind("2 - Thralls", "Rank3Trophies",
-                "TrophyWolf,TrophyFenring,TrophyHatchling,TrophyDragonQueen,TrophySGolem,TrophyUlv,TrophyCultist,TrophyFrostTroll,TrophyDeathsquito,TrophyLox,TrophyGoblin,TrophyGoblinBrute,TrophyGoblinShaman,TrophyGoblinKing,TrophySerpent",
-                "Heads worth tier 3, for hiring a golem.");
-            Tier4Trophies = cfg.Bind("2 - Thralls", "Rank4Trophies",
-                "TrophySeeker,TrophySeekerBrute,TrophySeekerQueen,TrophyGjall,TrophyDvergr,TrophyMorgen,TrophyCharredMelee,TrophyCharredArcher,TrophyCharredMage,TrophyFader,TrophyFallenValkyrie,TrophyBonemawSerpent,TrophyAsksvin,TrophyGrowth,TrophyKvastur,TrophyTick",
-                "Heads worth tier 4, for hiring a berserker.");
 
             Tier1Prefab = cfg.Bind("2 - Thralls", "Tier1Creature", "Greydwarf_Elite",
                 "Creature hired as a tier 1 thrall (greydwarf brute). Must be melee.");

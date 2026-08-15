@@ -401,25 +401,20 @@ namespace Thralls
             GUILayout.Space(4f);
 
             var player = Player.m_localPlayer;
-            var price = Mathf.Max(0, ThrallConfig.HeadsPerWorker.Value);
 
             for (int tier = 1; tier <= ThrallBreed.Count; tier++)
             {
                 var unlocked = ThrallBreed.Unlocked(tier);
-                var have = player != null ? Trophies.Count(player.GetInventory(), tier) : 0;
-                var affordable = unlocked && (price == 0 || have >= price);
 
                 var cost = ThrallBreed.RaiseCost(tier);
                 var paid = player != null && (string.IsNullOrEmpty(cost)
                                               || ItemCost.CanPay(player.GetInventory(), cost));
 
-                affordable = affordable && paid;
+                var affordable = unlocked && paid;
 
                 var detail = !unlocked
                     ? ThrallBreed.Blocker(tier)
-                    : !paid ? "not enough materials"
-                    : price == 0 ? "materials ready"
-                    : Mathf.Min(have, price) + " of " + price + " heads";
+                    : paid ? "materials ready" : "not enough materials";
 
                 TierCard(tier, ThrallBreed.NameFor(tier), detail, unlocked, affordable);
                 GUILayout.Space(6f);
@@ -592,9 +587,7 @@ namespace Thralls
             GUILayout.Space(14f);
 
             var player = Player.m_localPlayer;
-            var price = Mathf.Max(0, ThrallConfig.HeadsPerWorker.Value);
-            var have = player != null ? Trophies.Count(player.GetInventory(), tier) : 0;
-            var affordable = unlocked && (price == 0 || have >= price);
+            var affordable = unlocked;
 
             if (!unlocked)
             {
@@ -628,8 +621,7 @@ namespace Thralls
 
                 // Drawn but not wired when you cannot pay: a button that looks pressable
                 // and then refuses is worse than one that plainly is not.
-                var label = price == 0 ? "Raise one"
-                    : "Raise one  (" + Mathf.Min(have, price) + " of " + price + " heads)";
+                const string label = "Raise one";
 
                 var rect = GUILayoutUtility.GetRect(240f, 30f,
                     GUILayout.Width(240f), GUILayout.Height(30f));

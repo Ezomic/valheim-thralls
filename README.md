@@ -115,7 +115,7 @@ it and a plank bin at its foot. It stands 2.7m, which is deliberate: it governs 
 it has to be findable from inside that radius. Look at it to see how many of your crew are
 using it.
 
-## Tiers, levels and heads
+## Tiers and levels
 
 There are five kinds of thrall. They are **separate careers, not a ladder** — a brute never
 becomes a golem. You choose which to bind, and each is then trained on its own.
@@ -123,13 +123,13 @@ becomes a golem. You choose which to bind, and each is then trained on its own.
 Each answers only once the boss of **its own** biome is down, so a breed arrives about when
 you start working the ground it came from.
 
-| Tier | Body | Answers after | Hired with | Tool tier |
-| --- | --- | --- | --- | --- |
-| 1 | Greydwarf brute | The Elder | black forest heads | 1 |
-| 2 | Draugr elite | Bonemass | swamp heads | 2 |
-| 3 | Stone golem | Moder | mountain heads | 3 |
-| 4 | Fuling berserker | Yagluth | plains heads | 4 |
-| 5 | Seeker brute | The Queen | mistlands heads | 5 |
+| Tier | Body | Answers after | Tool tier |
+| --- | --- | --- | --- |
+| 1 | Greydwarf brute | The Elder | 1 |
+| 2 | Draugr elite | Bonemass | 2 |
+| 3 | Stone golem | Moder | 3 |
+| 4 | Fuling berserker | Yagluth | 4 |
+| 5 | Seeker brute | The Queen | 5 |
 
 On top of the boss, each tier above the first wants one more upgrade raised beside the
 altar. Both gates are config: `TierNRequiresBoss` takes a world key, empty for no gate, and
@@ -147,9 +147,9 @@ one head of that creature in particular.
 | 5 | 20 black marble, 15 eitr, 20 soft tissue, 15 carapace, 1 seeker brute trophy |
 
 The head in each line is the point of it: a golem's head to wake a golem. There used to be a
-second, separate trophy price on top — any head of the tier or better, from a mechanism
-older than these lists — and it charged alongside them so every thrall quietly wanted two
-trophies. It is off (`HeadsPerWorker = 0`) and these lists are the whole cost.
+second trophy price on top, taking any head of the tier or better, from a mechanism older
+than these lists — so every thrall quietly wanted two trophies. That mechanism is gone and
+these lists are the whole cost.
 
 **Levelling is earned, not bought.** A thrall gains experience by working and levels on its
 own, at 150 xp for level 2 and rising to 33,000 for level 20:
@@ -162,7 +162,7 @@ own, at 150 xp for level 2 and rising to 33,000 for level 20:
 | a repair | 3 |
 
 So the thrall you actually put to work is the one that gets good at it, and a thrall left
-standing at the altar stays a novice no matter how many heads you have. All the values, and
+standing at the altar stays a novice however long you keep it. All the values, and
 the level thresholds, are config.
 
 Tier sets the **tool tier**, which is the hard gate: a tier 1 thrall cannot fell an oak or
@@ -191,10 +191,7 @@ trait to another one or take it off the golem, and `SmashYield` sets how much su
 1 removes the penalty and leaves only the no-axe part, 0 means it brings back nothing at
 all. Handing a golem an axe anyway is still allowed and changes nothing.
 
-Sacrifices always spend the *cheapest* acceptable heads first, so hiring never quietly eats
-a boss trophy.
-
-Hire from the altar's ledger, which shows the head price per tier and lights up when you
+Hire from the altar's ledger, which shows each breed's price and lights up when you
 can afford it. The recruit hotkey binds the best tier you can currently pay for. Experience
 shows in the panel and in hover text.
 
@@ -276,9 +273,8 @@ needs no re-pointing.
 
 `BepInEx/config/ezomic.valheim.thralls.cfg`, written on first run.
 
-- `HeadsPerWorker` — heads per thrall, default 1. Set to 0 to recruit for nothing.
-- `Rank2Trophies` / `Rank3Trophies` / `Rank4Trophies` — which heads count as what.
-- `RecruitCost` — an *extra* cost on top of the heads, e.g. `Coins:50`. Empty by default.
+- `TierNCost` — what each breed costs to bind, materials and its own head.
+- `RecruitCost` — an *extra* cost on every breed, e.g. `Coins:50`. Empty by default.
 - `MaxThralls` — default 5.
 - `ToolTier` — tool tier of a **rank 1** thrall, default 1. Each rank adds one on top.
 - `ChopDamage` / `PickaxeDamage` / `SwingInterval` — how fast they work.
