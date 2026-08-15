@@ -240,6 +240,26 @@ namespace Thralls
             return true;
         }
 
+        /// <summary>
+        /// Hands one stack out of the pack to whoever asked for it.
+        ///
+        /// The whole stack or nothing. A partial move would need a split control in the
+        /// panel, and the pack is a handful of slots holding what it gathered this trip -
+        /// there is nothing in there worth taking half of.
+        /// </summary>
+        public bool TakeFromPack(ItemDrop.ItemData item, Inventory into)
+        {
+            if (item == null || into == null) return false;
+            if (!_inventory.ContainsItem(item)) return false;
+
+            if (!into.CanAddItem(item, item.m_stack)) return false;
+            if (!into.AddItem(item)) return false;
+
+            _inventory.RemoveItem(item);
+            SaveState();
+            return true;
+        }
+
         // ------------------------------------------------------------------ setup
 
         private void Awake()

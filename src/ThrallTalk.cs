@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Thralls
@@ -28,12 +29,19 @@ namespace Thralls
         private const float RailW = 196f;
         private const float Pad = 12f;
 
-        private static Rect _window = new Rect(0f, 0f, 470f, 268f);
+        private static Rect _window = new Rect(0f, 0f, 470f, 300f);
         private static bool _placed;
         private static Thrall _subject;
 
-        /// <summary>Shown instead of the order list while a job is being chosen.</summary>
-        private static bool _choosingJob;
+        /// <summary>
+        /// Which of the three the right-hand side is showing. Was a single bool for the job
+        /// list; the pack needed a third state and two bools describing one choice is how
+        /// you end up rendering both at once.
+        /// </summary>
+        private enum Pane { Orders, Jobs, Pack }
+
+        private static Pane _pane;
+        private static Vector2 _packScroll;
 
         public static bool IsOpen { get; private set; }
 
@@ -44,7 +52,8 @@ namespace Thralls
             if (thrall == null) return;
 
             _subject = thrall;
-            _choosingJob = false;
+            _pane = Pane.Orders;
+            _packScroll = Vector2.zero;
             IsOpen = true;
         }
 
@@ -58,7 +67,7 @@ namespace Thralls
         {
             IsOpen = false;
             _subject = null;
-            _choosingJob = false;
+            _pane = Pane.Orders;
         }
 
         /// <summary>
@@ -127,7 +136,8 @@ namespace Thralls
             GUI.DrawTexture(new Rect(RailW, body.y, 1f, body.height), AltarUI.HairTexture);
 
             var orders = new Rect(RailW + 1f, body.y, w - RailW - 1f, body.height);
-            if (_choosingJob) DrawJobs(thrall, orders);
+            if (_pane == Pane.Jobs) DrawJobs(thrall, orders);
+            else if (_pane == Pane.Pack) DrawPack(thrall, orders);
             else DrawOrders(thrall, orders);
 
             DrawFooter(new Rect(0f, h - FooterH, w, FooterH));
@@ -162,7 +172,7 @@ namespace Thralls
                                                            thrall.Base)) + "m from here", false);
 
             // A smasher at a tree is empty handed on purpose, and saying only "empty
-             // handed" reads as a thrall waiting to be given something.
+            // handed" reads as a thrall waiting to be given something.
             Line("Tool",
                  thrall.Tool.Length > 0 ? AltarUI.PrettyItem(thrall.Tool)
                  : thrall.Smashes ? "bare hands"
@@ -226,7 +236,13 @@ namespace Thralls
 
             if (Order("Do something else"))
             {
-                _choosingJob = true;
+                _pane = Pane.Jobs;
+            }
+
+            if (Order("Show me its pack"))
+            {
+                _packScroll = Vector2.zero;
+                _pane = Pane.Pack;
             }
 
             if (Order("Take your load in"))
@@ -291,9 +307,129 @@ namespace Thralls
 
             if (GUILayout.Button("< Back", AltarUI.ChipStyle,
                                  GUILayout.Width(70f), GUILayout.Height(22f)))
-                _choosingJob = false;
+                _pane = Pane.Orders;
 
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// What it is carrying, one row per stack, with the game's own item icons.
+        ///
+        /// A count of "7 / 12" answers how full it is and nothing else - and the question
+        /// you actually walk over with is usually whether it has the seed, or whether that
+        /// silver is still on it or already in the depot.
+        ///
+        /// Taking is whole stacks through a button rather than drag and drop. The vanilla
+        /// container window would give dragging for free, but only to something carrying a
+        /// real Container component, and bolting one onto a creature means a second
+        /// inventory serialising itself into the same ZDO the thrall already writes its
+        /// pack to. Not worth it for nine slots.
+        /// </summary>
+        private static void DrawPack(Thrall thrall, Rect area)
+        {
+            var player = Player.m_localPlayer;
+            if (player == null) { Close(); return; }
+
+            GUILayout.BeginArea(new Rect(area.x + 10f, area.y + 9f, area.width - 20f,
+                                         area.height - 12f));
+
+            var items = thrall.Carrying.GetAllItems();
+            var slots = thrall.Carrying.GetWidth() * thrall.Carrying.GetHeight();
+
+            GUILayout.Label("Carrying  " + items.Count + " of " + slots + " slots",
+                            AltarUI.SectionStyle);
+            GUILayout.Space(4f);
+
+            if (items.Count == 0)
+            {
+                GUILayout.Label("Nothing. It has either not started or just been to the depot.",
+                                Wrapped());
+            }
+            else
+            {
+                // Scrolled rather than clipped: a levelled seeker carries nine slots and
+                // the pane holds six. Horizontal scrolling is off in the shared skin.
+                _packScroll = GUILayout.BeginScrollView(_packScroll, false, false,
+                    GUIStyle.none, GUI.skin.verticalScrollbar, GUIStyle.none,
+                    GUILayout.Height(area.height - 66f));
+
+                // Copied before iterating: taking a stack removes it from the live list.
+                var snapshot = new List<ItemDrop.ItemData>(items);
+                for (int i = 0; i < snapshot.Count; i++) PackRow(thrall, player, snapshot[i]);
+
+                GUILayout.EndScrollView();
+            }
+
+            GUILayout.Space(6f);
+
+            if (GUILayout.Button("< Back", AltarUI.ChipStyle,
+                                 GUILayout.Width(70f), GUILayout.Height(22f)))
+                _pane = Pane.Orders;
+
+            GUILayout.EndArea();
+        }
+
+        private static void PackRow(Thrall thrall, Player player, ItemDrop.ItemData item)
+        {
+            if (item == null || item.m_shared == null) return;
+
+            GUILayout.BeginHorizontal();
+
+            var icon = GUILayoutUtility.GetRect(22f, 22f, GUILayout.Width(22f),
+                                                GUILayout.Height(22f));
+            DrawIcon(icon, item);
+
+            GUILayout.Space(6f);
+            GUILayout.Label(ItemName(item), AltarUI.RowNameStyle, GUILayout.Width(126f));
+            GUILayout.Label("x" + item.m_stack, AltarUI.MutedStyle, GUILayout.Width(34f));
+
+            if (GUILayout.Button("Take", AltarUI.ChipStyle,
+                                 GUILayout.Width(50f), GUILayout.Height(20f)))
+            {
+                if (!thrall.TakeFromPack(item, player.GetInventory()))
+                    ThrallsPlugin.Say("No room in your inventory for that.");
+            }
+
+            GUILayout.EndHorizontal();
+            GUILayout.Space(3f);
+        }
+
+        /// <summary>
+        /// The item's own icon, drawn from the sprite's patch of its atlas.
+        ///
+        /// GUI.DrawTexture on sprite.texture would draw the whole sheet, which for Valheim's
+        /// items is a page of every icon in the game squeezed into 22 pixels.
+        /// </summary>
+        private static void DrawIcon(Rect rect, ItemDrop.ItemData item)
+        {
+            var icons = item.m_shared.m_icons;
+            if (icons == null || icons.Length == 0) return;
+
+            var sprite = icons[Mathf.Clamp(item.m_variant, 0, icons.Length - 1)];
+            if (sprite == null || sprite.texture == null) return;
+
+            var r = sprite.textureRect;
+            var tex = sprite.texture;
+            GUI.DrawTextureWithTexCoords(rect, tex,
+                new Rect(r.x / tex.width, r.y / tex.height,
+                         r.width / tex.width, r.height / tex.height));
+        }
+
+        private static string ItemName(ItemDrop.ItemData item)
+        {
+            var name = item.m_shared.m_name ?? "";
+            return Localization.instance != null
+                ? Localization.instance.Localize(name)
+                : name.TrimStart('$');
+        }
+
+        private static GUIStyle _wrapped;
+
+        private static GUIStyle Wrapped()
+        {
+            if (_wrapped == null)
+                _wrapped = new GUIStyle(AltarUI.MutedStyle) { wordWrap = true };
+            return _wrapped;
         }
 
         private static void JobChip(Thrall thrall, ThrallJob job, string label)

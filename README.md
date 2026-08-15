@@ -36,6 +36,7 @@ you can tell it down the right.
 | Follow me | walks with you, and stops working |
 | **Work from here** | moves its base to **where you are standing**, job unchanged |
 | Do something else | pick a new job, worked from the base it already has |
+| Show me its pack | lists what it is carrying, with a **Take** button per stack |
 | Take your load in | sends it to the depot now rather than when its pack fills |
 | Wait here | stands where you are, doing nothing |
 | Go free | released, and kept on the altar's roll so it can be called back |
