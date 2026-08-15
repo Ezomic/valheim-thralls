@@ -1105,6 +1105,19 @@ namespace Thralls
             if (upgrade != null)
                 return ThrallConfig.UpgradeLegacyNames(upgrade.Level);
 
+            // Only the altar itself carries the altar's old names.
+            //
+            // This used to fall through to them for *any* piece that was not an upgrade,
+            // which was harmless while the altar and its upgrades were the only things the
+            // mod shipped. The depot is neither, and it was being offered the altar's
+            // legacy names: on a character that still had "Summoning altar (Bindstone)"
+            // learned, Renamed would have moved that unlock onto the depot and taken it off
+            // the altar - so the altar would vanish out of the hammer and the depot would
+            // appear without ever being taught, which is a very confusing pair of symptoms
+            // to be handed at once.
+            if (prefab.GetComponent<ThrallAltar>() == null)
+                return new List<string>();
+
             var names = new List<string>();
             for (int i = 0; i < LegacyAltarSuffixes.Length; i++)
                 names.Add(ThrallConfig.AltarName.Value + LegacyAltarSuffixes[i]);
