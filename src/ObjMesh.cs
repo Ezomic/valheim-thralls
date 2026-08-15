@@ -27,11 +27,20 @@ namespace Thralls
 
     internal static class ObjMesh
     {
-        public static ModelData Load(string path)
+        /// <summary>
+        /// Reads a model, or returns null.
+        ///
+        /// <paramref name="expected"/> is false for a piece whose model has been shelved
+        /// on purpose - the upgrades for breeds this release does not offer. A missing
+        /// model is a real problem for a piece somebody can build and a fact of life for
+        /// one they cannot, and warning about both trains people to ignore the warning.
+        /// </summary>
+        public static ModelData Load(string path, bool expected = true)
         {
             if (!File.Exists(path))
             {
-                ThrallsPlugin.Log.LogWarning("No model at " + path);
+                if (expected) ThrallsPlugin.Log.LogWarning("No model at " + path);
+                else ThrallsPlugin.Log.LogInfo("No model at " + path + " - shelved, assembling from parts.");
                 return null;
             }
 

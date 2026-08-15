@@ -364,7 +364,7 @@ namespace Thralls
                 + ";guard_stone:0,0.95,0:0.60:0",
                 "Fallback for the second altar upgrade, used only if Upgrade2Model is missing. Stacked rock with a rune stone crowning it, for the mountain.");
             Upgrade4Parts = cfg.Bind("2 - Thralls", "Upgrade4Parts",
-                "blackmarble_pillar:0,0,0:0.5:0"
+                "blackmarble_column_1:0,0,0:0.5:0"
                 + ";blackmarble_head_big01:0,0.9,0:0.4:0",
                 "What the fourth altar upgrade is built out of, if its model is missing. Black marble, for the mistlands.");
             Upgrade3Parts = cfg.Bind("2 - Thralls", "Upgrade3Parts",

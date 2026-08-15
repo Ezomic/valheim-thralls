@@ -671,7 +671,8 @@ namespace Thralls
 
             // The hand-modelled altar first; the assembled-from-pieces version is the
             // fallback for when the model file is missing.
-            var added = AddModel(visual.transform, modelFile) ? 1 : 0;
+            var expected = ModelExpected(prefab.name);
+            var added = AddModel(visual.transform, modelFile, expected) ? 1 : 0;
 
             if (added == 0)
             {
@@ -719,7 +720,7 @@ namespace Thralls
                 wear.m_broken = null;
             }
 
-            AddColliders(prefab, modelFile);
+            AddColliders(prefab, modelFile, expected);
 
             var pieceLayer = LayerMask.NameToLayer("piece");
             if (pieceLayer >= 0) prefab.layer = pieceLayer;
@@ -753,7 +754,7 @@ namespace Thralls
         /// with its per-group skins, and the rendered icon. Copying them would mean two
         /// places to fix the next time a sidecar gains a field.
         /// </remarks>
-        internal static void AddColliders(GameObject prefab, string modelFile)
+        internal static void AddColliders(GameObject prefab, string modelFile, bool expected = true)
         {
             var dir = Path.GetDirectoryName(typeof(AltarPrefab).Assembly.Location);
             var path = Path.Combine(dir, Path.ChangeExtension(modelFile, ".col"));
@@ -814,7 +815,10 @@ namespace Thralls
                 var fallback = body.AddComponent<BoxCollider>();
                 fallback.center = new Vector3(0f, 0.9f, 0f);
                 fallback.size = new Vector3(3.2f, 1.8f, 3.2f);
-                ThrallsPlugin.Log.LogWarning("No collision file for " + modelFile + ", using one box.");
+
+                var note = "No collision file for " + modelFile + ", using one box.";
+                if (expected) ThrallsPlugin.Log.LogWarning(note);
+                else ThrallsPlugin.Log.LogInfo(note);
                 return;
             }
 
@@ -826,13 +830,13 @@ namespace Thralls
         /// it takes the game's own shader, lighting, wetness and snow rather than looking
         /// like a foreign object dropped into the world.
         /// </summary>
-        internal static bool AddModel(Transform parent, string modelFile)
+        internal static bool AddModel(Transform parent, string modelFile, bool expected = true)
         {
             ModelData model;
             if (!Models.TryGetValue(modelFile, out model))
             {
                 var dir = Path.GetDirectoryName(typeof(AltarPrefab).Assembly.Location);
-                model = ObjMesh.Load(Path.Combine(dir, modelFile));
+                model = ObjMesh.Load(Path.Combine(dir, modelFile), expected);
                 Models[modelFile] = model;
             }
             if (model == null) return false;
@@ -1258,6 +1262,26 @@ namespace Thralls
         /// where it reads as content you have failed to unlock. It stays registered so the
         /// ones already standing in a world keep resolving; it simply is not offered.
         /// </summary>
+        /// <summary>
+        /// Whether this prefab's model is expected on disk, by name.
+        ///
+        /// By name because BuildUpgrades attaches the AltarUpgrade component *after*
+        /// BuildPrefab has already composed the thing, so the component is not there to
+        /// ask when the question comes up.
+        /// </summary>
+        private static bool ModelExpected(string prefabName)
+        {
+            if (string.IsNullOrEmpty(prefabName)) return true;
+
+            var mark = prefabName.IndexOf("_upgrade", System.StringComparison.Ordinal);
+            if (mark < 0) return true;
+
+            int level;
+            if (!int.TryParse(prefabName.Substring(mark + 8), out level)) return true;
+
+            return level <= ThrallBreed.Count - 1;
+        }
+
         private static bool Offered(GameObject prefab)
         {
             var upgrade = prefab.GetComponent<AltarUpgrade>();
