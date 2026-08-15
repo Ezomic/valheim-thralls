@@ -2,8 +2,8 @@
   "name": "Thralls",
   "author": "Robbin Thijssen",
   "version_number": "1.0.0",
-  "website_url": "",
-  "description": "Recruit workers to chop, mine, gather, farm and haul to your chests.",
+  "website_url": "https://github.com/Ezomic/valheim-thralls",
+  "description": "Bind workers at an altar and set them to chop, mine, gather, farm and repair, hauling it all to a depot you build.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"
   ]
