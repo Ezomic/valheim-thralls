@@ -423,7 +423,7 @@ namespace Thralls
         private static void DrawHead(float x, ref float y, float width)
         {
             GUI.Label(new Rect(x, y, width * 0.6f, HeadH),
-                _altar != null ? _altar.GetHoverName() : "Summoning altar", _boardStyle);
+                _altar != null ? _altar.GetHoverName() : "Bindstone", _boardStyle);
 
             var working = ThrallRegistry.WorkingCount();
             var slots = Mathf.Max(1, ThrallAltar.Slots);
@@ -501,7 +501,7 @@ namespace Thralls
             // piece you build with the hammer - so it sat in a column of things you pick
             // and was the one thing in it that did nothing. What it had to say is said
             // where it is needed instead: a breed the altar cannot yet call reads "needs
-            // altar upgrade 1" on its own card, and again in the detail column.
+            // bindstone upgrade 1" on its own card, and again in the detail column.
 
             // The ones you sent away, waiting to be called back as themselves.
             if (Resting.Count > 0)
@@ -1120,7 +1120,7 @@ namespace Thralls
             else if (ThrallRegistry.IsWork(job) && !ThrallRegistry.HasFreeSlot(thrall))
             {
                 ThrallsPlugin.Say(string.Format(
-                    "Only {0} thralls can work at once. Build more station upgrades near the altar.",
+                    "Only {0} thralls can work at once. Build more station upgrades near the bindstone.",
                     ThrallAltar.Slots));
             }
             else

@@ -28,7 +28,7 @@ namespace Thralls
             var altar = ThrallAltar.Current;
             if (altar == null)
             {
-                ThrallsPlugin.Log.LogWarning("No altar nearby to photograph.");
+                ThrallsPlugin.Log.LogWarning("No bindstone nearby to photograph.");
                 return null;
             }
 
@@ -147,7 +147,7 @@ namespace Thralls
             }
             catch (Exception e)
             {
-                ThrallsPlugin.Log.LogError("Altar shot failed: " + e);
+                ThrallsPlugin.Log.LogError("Bindstone shot failed: " + e);
                 return null;
             }
             finally

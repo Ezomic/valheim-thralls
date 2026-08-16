@@ -1,6 +1,6 @@
 # Thralls
 
-A Valheim mod that lets you put workers to task. Bind a thrall at an altar, lead it to a
+A Valheim mod that lets you put workers to task. Bind a thrall at a bindstone, lead it to a
 forest, a copper vein or a berry patch, and tell it to work from there. It clears the
 ground around that spot and hauls what it gathers to a depot you build.
 
@@ -12,7 +12,7 @@ There are no keys for ordering thralls about. Everything is a menu:
 
 | What you want | Where |
 | --- | --- |
-| Bind a thrall, see the whole crew, raise the dead | press `E` on the altar |
+| Bind a thrall, see the whole crew, raise the dead | press `E` on the bindstone |
 | Order one thrall — job, where it works, follow, release | press `E` on that thrall |
 | Somewhere to unload | build a depot |
 
@@ -24,7 +24,7 @@ rebindable in the config.
 | `Numpad 7` | Step the time of day through dawn, midday, dusk and night |
 | `Numpad 8` | Level a wide circle of ground where you are looking |
 | `Numpad 9` | Toggle unlimited health and stamina |
-| `Numpad -` | Cycle the altar's light and motes, for diagnosing what you can see |
+| `Numpad -` | Cycle the bindstone's light and motes, for diagnosing what you can see |
 
 ## Talking to a thrall
 
@@ -39,7 +39,7 @@ you can tell it down the right.
 | Show me its pack | lists what it is carrying, with a **Take** button per stack |
 | Take your load in | sends it to the depot now rather than when its pack fills |
 | Wait here | stands where you are, doing nothing |
-| Send it to rest | hands its load in and steps onto the altar's roll, name, level and tool intact |
+| Send it to rest | hands its load in and steps onto the bindstone's roll, name, level and tool intact |
 
 The left rail carries the two numbers you walked over to find out: how far the depot is, and
 how far its base is. A thrall standing next to you with its base three hundred metres away
@@ -64,8 +64,8 @@ Three different things, and all three keep the thrall's name, level and tool.
 | You want | Where | Cost |
 | --- | --- | --- |
 | **Put one away** | its own panel — *Send it to rest* | nothing; it hands its load in first |
-| **Bring that one back** | altar ledger — **Resting**, *Call back* | biome goods, about half a raise |
-| **Raise one that died** | altar ledger — **Fallen**, *Bring back* | biome goods, below |
+| **Bring that one back** | bindstone ledger — **Resting**, *Call back* | biome goods, about half a raise |
+| **Raise one that died** | bindstone ledger — **Fallen**, *Bring back* | biome goods, below |
 
 Putting one away is free and waking it is not, on purpose. Resting is you deciding you have
 too many mouths at the treeline, and charging for tidying up only teaches people to leave
@@ -83,7 +83,7 @@ Resting and dying are not the same list. A thrall you sent away is waiting; a th
 was killed is on the roll of the dead and costs goods to raise. Either way it returns at
 the level it had, so experience is never lost — only the goods are.
 
-Without an altar there is no roll, so a thrall released in the field is released for good.
+Without a bindstone there is no roll, so a thrall released in the field is released for good.
 The panel says which of the two it did.
 
 ## The depot
@@ -103,7 +103,7 @@ one of them in range is full does a thrall say so and go back to standing by.
 
 It was a chest you nominated with a keypress, once per thrall, which was a chore repeated as
 many times as you had workers. Softening that with an auto-adopt made it worse in a
-different way: a thrall would quietly claim whichever box happened to be nearest the altar,
+different way: a thrall would quietly claim whichever box happened to be nearest the bindstone,
 including one you were keeping something else in. Building the store where you want the
 store says everything, in one action, in the world rather than in a setting you cannot see.
 
@@ -130,7 +130,7 @@ The golem, the berserker and the seeker are built and waiting behind `Breeds`. S
 3, 4 or 5 to turn them on — their pieces stay registered whatever it is set to, so nothing
 already standing in a world is lost either way.
 
-On top of the boss, the draugr wants one upgrade raised beside the altar. Both gates are
+On top of the boss, the draugr wants one upgrade raised beside the bindstone. Both gates are
 config: `TierNRequiresBoss` takes a world key, empty for no gate, and `UpgradesGateTiers`
 turns the upgrade requirement off.
 
@@ -158,7 +158,7 @@ own, at 150 xp for level 2 and rising to 33,000 for level 20:
 | a repair | 3 |
 
 So the thrall you actually put to work is the one that gets good at it, and a thrall left
-standing at the altar stays a novice however long you keep it. All the values, and
+standing at the bindstone stays a novice however long you keep it. All the values, and
 the level thresholds, are config.
 
 Tier sets the **tool tier**, which is the hard gate: a tier 1 thrall cannot fell an oak or
@@ -190,14 +190,14 @@ trait to another one or take it off the golem, and `SmashYield` sets how much su
 1 removes the penalty and leaves only the no-axe part, 0 means it brings back nothing at
 all. Handing a golem an axe anyway is still allowed and changes nothing.
 
-Hire from the altar's ledger, which shows each breed's price and lights up when you
+Hire from the bindstone's ledger, which shows each breed's price and lights up when you
 can afford it. The recruit hotkey binds the best tier you can currently pay for. Experience
 shows in the panel and in hover text.
 
 ## Death and raising
 
-A thrall that dies is written into the altar's roll of the dead, keeping its name, tier
-and level. Raise it from the altar's ledger for goods from its own biome:
+A thrall that dies is written into the bindstone's roll of the dead, keeping its name, tier
+and level. Raise it from the bindstone's ledger for goods from its own biome:
 
 | Tier | Cost to raise |
 | --- | --- |
@@ -205,7 +205,7 @@ and level. Raise it from the altar's ledger for goods from its own biome:
 | 2 | 15 bloodbags, 5 iron scrap |
 
 It comes back at the level it died with, so the experience it earned is never lost — only
-the goods. All five costs are config. Without an altar there is nobody keeping the roll,
+the goods. All five costs are config. Without a bindstone there is nobody keeping the roll,
 and death is final.
 
 ## Farming
@@ -232,15 +232,15 @@ damaged piece within its work radius, walks over, and repairs it, then moves on 
 worst. Repair costs nothing, exactly as it does when you swing the hammer
 yourself. Leave one posted at a base and it will quietly undo storm and raid wear.
 
-## The altar's ledger
+## The bindstone's ledger
 
-Press `E` on a summoning altar to open the ledger, which lists every thrall with:
+Press `E` on a bindstone to open the ledger, which lists every thrall with:
 
 - a rename field
 - what it is doing, how full its pack is, how far away it is, and whether a depot is in
   reach of where it works
 - job buttons that put it to work where it stands
-- **Come**, to call it to the altar
+- **Come**, to call it to the bindstone
 - **Release**, to dismiss it
 
 There is also **Recall all here**. The panel closes with its own button, with Escape, or by

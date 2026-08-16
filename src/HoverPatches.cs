@@ -80,7 +80,7 @@ namespace Thralls
         }
 
         /// <summary>
-        /// Escape closes the altar panel instead of opening the game menu.
+        /// Escape closes the bindstone panel instead of opening the game menu.
         ///
         /// Menu.Update calls Show() on escape, so this catches the call rather than the
         /// key: it means the panel closes on the same press that would otherwise have
@@ -154,7 +154,7 @@ namespace Thralls
         }
 
         /// <summary>
-        /// Stops the character turning while the altar panel is open.
+        /// Stops the character turning while the bindstone panel is open.
         ///
         /// Player.TakeInput above blocks actions but not the camera: mouse look lives in
         /// PlayerController.LateUpdate, behind its own private TakeInput and this test.

@@ -54,7 +54,7 @@ namespace Thralls
             if (basis == null)
             {
                 ThrallsPlugin.Log.LogWarning("No " + (wooden ? "wood" : "stone")
-                                             + " material to skin the altar with.");
+                                             + " material to skin the bindstone with.");
                 return null;
             }
 
@@ -412,7 +412,7 @@ namespace Thralls
                     _stoneUvKnown = true;
 
                     ThrallsPlugin.Log.LogInfo(string.Format(
-                        "Altar skinned with {0} from {1} (shader {2}), atlas patch {3}",
+                        "Bindstone skinned with {0} from {1} (shader {2}), atlas patch {3}",
                         material.name, name.Trim(), material.shader.name, _stoneUv));
 
                     _stone = material;
@@ -458,7 +458,7 @@ namespace Thralls
                     _woodUvKnown = true;
 
                     ThrallsPlugin.Log.LogInfo(string.Format(
-                        "Altar wood borrowed from {0}/{1} (shader {2}), atlas patch {3}",
+                        "Bindstone wood borrowed from {0}/{1} (shader {2}), atlas patch {3}",
                         name.Trim(), material.name, material.shader.name, _woodUv));
 
                     _wood = material;

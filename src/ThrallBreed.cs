@@ -88,7 +88,7 @@ namespace Thralls
             tier = Clamp(tier);
 
             if (ThrallConfig.UpgradesGateTiers.Value && ThrallAltar.Level < tier - 1)
-                return "needs altar upgrade " + (tier - 1);
+                return "needs bindstone upgrade " + (tier - 1);
 
             var key = RequiredKey(tier);
             if (!string.IsNullOrEmpty(key)
@@ -171,7 +171,7 @@ namespace Thralls
         }
 
         /// <summary>Bigger bodies need more room to swing, or they stall out of reach.</summary>
-        /// <summary>What the altar has to say about each breed, which is not much.</summary>
+        /// <summary>What the bindstone has to say about each breed, which is not much.</summary>
         public static string Lore(int tier)
         {
             switch (Clamp(tier))

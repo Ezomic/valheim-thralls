@@ -9,13 +9,13 @@ First release.
 
 ### The crew
 
-- **Summoning altar**, built with the hammer under Crafting. Binds thralls, keeps the crew
+- **Bindstone**, built with the hammer under Crafting. Binds thralls, keeps the crew
   list and the roll of the dead, and cannot be killed by a raid because it is a piece
   rather than a person.
 - **Two kinds of thrall**, and they are separate careers rather than rungs of a ladder — a
   brute never becomes a draugr:
   - **Greydwarf brute**, once the Elder is down.
-  - **Draugr elite**, once Bonemass is down and a bog stone stands beside the altar.
+  - **Draugr elite**, once Bonemass is down and a bog stone stands beside the bindstone.
 - **Binding** costs goods from the breed's own biome and one head of that creature in
   particular. A draugr's head to raise a draugr.
 - **Levelling is earned, not bought.** Thralls gain experience by working and level to 20 on
@@ -58,7 +58,7 @@ First release.
 
 ### Away and back
 
-- **Send it to rest** puts a thrall on the altar's roll for nothing; it hands its load in
+- **Send it to rest** puts a thrall on the bindstone's roll for nothing; it hands its load in
   first, and keeps its name, level and tool.
 - **Call back** wakes a resting thrall for goods from its biome, about half the price of a
   raise.
@@ -69,7 +69,7 @@ First release.
 
 - Thralls appear on the **map**, with a checkbox to turn them off and labels that can be
   turned off separately.
-- Building aids on the numpad: time of day, ground levelling, god mode, and an altar effect
+- Building aids on the numpad: time of day, ground levelling, god mode, and a bindstone effect
   cycle for diagnosing what you can see. There are no keys for ordering thralls about —
   that is all menus.
 - Around 140 config settings, every one of them read by something.
@@ -77,7 +77,7 @@ First release.
 ### Not in this release
 
 - **The golem, the berserker and the seeker.** All three are finished — bodies, costs,
-  altar upgrades and hand-built models — and are switched off behind `Breeds`. Set it to
+  bindstone upgrades and hand-built models — and are switched off behind `Breeds`. Set it to
   3, 4 or 5 to turn them on. Their pieces stay registered whatever it is set to, so raising
   the cap later loses nothing already standing in a world.
 - **The golem's bare-handed felling**, which knocks trees down without an axe and wastes

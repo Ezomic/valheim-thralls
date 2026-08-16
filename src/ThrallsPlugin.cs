@@ -47,7 +47,7 @@ namespace Thralls
             Log.LogInfo(PluginName + " " + PluginVersion + " by " + PluginAuthor + " - ready.");
 
             if (ThrallConfig.TestMode.Value)
-                Log.LogWarning("TEST MODE: the altar and every upgrade cost one wood. "
+                Log.LogWarning("TEST MODE: the bindstone and every upgrade cost one wood. "
                                + "Turn TestMode off in the config before playing for real.");
         }
 
@@ -264,7 +264,7 @@ namespace Thralls
             if (thrall != null) thrall.Restore(entry.Xp, entry.Tool);
 
             Resting.Remove(entry);
-            Say(entry.Name + " answers the altar again.");
+            Say(entry.Name + " answers the bindstone again.");
             return true;
         }
 

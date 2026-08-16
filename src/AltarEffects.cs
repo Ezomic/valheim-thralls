@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Thralls
 {
     /// <summary>
-    /// Builds the drifting motes above each altar in code.
+    /// Builds the drifting motes above each bindstone in code.
     ///
     /// The particle material is lifted off a vanilla effect, so the sprites, blending and
     /// fog all match the game rather than looking like a foreign overlay. Only the
@@ -91,7 +91,7 @@ namespace Thralls
             var material = SparkMaterial();
             if (material == null)
             {
-                ThrallsPlugin.Log.LogWarning("No particle material to borrow; skipping altar motes.");
+                ThrallsPlugin.Log.LogWarning("No particle material to borrow; skipping bindstone motes.");
                 return;
             }
 
@@ -222,7 +222,7 @@ namespace Thralls
         private static float _fireIntensity = 1.6f;
 
         /// <summary>
-        /// What Valheim gives one of its own fires. Used as the unit the altar's light is
+        /// What Valheim gives one of its own fires. Used as the unit the bindstone's light is
         /// measured in, so "brighter than a campfire" means the same thing here as it does
         /// in the game.
         /// </summary>
@@ -244,7 +244,7 @@ namespace Thralls
 
                     _fireIntensity = light.intensity;
                     ThrallsPlugin.Log.LogInfo(string.Format(
-                        "Altar light measured against {0}: intensity {1}, range {2}. "
+                        "Bindstone light measured against {0}: intensity {1}, range {2}. "
                         + "Pixel light budget is {3}.",
                         name.Trim(), light.intensity, light.range,
                         QualitySettings.pixelLightCount));
@@ -276,7 +276,7 @@ namespace Thralls
                     if (material == null || material.shader == null) continue;
                     if (!material.HasProperty("_MainTex") || material.GetTexture("_MainTex") == null) continue;
 
-                    ThrallsPlugin.Log.LogInfo("Altar motes use " + material.name
+                    ThrallsPlugin.Log.LogInfo("Bindstone motes use " + material.name
                                               + " from " + name.Trim());
                     _spark = material;
                     return _spark;
@@ -287,7 +287,7 @@ namespace Thralls
     }
 
     /// <summary>
-    /// Switches the altar's light and motes on and off on every altar in the scene, so
+    /// Switches the bindstone's light and motes on and off on every altar in the scene, so
     /// which of them is responsible for something can be settled by looking rather than
     /// by a rebuild and a restart per guess.
     /// </summary>
@@ -337,7 +337,7 @@ namespace Thralls
                 systems++;
             }
 
-            var report = "Altar test " + (_state + 1) + "/" + Names.Length + ": " + Names[_state];
+            var report = "Bindstone test " + (_state + 1) + "/" + Names.Length + ": " + Names[_state];
 
             ThrallsPlugin.Log.LogInfo(report);
             if (Player.m_localPlayer != null)
@@ -352,7 +352,7 @@ namespace Thralls
             new Dictionary<Renderer, Material[]>();
 
         /// <summary>
-        /// Swaps the altar onto the untouched vanilla stone material.
+        /// Swaps the bindstone onto the untouched vanilla stone material.
         ///
         /// This is the test that actually splits the problem in two. If the black facets
         /// survive a plain vanilla material, nothing about our textures, UVs or normal maps

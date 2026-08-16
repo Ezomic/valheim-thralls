@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Thralls
 {
     /// <summary>
-    /// The summoning altar. Replaces the wandering steward it was built to retire: it is a
+    /// The bindstone. Replaces the wandering steward it was built to retire: it is a
     /// piece you build, it keeps the roll of the dead on its own ZDO, and being a piece it
     /// simply cannot be killed by a raid.
     /// </summary>
@@ -585,7 +585,7 @@ namespace Thralls
             if (basePrefab == null)
             {
                 ThrallsPlugin.Log.LogError("Cannot find '" + ThrallConfig.AltarBasePrefab.Value
-                                           + "' to base the altar on.");
+                                           + "' to base the bindstone on.");
                 return null;
             }
 
@@ -655,7 +655,7 @@ namespace Thralls
             if (prefab.GetComponent<ThrallAltar>() == null) prefab.AddComponent<ThrallAltar>();
 
             _prefab = prefab;
-            ThrallsPlugin.Log.LogInfo("Altar '" + label + "' built.");
+            ThrallsPlugin.Log.LogInfo("Bindstone '" + label + "' built.");
             if (ThrallConfig.AltarDiagnostics.Value) DumpRenderers(prefab);
             return prefab;
         }
@@ -950,7 +950,7 @@ namespace Thralls
             var donor = ZNetScene.instance.GetPrefab(fields[0].Trim());
             if (donor == null)
             {
-                ThrallsPlugin.Log.LogWarning("Altar part '" + fields[0].Trim() + "' does not exist, skipping.");
+                ThrallsPlugin.Log.LogWarning("Bindstone part '" + fields[0].Trim() + "' does not exist, skipping.");
                 return false;
             }
 
@@ -1073,7 +1073,7 @@ namespace Thralls
                 var drop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
                 if (drop == null)
                 {
-                    ThrallsPlugin.Log.LogWarning("Altar cost mentions unknown item '" + entry.Key + "'.");
+                    ThrallsPlugin.Log.LogWarning("Bindstone cost mentions unknown item '" + entry.Key + "'.");
                     continue;
                 }
 
@@ -1114,7 +1114,7 @@ namespace Thralls
             if (upgrade != null)
                 return ThrallConfig.UpgradeLegacyNames(upgrade.Level);
 
-            // Only the altar itself carries the altar's old names.
+            // Only the bindstone itself carries the altar's old names.
             //
             // This used to fall through to them for *any* piece that was not an upgrade,
             // which was harmless while the altar and its upgrades were the only things the

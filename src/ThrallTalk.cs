@@ -9,7 +9,7 @@ namespace Thralls
     /// The altar's ledger is for running a crew - every thrall in a list, hiring, the roll
     /// of the dead. This is for talking to one of them where it stands, and the difference
     /// matters for one order in particular: "work from here" means the ground under your
-    /// feet, and there is no way to say that from a panel you opened at the altar.
+    /// feet, and there is no way to say that from a panel you opened at the bindstone.
     ///
     /// Laid out as the field ledger of the three mockups: what it is doing down the left,
     /// what you can tell it down the right. The left rail is not decoration - the two
@@ -72,7 +72,7 @@ namespace Thralls
 
         /// <summary>
         /// Shuts itself when the thrall dies, is dismissed, or you walk off - the same
-        /// three ways the altar panel closes. A panel left open on a thrall that no longer
+        /// three ways the bindstone panel closes. A panel left open on a thrall that no longer
         /// exists would keep the cursor free and the player frozen with nothing to click.
         /// </summary>
         public static void Tick()
@@ -276,8 +276,8 @@ namespace Thralls
                 thrall.Dismiss();
 
                 ThrallsPlugin.Say(Resting.HasLedger
-                    ? name + " rests at the altar. Call it back from the ledger."
-                    : name + " is released for good - with no altar there is no roll to "
+                    ? name + " rests at the bindstone. Call it back from the ledger."
+                    : name + " is released for good - with no bindstone there is no roll to "
                            + "keep it on.");
                 Close();
             }

@@ -119,7 +119,7 @@ namespace Thralls
                 default:
                     Shadows(true);
                     HideProps(false);
-                    ThrallsPlugin.Log.LogInfo("Altar diagnosis complete.");
+                    ThrallsPlugin.Log.LogInfo("Bindstone diagnosis complete.");
                     Destroy(this);
                     return;
             }

@@ -686,7 +686,7 @@ namespace Thralls
             ReturnPack();
 
             if (keep && Resting.Rest(_name, _tier, _xp, _tool))
-                Announce(_name + " steps back into the altar's keeping.");
+                Announce(_name + " steps back into the bindstone's keeping.");
 
             if (_nview != null && _nview.IsValid())
             {

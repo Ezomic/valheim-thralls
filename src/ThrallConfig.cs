@@ -216,7 +216,7 @@ namespace Thralls
         /// </summary>
         private const string TestCost = "Wood:1";
 
-        /// <summary>What the summoning altar costs, honouring TestMode.</summary>
+        /// <summary>What the bindstone costs, honouring TestMode.</summary>
         public static string AltarCostNow()
         {
             return TestMode.Value ? TestCost : AltarCost.Value;
@@ -228,7 +228,7 @@ namespace Thralls
             return TestMode.Value ? TestCost : DepotCost.Value;
         }
 
-        /// <summary>What the numbered altar upgrade costs.</summary>
+        /// <summary>What the numbered bindstone upgrade costs.</summary>
         public static string UpgradeCost(int level)
         {
             if (TestMode.Value) return TestCost;
@@ -282,7 +282,7 @@ namespace Thralls
 
             KeyAltarEffects = cfg.Bind("1 - Keys", "AltarEffects",
                 new KeyboardShortcut(KeyCode.KeypadMinus),
-                "Cycles the altar's light and drifting motes on and off: both, no light, no motes, neither. For working out which of them is behind something you can see.");
+                "Cycles the bindstone's light and drifting motes on and off: both, no light, no motes, neither. For working out which of them is behind something you can see.");
 
             KeyGodMode = cfg.Bind("1 - Keys", "GodMode", new KeyboardShortcut(KeyCode.Keypad9),
                 "Toggle unlimited health and stamina. A building aid, not a feature.");
@@ -348,29 +348,29 @@ namespace Thralls
                 "The Queen must fall before seekers will answer.");
 
             UpgradesGateTiers = cfg.Bind("2 - Thralls", "UpgradesGateTiers", true,
-                "Each altar upgrade opens the next breed. Turn off to let the boss keys alone decide.");
+                "Each bindstone upgrade opens the next breed. Turn off to let the boss keys alone decide.");
             Upgrade1Parts = cfg.Bind("2 - Thralls", "Upgrade1Parts",
                 "stone_floor_2x2:0,0,0:0.34:0"
                 + ";stone_pillar:0,0.04,0:0.30:0"
                 + ";piece_groundtorch_green:0,0.70,0:0.85:0",
-                "Fallback for the first altar upgrade, used only if Upgrade1Model is missing from disk. Each part is prefab:x,y,z:scale:yaw. Green fire over a sunken slab, for the swamp.");
+                "Fallback for the first bindstone upgrade, used only if Upgrade1Model is missing from disk. Each part is prefab:x,y,z:scale:yaw. Green fire over a sunken slab, for the swamp.");
             Upgrade2Parts = cfg.Bind("2 - Thralls", "Upgrade2Parts",
                 "stone_floor_2x2:0,0,0:0.46:0"
                 + ";stone_floor_2x2:0,0.18,0:0.32:45"
                 + ";stone_pillar:0,0.30,0:0.42:0"
                 + ";guard_stone:0,0.95,0:0.60:0",
-                "Fallback for the second altar upgrade, used only if Upgrade2Model is missing. Stacked rock with a rune stone crowning it, for the mountain.");
+                "Fallback for the second bindstone upgrade, used only if Upgrade2Model is missing. Stacked rock with a rune stone crowning it, for the mountain.");
             Upgrade4Parts = cfg.Bind("2 - Thralls", "Upgrade4Parts",
                 "blackmarble_column_1:0,0,0:0.5:0"
                 + ";blackmarble_head_big01:0,0.9,0:0.4:0",
-                "What the fourth altar upgrade is built out of, if its model is missing. Black marble, for the mistlands.");
+                "What the fourth bindstone upgrade is built out of, if its model is missing. Black marble, for the mistlands.");
             Upgrade3Parts = cfg.Bind("2 - Thralls", "Upgrade3Parts",
                 "stone_floor_2x2:0,0,0:0.44:0"
                 + ";stone_arch:0,0.10,0:0.52:0"
                 + ";fire_pit:0,0.14,0:0.55:0"
                 + ";piece_groundtorch:-0.62,0.16,0:0.78:0"
                 + ";piece_groundtorch:0.62,0.16,0:0.78:0",
-                "Fallback for the third altar upgrade, used only if Upgrade3Model is missing. An arch over open fire, for the war camps of the plains.");
+                "Fallback for the third bindstone upgrade, used only if Upgrade3Model is missing. An arch over open fire, for the war camps of the plains.");
 
             // Each one is paid for in the goods of the biome whose dead it opens, so the
             // rung cannot be reached before you have been where its thralls come from.
@@ -378,16 +378,16 @@ namespace Thralls
             // let every breed be unlocked in a minute, and one that should not ship.
             Upgrade1Cost = cfg.Bind("2 - Thralls", "Upgrade1Cost",
                 "Iron:10,Guck:10,WitheredBone:5,Stone:20,ElderBark:15",
-                "What the bog stone costs. It is the first altar upgrade and it opens swamp elites.");
+                "What the bog stone costs. It is the first bindstone upgrade and it opens swamp elites.");
             Upgrade2Cost = cfg.Bind("2 - Thralls", "Upgrade2Cost",
                 "Obsidian:20,FineWood:20,DeerHide:10,Silver:6,Crystal:25,FreezeGland:10",
-                "What the mountain cairn costs. It is the second altar upgrade and it opens mountain golems.");
+                "What the mountain cairn costs. It is the second bindstone upgrade and it opens mountain golems.");
             Upgrade3Cost = cfg.Bind("2 - Thralls", "Upgrade3Cost",
                 "BlackMetal:20,Needle:15,LinenThread:25,GoblinTotem:2",
-                "What the war totem costs. It is the third altar upgrade and it opens fuling berserkers.");
+                "What the war totem costs. It is the third bindstone upgrade and it opens fuling berserkers.");
             Upgrade4Cost = cfg.Bind("2 - Thralls", "Upgrade4Cost",
                 "BlackMarble:30,Eitr:20,YggdrasilWood:30,Iron:30",
-                "What the rift stone costs. It is the fourth altar upgrade and it opens mistlands seekers.");
+                "What the rift stone costs. It is the fourth bindstone upgrade and it opens mistlands seekers.");
 
             // Each upgrade wears its own hand-modelled mesh, sitting next to the plugin
             // alongside the altar's. The UpgradeNParts assemblies above are still the
@@ -397,16 +397,16 @@ namespace Thralls
             // rising out of the guck, a golem under the cairn, a fuling war totem.
             Upgrade1Model = cfg.Bind("2 - Thralls", "Upgrade1Model",
                 "thrall_altar_upgrade1.obj",
-                "Model file for the first altar upgrade, sitting next to the plugin dll. Empty falls back to Upgrade1Parts.");
+                "Model file for the first bindstone upgrade, sitting next to the plugin dll. Empty falls back to Upgrade1Parts.");
             Upgrade2Model = cfg.Bind("2 - Thralls", "Upgrade2Model",
                 "thrall_altar_upgrade2.obj",
-                "Model file for the second altar upgrade. Empty falls back to Upgrade2Parts.");
+                "Model file for the second bindstone upgrade. Empty falls back to Upgrade2Parts.");
             Upgrade3Model = cfg.Bind("2 - Thralls", "Upgrade3Model",
                 "thrall_altar_upgrade3.obj",
-                "Model file for the third altar upgrade. Empty falls back to Upgrade3Parts.");
+                "Model file for the third bindstone upgrade. Empty falls back to Upgrade3Parts.");
             Upgrade4Model = cfg.Bind("2 - Thralls", "Upgrade4Model",
                 "thrall_altar_upgrade4.obj",
-                "Model file for the fourth altar upgrade. Empty falls back to Upgrade4Parts.");
+                "Model file for the fourth bindstone upgrade. Empty falls back to Upgrade4Parts.");
 
             Tier1Cost = cfg.Bind("2 - Thralls", "Tier1Cost",
                 "Bronze:5,Resin:20,GreydwarfEye:10,RoundLog:25,Stone:25,TrophyGreydwarfBrute:1",
@@ -510,7 +510,7 @@ namespace Thralls
             DepotName = cfg.Bind("7 - Depot", "DepotName", "Thrall depot",
                 "What the depot is called in the build menu and when you look at it.");
             DepotCost = cfg.Bind("7 - Depot", "DepotCost", "Wood:20,RoundLog:6,LeatherScraps:4,Iron:2",
-                "What it takes to build a depot. Iron puts it at roughly the altar's own tier, so a crew that can be bound can be given somewhere to unload.");
+                "What it takes to build a depot. Iron puts it at roughly the bindstone's own tier, so a crew that can be bound can be given somewhere to unload.");
             DepotBasePrefab = cfg.Bind("7 - Depot", "DepotBasePrefab", "piece_chest_wood",
                 "Existing piece the depot is cloned from, for its components - the container, the network view, the wear-and-tear. Its own model is switched off and replaced, so this does NOT decide how the depot looks. It MUST be something carrying a Container or there is nowhere for the goods to go.");
             DepotModel = cfg.Bind("7 - Depot", "DepotModel", "thrall_depot.obj",
@@ -527,7 +527,7 @@ namespace Thralls
             TalkOnUse = cfg.Bind("7 - Depot", "TalkOnUse", true,
                 "Pressing use on a thrall opens its orders panel. Turn off to leave the key doing whatever the creature normally does with it.");
             TalkWalkAway = cfg.Bind("7 - Depot", "TalkWalkAway", 8f,
-                "How far you can walk from a thrall before its orders panel closes itself. Matches the altar panel.");
+                "How far you can walk from a thrall before its orders panel closes itself. Matches the bindstone panel.");
 
             WorkAtNight = cfg.Bind("3 - Work", "WorkAtNight", true, "If false, thralls idle between dusk and dawn.");
             MineablePrefabs = cfg.Bind("3 - Work", "ExtraMineableNames", "rock,stone,copper,tin,silver,obsidian,flametal,mudpile,ore",
@@ -538,16 +538,16 @@ namespace Thralls
             SwingAnimation = cfg.Bind("3 - Work", "SwingAnimation", "",
                 "Animator trigger played when a thrall works. Empty picks the first one the creature has. Set to 'none' for no animation at all if your chosen creature does something silly.");
 
-            AltarName = cfg.Bind("2 - Thralls", "AltarName", "Summoning altar",
-                "What the altar is called in the build menu and when you look at it.");
+            AltarName = cfg.Bind("2 - Thralls", "AltarName", "Bindstone",
+                "What the bindstone is called in the build menu and when you look at it.");
             AltarCost = cfg.Bind("2 - Thralls", "AltarCost", "HardAntler:3,Stone:30,Wood:20,GreydwarfEye:5,Bronze:5",
-                "What it takes to build the altar. ElderBark is ancient bark, so the altar now sits behind the swamp rather than behind Eikthyr - hard antler and greydwarf eyes no longer set the gate, they are just flavour on top of it.");
+                "What it takes to build the bindstone. ElderBark is ancient bark, so the bindstone now sits behind the swamp rather than behind Eikthyr - hard antler and greydwarf eyes no longer set the gate, they are just flavour on top of it.");
             AltarBasePrefab = cfg.Bind("2 - Thralls", "AltarBasePrefab", "guard_stone",
-                "Existing piece the altar is cloned from, for its components - the network view, the wear-and-tear and the piece itself. Its own model is switched off and replaced, so this does NOT decide how the altar looks; AltarMaterialFrom and the model files do. Change only if the clone is misbehaving.");
+                "Existing piece the bindstone is cloned from, for its components - the network view, the wear-and-tear and the piece itself. Its own model is switched off and replaced, so this does NOT decide how the altar looks; AltarMaterialFrom and the model files do. Change only if the clone is misbehaving.");
             AltarRange = cfg.Bind("2 - Thralls", "AltarRange", 20f,
-                "How close to an altar you must be to bind thralls or open its panel.");
+                "How close to a bindstone you must be to bind thralls or open its panel.");
             AltarScale = cfg.Bind("2 - Thralls", "AltarScale", 1f,
-                "Overall size of the altar.");
+                "Overall size of the bindstone.");
             // The bench is gone: the bindstone replaced it and it has been archived.
             //
             // Note this list, not the files on disk, is what decides whether a shape's
@@ -557,7 +557,7 @@ namespace Thralls
             // beside the plugin is harmless: it falls back to the AltarParts assembly.
             AltarShapes = cfg.Bind("2 - Thralls", "AltarShapes",
                 "bindstone",
-                "Which altar shapes appear on the hammer, each as its own buildable piece. They all work identically. Names match the model files sitting next to the plugin dll; the shelved ones are in assets/archive. CAREFUL: this list alone decides which prefabs exist - nothing here checks the disk. Removing a name destroys every altar of that shape already standing in a world, because ZNetScene discards ZDOs whose prefab it cannot resolve. Leaving a name here with no model beside the plugin is harmless: it falls back to the AltarParts assembly. Empty falls back to the single AltarModel.");
+                "Which bindstone shapes appear on the hammer, each as its own buildable piece. They all work identically. Names match the model files sitting next to the plugin dll; the shelved ones are in assets/archive. CAREFUL: this list alone decides which prefabs exist - nothing here checks the disk. Removing a name destroys every altar of that shape already standing in a world, because ZNetScene discards ZDOs whose prefab it cannot resolve. Leaving a name here with no model beside the plugin is harmless: it falls back to the AltarParts assembly. Empty falls back to the single AltarModel.");
             AltarVanillaGroups = cfg.Bind("2 - Thralls", "AltarVanillaGroups", "darkstone",
                 "Material groups that wear Valheim's own stone material instead of a texture of ours, comma separated. Ours are flattened to remove the normal map, which is where the game's stone gets most of its contrast, so a large plain mass reads flatter and darker than the rock around it. Empty means every group uses our own sheets.");
             OneStarRank = cfg.Bind("2 - Thralls", "OneStarRank", 10,
@@ -574,15 +574,15 @@ namespace Thralls
             AltarModel = cfg.Bind("2 - Thralls", "AltarModel", "thrall_altar_bindstone.obj",
                 "Model file sitting next to the plugin dll, used only when AltarShapes is empty. Delete or rename it to fall back to the altar assembled from existing pieces.");
             AltarDiagnostics = cfg.Bind("6 - Altar props", "Diagnostics", false,
-                "Cycle the altar through a series of test states on load, photographing each. For working out which part of the altar is responsible for something you can see. Costs a few seconds and six images every time a world loads.");
+                "Cycle the bindstone through a series of test states on load, photographing each. For working out which part of the altar is responsible for something you can see. Costs a few seconds and six images every time a world loads.");
             AltarScreenshot = cfg.Bind("6 - Altar props", "Screenshot", false,
-                "Photograph the altar from four sides shortly after it loads, next to the plugin. Only altars standing at load time are caught. Do NOT judge colour or brightness from these: the routine forces daylight before shooting and renders through a camera of its own, which carries none of the game's post-processing, so every object in them is lighter and flatter than on screen. Good for shape and placement, misleading for anything else.");
+                "Photograph the bindstone from four sides shortly after it loads, next to the plugin. Only bindstones standing at load time are caught. Do NOT judge colour or brightness from these: the routine forces daylight before shooting and renders through a camera of its own, which carries none of the game's post-processing, so every object in them is lighter and flatter than on screen. Good for shape and placement, misleading for anything else.");
 
             AltarTexturePoint = cfg.Bind("2 - Thralls", "AltarTexturePoint", true,
-                "Sample the altar textures without smoothing, so texels stay square. This is most of what gives Valheim props their crisp blocky look up close; turn it off for a soft, filtered surface.");
+                "Sample the bindstone textures without smoothing, so texels stay square. This is most of what gives Valheim props their crisp blocky look up close; turn it off for a soft, filtered surface.");
 
             AltarBakedShading = cfg.Bind("2 - Thralls", "AltarBakedShading", false,
-                "Feed the altar's baked ambient occlusion to the shader through vertex colours. Only correct if Valheim's piece shader treats vertex colour as a plain tint; if it uses those channels for blending or wear instead, this paints black facets across the model. Off sends plain white.");
+                "Feed the bindstone's baked ambient occlusion to the shader through vertex colours. Only correct if Valheim's piece shader treats vertex colour as a plain tint; if it uses those channels for blending or wear instead, this paints black facets across the model. Off sends plain white.");
 
             AltarUvScale = cfg.Bind("2 - Thralls", "AltarUvScale", 0.5f,
                 "How many times the texture repeats per metre. Lower means larger, coarser grain. Must match UV_SCALE in tools/altar_model.py, or the preview renders lie about how the altar will look.");
@@ -591,26 +591,26 @@ namespace Thralls
 
             AltarMaterialFrom = cfg.Bind("2 - Thralls", "AltarMaterialFrom",
                 "stone_wall_2x1,stone_floor_2x2,stone_pillar,stone_arch,stone_wall_4x2,guard_stone,blackmarble_column_1",
-                "Pieces to lift a stone material from, first one that resolves wins. This is what makes the altar light and weather like the rest of the world.");
+                "Pieces to lift a stone material from, first one that resolves wins. This is what makes the bindstone light and weather like the rest of the world.");
 
             // Dressed and ceremonial: torches lighting the steps.
             PropsPlinth = cfg.Bind("6 - Altar props", "Plinth",
                 "piece_groundtorch:-1.05,0,-1.95:0.9:0"
                 + ";piece_groundtorch:1.05,0,-1.95:0.9:0",
-                "Props added to the plinth altar, as prefab:x,y,z:scale:yaw separated by semicolons. Missing prefabs are skipped.");
+                "Props added to the plinth bindstone, as prefab:x,y,z:scale:yaw separated by semicolons. Missing prefabs are skipped.");
 
             // Ancient and cold: dwarven lamps under the capstone.
             PropsDolmen = cfg.Bind("6 - Altar props", "Dolmen",
                 "piece_dvergr_lantern:0,0,-1.55:0.85:0"
                 + ";piece_groundtorch_blue:-1.95,0,1.05:0.8:0"
                 + ";piece_groundtorch_blue:1.95,0,1.05:0.8:0",
-                "Props added to the dolmen altar.");
+                "Props added to the dolmen bindstone.");
 
             // Rough and lived-in: a fire burning in the crown of the pile.
             PropsCairn = cfg.Bind("6 - Altar props", "Cairn",
                 "fire_pit:0,1.32,0:0.75:0"
                 + ";piece_groundtorch_wood:-2.05,0,-1.25:0.85:0",
-                "Props added to the cairn altar.");
+                "Props added to the cairn bindstone.");
 
             // Ritual and overgrown: green fire in the ring.
             PropsCircle = cfg.Bind("6 - Altar props", "Circle",
@@ -618,21 +618,21 @@ namespace Thralls
                 + ";piece_groundtorch_green:-2.15,0,1.25:0.85:0"
                 + ";piece_groundtorch_green:2.15,0,1.25:0.85:0"
                 + ";piece_groundtorch_green:0,0,-2.35:0.85:0",
-                "Props added to the stone circle altar.");
+                "Props added to the stone circle bindstone.");
 
             PropsNoEffects = cfg.Bind("6 - Altar props", "PropsWithoutEffects", "Trophy",
-                "Prefab name prefixes whose props lose their particles and lights when mounted on an altar. Item prefabs sparkle so you can find them dropped in grass, which on an altar just looks like loot lying there. Torches and candles are not listed, because their flame is the point.");
+                "Prefab name prefixes whose props lose their particles and lights when mounted on a bindstone. Item prefabs sparkle so you can find them dropped in grass, which on an altar just looks like loot lying there. Torches and candles are not listed, because their flame is the point.");
 
             AltarEffects = cfg.Bind("6 - Altar props", "Motes", false,
-                "Drifting motes above each altar, coloured to match it. Off by default: the altars now wear the game's own stone and wood, and the motes were doing work that the material was not doing before. Turn on for the coloured drift.");
+                "Drifting motes above each bindstone, coloured to match it. Off by default: the bindstones now wear the game's own stone and wood, and the motes were doing work that the material was not doing before. Turn on for the coloured drift.");
             AltarEffectStrength = cfg.Bind("6 - Altar props", "MoteStrength", 1f,
-                "Multiplier on how many motes each altar gives off.");
+                "Multiplier on how many motes each bindstone gives off.");
             AltarLight = cfg.Bind("6 - Altar props", "Light", false,
-                "A light on the altar itself, coloured to match its motes. Vanilla torches cannot be used as props for this - they are stripped of the component that lights them - and candles alone are too dim to work by.");
+                "A light on the bindstone itself, coloured to match its motes. Vanilla torches cannot be used as props for this - they are stripped of the component that lights them - and candles alone are too dim to work by.");
             AltarLightRange = cfg.Bind("6 - Altar props", "LightRange", 18f,
-                "How far the altar's light reaches, in metres.");
+                "How far the bindstone's light reaches, in metres.");
             AltarLightStrength = cfg.Bind("6 - Altar props", "LightStrength", 2f,
-                "How bright the altar's light is, as a multiple of one of Valheim's own fires. 1 is about a campfire. 0 is the same as turning it off.");
+                "How bright the bindstone's light is, as a multiple of one of Valheim's own fires. 1 is about a campfire. 0 is the same as turning it off.");
 
             AltarEffectFrom = cfg.Bind("6 - Altar props", "MoteMaterialFrom",
                 "fire_pit,bonfire,piece_groundtorch,piece_groundtorch_green",
@@ -654,7 +654,7 @@ namespace Thralls
                 "Candle_resin:-0.60,1.16,-0.30:0.45:0"
                 + ";Candle_resin:-0.46,1.16,-0.38:0.38:0"
                 + ";Candle_resin:0.62,1.16,-0.30:0.42:0",
-                "Props for the summoning bench, which has been archived and replaced by the summoning altar - kept so the shape still dresses correctly if it is ever put back in AltarShapes. Only the candles: a vanilla item prefab mounted as decoration keeps the sparkle it uses to be findable on the ground.");
+                "Props for the summoning bench, which has been archived and replaced by the bindstone - kept so the shape still dresses correctly if it is ever put back in AltarShapes. Only the candles: a vanilla item prefab mounted as decoration keeps the sparkle it uses to be findable on the ground.");
 
             // The bindstone's shelf runs across the back of its crown, 1.20 up and 0.27
             // back. The skeleton trophy stands between the two candles, where the model
@@ -664,7 +664,7 @@ namespace Thralls
             PropsBindstone = cfg.Bind("6 - Altar props", "Bindstone",
                 "Candle_resin:-0.17,0.52,-0.73:0.45:0"
                 + ";Candle_resin:0.17,0.52,-0.73:0.42:0",
-                "Props added to the summoning altar, on the flat capstone across the front of its kerb.");
+                "Props added to the bindstone, on the flat capstone across the front of its kerb.");
 
             // Necromancy: corpse-light, guttering candles and banners over the howe.
             PropsBarrow = cfg.Bind("6 - Altar props", "Barrow",
@@ -675,7 +675,7 @@ namespace Thralls
                 + ";piece_banner07:-2.30,0,1.15:0.9:0"
                 + ";piece_banner07:2.30,0,1.15:0.9:0"
                 + ";itemstand:0,0.95,0.55:1:180",
-                "Props added to the barrow altar.");
+                "Props added to the barrow bindstone.");
 
             AltarParts = cfg.Bind("2 - Thralls", "AltarParts",
                 "stone_floor_2x2:0,0,0:0.62:0"
@@ -685,17 +685,17 @@ namespace Thralls
                 + ";stone_pillar:1.15,0,-0.15:0.7:0"
                 + ";piece_groundtorch:-1.15,1.35,-0.15:0.8:0"
                 + ";piece_groundtorch:1.15,1.35,-0.15:0.8:0",
-                "Fallback for the altar itself, used only if its model file is missing from disk. Each part is prefab:x,y,z:scale:yaw, separated by semicolons. Parts that do not exist are skipped. Empty leaves the altar wearing the plain borrowed model.");
+                "Fallback for the bindstone itself, used only if its model file is missing from disk. Each part is prefab:x,y,z:scale:yaw, separated by semicolons. Parts that do not exist are skipped. Empty leaves the altar wearing the plain borrowed model.");
 
             BaseWorkSlots = cfg.Bind("2 - Thralls", "BaseWorkSlots", 1,
-                "How many thralls can be working at once with no station upgrades built near the altar.");
+                "How many thralls can be working at once with no station upgrades built near the bindstone.");
             MaxWorkSlots = cfg.Bind("2 - Thralls", "MaxWorkSlots", 5,
                 "Hard ceiling on thralls working at once, however many upgrades you build.");
             SlotSearchRange = cfg.Bind("2 - Thralls", "SlotSearchRange", 40f,
-                "How far from the altar station upgrades count towards your work slots.");
+                "How far from the bindstone station upgrades count towards your work slots.");
 
             RequireTools = cfg.Bind("5 - Tools", "RequireTools", true,
-                "A thrall must be handed a tool before it will chop, mine or farm. Give it one from its page in the altar panel. Turn off to let them work bare handed as they used to.");
+                "A thrall must be handed a tool before it will chop, mine or farm. Give it one from its page in the bindstone panel. Turn off to let them work bare handed as they used to.");
             ToolsChop = cfg.Bind("5 - Tools", "ChopTools",
                 "AxeStone,AxeFlint,AxeBronze,AxeIron,AxeBlackMetal,AxeJotunBane,AxeBerzerkr",
                 "Items accepted as a chopping tool, by prefab name.");
@@ -730,7 +730,7 @@ namespace Thralls
             Verbose = cfg.Bind("4 - Misc", "VerboseLogging", false, "Chatty logs, for when something misbehaves.");
 
             TestMode = cfg.Bind("4 - Misc", "TestMode", false,
-                "Makes the altar and every upgrade cost one wood, so all four tiers can be "
+                "Makes the bindstone and every upgrade cost one wood, so all four tiers can be "
                 + "built and looked at without four biomes of progression behind them. "
                 + "Turn it off before playing for real - it is announced in the log on "
                 + "startup so it is hard to leave on by accident.");

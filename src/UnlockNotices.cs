@@ -21,7 +21,7 @@ namespace Thralls
         /// The check runs after the piece is placed rather than predicting from the piece's
         /// own level, because the chain has to be unbroken: laying the third upgrade with
         /// the first two missing grants nothing, and announcing berserkers there would be a
-        /// lie. LevelNear is asked what the altar actually reaches now.
+        /// lie. LevelNear is asked what the bindstone actually reaches now.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
@@ -52,9 +52,9 @@ namespace Thralls
 
             if (MessageHud.instance != null)
                 MessageHud.instance.QueueUnlockMsg(piece.m_icon, "New thralls",
-                    breed + " can now be bound at the altar");
+                    breed + " can now be bound at the bindstone");
             else
-                ThrallsPlugin.Say(breed + " can now be bound at the altar");
+                ThrallsPlugin.Say(breed + " can now be bound at the bindstone");
 
             ThrallsPlugin.Log.LogInfo("Announced breed unlock: " + breed + " (upgrade " + level + ")");
         }
