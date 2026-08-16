@@ -5,7 +5,7 @@
   "website_url": "https://github.com/Ezomic/valheim-thralls",
   "description": "Bind workers at an altar and set them to chop, mine, gather, farm and repair, hauling it all to a depot you build.",
   "dependencies": [
-    "Ezomic-Core-0.2.0",
+    "Ezomic-Longhouse_Core-0.2.0",
     "denikson-BepInExPack_Valheim-5.4.2333"
   ]
 }
