@@ -75,9 +75,9 @@ free storage, and you would bind five, rest four, and swap whichever you needed 
 | Tier | To call back | To raise from the dead |
 | --- | --- | --- |
 | 1 | 10 greydwarf eyes, 10 wood | 20 greydwarf eyes, 20 wood |
-| 2 | 8 bloodbags, 2 iron scrap | 15 bloodbags, 5 iron scrap |
 
-Both are config, and an empty recall cost makes calling back free again.
+Both are config, and an empty recall cost makes calling back free again. The other four
+tiers keep their own prices in the config for when `Breeds` turns them on.
 
 Resting and dying are not the same list. A thrall you sent away is waiting; a thrall that
 was killed is on the roll of the dead and costs goods to raise. Either way it returns at
@@ -112,40 +112,44 @@ it and a plank bin at its foot. It stands 2.7m, which is deliberate: it governs 
 it has to be findable from inside that radius. Look at it to see how many of your crew are
 using it.
 
-## Tiers and levels
+## The thrall
 
-This release ships **two** kinds of thrall. They are **separate careers, not a ladder** —
-a brute never becomes a draugr. You choose which to bind, and each is then trained on its
-own.
-
-Each answers only once the boss of **its own** biome is down, so a breed arrives about when
-you start working the ground it came from.
+This release ships **one** kind: the greydwarf brute. It answers once **The Elder** is
+down, so it arrives about when you start working the ground it came from.
 
 | Tier | Body | Answers after | Tool tier |
 | --- | --- | --- | --- |
 | 1 | Greydwarf brute | The Elder | 1 |
-| 2 | Draugr elite | Bonemass | 2 |
 
-The golem, the berserker and the seeker are built and waiting behind `Breeds`. Set it to
-3, 4 or 5 to turn them on — their pieces stay registered whatever it is set to, so nothing
-already standing in a world is lost either way.
+One rather than five is a deliberate cut, and not a placeholder. A thrall is a whole thing
+to learn — where it works, what it carries, what it will and will not touch — and one kind
+finished and tested is a release, where five half-tested ones are a wishlist. The draugr,
+golem, berserker and seeker are written and their code stays in; `Breeds` turns them back
+on one at a time.
 
-On top of the boss, the draugr wants one upgrade raised beside the bindstone. Both gates are
-config: `TierNRequiresBoss` takes a world key, empty for no gate, and `UpgradesGateTiers`
-turns the upgrade requirement off.
+**There are no bindstone upgrades.** An upgrade existed only to unlock the breed above it,
+so with a single breed they were four buildable pieces that did nothing. They come back
+automatically if you raise `Breeds`, since the mod counts them off the breeds on offer
+rather than building a fixed four.
 
-**Binding one** costs the breed's own price and nothing else — goods from its biome, and
-one head of that creature in particular.
+**Five thralls can work at once**, flat. Nothing raises it — there is nothing to earn with
+the upgrades gone. `BaseWorkSlots` and `MaxWorkSlots` are both 5, and the count is clamped
+between them, so lowering the first makes station extensions near the bindstone count
+again.
+
+`MaxThralls` (20) is a separate number: how many you may *keep*. Five of them work and the
+rest stand by, rest, or follow.
+
+**Binding one** costs goods from its biome and one head of that creature in particular:
 
 | Tier | What it costs |
 | --- | --- |
 | 1 | 5 bronze, 20 resin, 10 greydwarf eyes, 25 round logs, 25 stone, 1 greydwarf brute trophy |
-| 2 | 5 iron, 20 entrails, 10 bloodbags, 25 ancient bark, 25 flint, 1 draugr elite trophy |
 
-The head in each line is the point of it: a draugr's head to raise a draugr. There used to be a
-second trophy price on top, taking any head of the tier or better, from a mechanism older
-than these lists — so every thrall quietly wanted two trophies. That mechanism is gone and
-these lists are the whole cost.
+The head is the point of it: a greydwarf brute's head to raise a greydwarf brute. There used
+to be a second trophy price on top, taking any head of the tier or better, from a mechanism
+older than these lists — so every thrall quietly wanted two trophies. That mechanism is gone
+and this line is the whole cost.
 
 **Levelling is earned, not bought.** A thrall gains experience by working and levels on its
 own, at 150 xp for level 2 and rising to 33,000 for level 20:
@@ -168,14 +172,14 @@ that — it only makes the thrall hit harder and swing faster:
 - each **tier** above the first: +50% damage, +12% speed
 - each **level** above the first: +8% damage, +3% speed
 
-A fresh brute chops for 40 a swing every 1.6s; a fresh draugr for 60 every 1.41s, and at
-level 20 that same draugr hits for 151 every 0.87s. A levelled brute still cannot fell an
-oak — tier fixes the tool, and no amount of experience moves it.
+A fresh brute chops for 40 a swing every 1.6s, and at level 20 the same brute hits for 100
+every 0.99s. It still cannot fell an oak — tier fixes the tool, and no amount of experience
+moves it.
 
 ### The golem smashes (not in this release)
 
 The golem is tier 3, so this waits for the release that turns it on — it is written and
-works, and raising `Breeds` above 2 brings it with the golem.
+works, and setting `Breeds` to 3 brings it in along with the draugr below it.
 
 The golem is the one breed that does not use an axe. Set it to chopping with empty hands
 and it walks at trees and knocks them down, which makes it far and away the fastest way to
@@ -202,10 +206,9 @@ and level. Raise it from the bindstone's ledger for goods from its own biome:
 | Tier | Cost to raise |
 | --- | --- |
 | 1 | 20 greydwarf eyes, 20 wood |
-| 2 | 15 bloodbags, 5 iron scrap |
 
 It comes back at the level it died with, so the experience it earned is never lost — only
-the goods. All five costs are config. Without a bindstone there is nobody keeping the roll,
+the goods. Every cost is config. Without a bindstone there is nobody keeping the roll,
 and death is final.
 
 ## Farming
@@ -269,10 +272,13 @@ needs no re-pointing.
 
 `BepInEx/config/ezomic.valheim.thralls.cfg`, written on first run.
 
-- `Breeds` — how many kinds this release offers, default 2. Raise to 5 for all of them.
+- `Breeds` — how many kinds are offered, default 1. Raise to 5 for all of them; it also
+  decides how many bindstone upgrades exist, so at 1 there are none.
+- `BaseWorkSlots` / `MaxWorkSlots` — both 5, which is what makes the crew a flat five.
+  Lower the first to make station extensions near the bindstone earn slots again.
 - `TierNCost` — what each breed costs to bind, materials and its own head.
 - `RecruitCost` — an *extra* cost on every breed, e.g. `Coins:50`. Empty by default.
-- `MaxThralls` — default 5.
+- `MaxThralls` — how many you may keep in total, default 20.
 - `ToolTier` — tool tier of a **rank 1** thrall, default 1. Each rank adds one on top.
 - `ChopDamage` / `PickaxeDamage` / `SwingInterval` — how fast they work.
 - `SeedsPerTrip` — seed drawn from the depot per visit, default 20. Set to 0 to stop them

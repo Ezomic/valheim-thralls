@@ -535,6 +535,15 @@ namespace Thralls
         /// </summary>
         private static void BuildUpgrades()
         {
+            // All four are built and registered whatever Breeds says, and that is not an
+            // oversight - it is the only ZDO-safe way to switch them off.
+            //
+            // Offered() keeps them out of the hammer and AddToHammer actively removes any
+            // that slipped in, so at Breeds=1 none of them can be built. But ZNetScene
+            // discards any ZDO whose prefab name no longer resolves, so skipping the build
+            // here would silently delete every upgrade already standing in a world the
+            // moment somebody lowered Breeds - and raising it again would not bring them
+            // back. Registered-but-unbuildable costs four prefabs and loses nothing.
             for (int level = 1; level <= 4; level++)
             {
                 var name = Name + "_upgrade" + level;

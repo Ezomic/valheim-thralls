@@ -291,8 +291,8 @@ namespace Thralls
             FlattenRadius = cfg.Bind("3 - Work", "FlattenRadius", 5f,
                 "Radius of the ground levelling tool, so 5 gives a 10m circle.");
 
-            Breeds = cfg.Bind("2 - Thralls", "Breeds", 2,
-                "How many of the five kinds of thrall this release offers, counting up from the greydwarf brute. Two ships the brute and the draugr, which are a whole game each rather than the bottom of a ladder. The other three are finished and their pieces stay registered - raise this to 3, 4 or 5 to turn the golem, the berserker and the seeker back on without losing anything already built.");
+            Breeds = cfg.Bind("2 - Thralls", "Breeds", 1,
+                "How many of the five kinds of thrall are offered, counting up from the greydwarf brute. One ships the brute alone: a thrall is a whole thing to learn rather than the bottom of a ladder, and one kind done properly is a release where five half-tested ones are a wishlist. The other four are written and their code stays in - raise this to 2, 3, 4 or 5 to turn the draugr, golem, berserker and seeker back on. This also decides how many bindstone upgrades exist, since an upgrade is what unlocks the breed above it: at 1 there are none.");
             MaxThralls = cfg.Bind("2 - Thralls", "MaxThralls", 20,
                 "How many thralls you may keep in total. Only a few of them can be working at once - see WorkSlots.");
             RecruitCost = cfg.Bind("2 - Thralls", "RecruitCost", "",
@@ -687,12 +687,12 @@ namespace Thralls
                 + ";piece_groundtorch:1.15,1.35,-0.15:0.8:0",
                 "Fallback for the bindstone itself, used only if its model file is missing from disk. Each part is prefab:x,y,z:scale:yaw, separated by semicolons. Parts that do not exist are skipped. Empty leaves the altar wearing the plain borrowed model.");
 
-            BaseWorkSlots = cfg.Bind("2 - Thralls", "BaseWorkSlots", 1,
-                "How many thralls can be working at once with no station upgrades built near the bindstone.");
+            BaseWorkSlots = cfg.Bind("2 - Thralls", "BaseWorkSlots", 5,
+                "How many thralls can be working at once. This release gives five flat and offers no way to raise it: with a single breed and no bindstone upgrades there is nothing to earn, and a crew that starts at one is a mod you cannot see working until you have built something else. Set below MaxWorkSlots to make station extensions matter again.");
             MaxWorkSlots = cfg.Bind("2 - Thralls", "MaxWorkSlots", 5,
-                "Hard ceiling on thralls working at once, however many upgrades you build.");
+                "Hard ceiling on thralls working at once. Equal to BaseWorkSlots by default, which is what makes the crew a flat five: the count is clamped between the two, so with both at five nothing built nearby can add to it.");
             SlotSearchRange = cfg.Bind("2 - Thralls", "SlotSearchRange", 40f,
-                "How far from the bindstone station upgrades count towards your work slots.");
+                "How far from the bindstone a station extension counts towards your work slots. Dormant while BaseWorkSlots equals MaxWorkSlots, since the clamp discards whatever it finds.");
 
             RequireTools = cfg.Bind("5 - Tools", "RequireTools", true,
                 "A thrall must be handed a tool before it will chop, mine or farm. Give it one from its page in the bindstone panel. Turn off to let them work bare handed as they used to.");

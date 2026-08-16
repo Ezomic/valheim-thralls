@@ -12,12 +12,13 @@ First release.
 - **Bindstone**, built with the hammer under Crafting. Binds thralls, keeps the crew
   list and the roll of the dead, and cannot be killed by a raid because it is a piece
   rather than a person.
-- **Two kinds of thrall**, and they are separate careers rather than rungs of a ladder — a
-  brute never becomes a draugr:
-  - **Greydwarf brute**, once the Elder is down.
-  - **Draugr elite**, once Bonemass is down and a bog stone stands beside the bindstone.
-- **Binding** costs goods from the breed's own biome and one head of that creature in
-  particular. A draugr's head to raise a draugr.
+- **One kind of thrall**: the **greydwarf brute**, once the Elder is down. One finished and
+  tested is a release; five half-tested ones are a wishlist.
+- **Five work at once**, flat, with nothing to build to raise it.
+- **No bindstone upgrades.** An upgrade only ever unlocked the breed above it, so with a
+  single breed they were four buildable pieces that did nothing.
+- **Binding** costs goods from its biome and one head of that creature in particular — a
+  greydwarf brute's head to raise a greydwarf brute.
 - **Levelling is earned, not bought.** Thralls gain experience by working and level to 20 on
   their own, hitting harder, working faster and carrying more. Tier fixes the tool tier and
   no amount of experience moves it, so a levelled brute still cannot fell an oak.
@@ -76,17 +77,20 @@ First release.
 
 ### Not in this release
 
-- **The golem, the berserker and the seeker.** All three are finished — bodies, costs,
-  bindstone upgrades and hand-built models — and are switched off behind `Breeds`. Set it to
-  3, 4 or 5 to turn them on. Their pieces stay registered whatever it is set to, so raising
-  the cap later loses nothing already standing in a world.
+- **The draugr, the golem, the berserker and the seeker.** All four are finished — bodies,
+  costs, gates and hand-built models — and are switched off behind `Breeds`. Set it to 2, 3,
+  4 or 5 to turn them on in order.
+- **The bindstone upgrades.** One exists per breed above the first, so they return with the
+  breeds rather than needing to be switched on separately.
 - **The golem's bare-handed felling**, which knocks trees down without an axe and wastes
-  most of the wood. It arrives with the golem.
+  most of the wood. It arrives with the golem at `Breeds` 3.
 
 ### Known limits
 
 - Exercised in single-player. It should work in co-op, since each thrall is driven by
   whoever owns its ZDO, but dedicated-server use is untested.
-- The three shelved upgrade models are not in the package. If `Breeds` is raised without
-  putting them back in `assets/`, those pieces build as stand-ins assembled from vanilla
-  props rather than wearing their own mesh.
+- The shelved upgrade models are not in the package. If `Breeds` is raised without putting
+  them back in `assets/` from `assets/shelved/`, those pieces build as stand-ins assembled
+  from vanilla props rather than wearing their own mesh.
+- The bindstone still wears its first model. A redesign is drawn and rendered but not
+  wired up, so the shape in this release is not the shape it will keep.
