@@ -1,23 +1,29 @@
 """
-Four fresh altar silhouettes, rendered at eye height for a pick.
+Four bindstone silhouettes, rendered at eye height for a pick.
 
 Run headless:
     "C:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe" --background --python tools/altar_designs.py
 
-This is a redesign, not a variation pass - altar_variations.py already covers "the
-shipped bindstone with one thing changed", and the shipped bindstone is what is being
-replaced. Each shape here has a genuinely different outline: a blade, a doorway, a dome
-and a diagonal. If two of them read the same in silhouette there is only one design.
+Second pass. The first four were designed around the word "altar" and it showed: a stele,
+a gate, a mound and a pole are four *places of worship*, and only one of them read. The
+piece is a bindstone now, and the word changes the subject entirely - the thing is a rock,
+and what happens at it is a fettering, not an offering.
 
-What they are built against is a rip rather than a memory. BossStone_Eikthyr came out of
-the running game as a carved standing stone 3 x 4.53 x 1.64m wearing Custom/StaticRock -
-one albedo, a moss texture the shader blends in from above, and the runes as a *separate*
-emissive sheet. So vanilla's answer to "a stone with writing on it" is a carved slab with
-moss in its lee, not a machined block. The shipped bindstone is a flat grey box with horns
-on it, and that is the gap being closed.
+Which hands us the source directly. Fenrir was bound with Gleipnir to the boulder Gjoll,
+and the slab Thviti was hammered down on top of it as the anchor. A rock a monster is
+chained to is the literal subject of this mod, so every shape here is one stone mass with
+iron driven into it, and the four differ in what the stone is doing: holding, splitting,
+holed, or pinning something down.
 
-Sizes are held near 2m. The boss stone is 4.5m tall because it is a boss altar placed once
-per world; this is a piece you put in a base and stand next to, and it goes in rows.
+Two things carry over from the first pass as fixed lessons:
+
+  * Spheres cannot play rock. add_sphere is a UV sphere and at any segment count it reads
+    as a potato - it sank the mound and the pole's cairn. rock() below is an icosphere at
+    one subdivision with its vertices pushed about, which is 20 hard facets and reads as
+    stone at a glance.
+
+  * Concentric anything reads as a wedding cake before it reads as rough, however hard it
+    is jittered. No stacked discs of falling radius anywhere in this file.
 
 OUT_DIR and PREVIEW_DIR are both redirected into assets/previews/designs, so a run cannot
 overwrite a shipped model, texture or icon.
@@ -37,291 +43,287 @@ am.OUT_DIR = OUT
 am.PREVIEW_DIR = OUT
 
 # Eye height, per the house rule: 1.7m up, 42mm. Backed off to just over 4m rather than
-# the usual 3 - at 3m a 2.2m piece walks straight out of the top of a square frame, and a
+# the usual 3 - at 3m a two metre piece walks out of the top of a square frame, and a
 # design cannot be judged on a silhouette that is cropped.
 EYE = (2.05, -3.55, 1.70)
-LOOK = 1.00
+LOOK = 0.85
 LENS = 42.0
 SIZE = 620
 
-# Everything shares one seed so two designs never differ because of jitter.
 SEED = 20260816
-
-# A buildable piece is capped at 10,000 triangles and gets placed in rows, so the number
-# is paid per copy in view rather than once.
 TRI_CAP = 10000
+
+
+# ----------------------------------------------------------------- rock
+
+def rock(name, size, location, rot_z=0.0, rough=0.16, mat="kerbstone", seed=None):
+    """
+    A boulder: an icosphere at one subdivision, vertices shoved along their own normals.
+
+    Twenty faces and every edge hard, which is what separates stone from a bean. A UV
+    sphere cannot do this at any segment count - its quads run in neat rings round a pole
+    and the eye finds the rings immediately.
+    """
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=1.0, location=location)
+    obj = bpy.context.active_object
+    obj.name = name
+
+    if seed is not None:
+        am.random.seed(seed)
+
+    for vert in obj.data.vertices:
+        push = 1.0 + am.random.uniform(-rough, rough)
+        vert.co *= push
+
+    obj.scale = (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0)
+    obj.rotation_euler[2] = math.radians(rot_z)
+    obj.rotation_euler[0] = math.radians(am.random.uniform(-9.0, 9.0))
+    obj.rotation_euler[1] = math.radians(am.random.uniform(-9.0, 9.0))
+    obj["thralls_collide"] = True
+    return am.surface(obj, mat)
+
+
+def fetter(name, a, b, radius=0.082, mat="iron"):
+    """
+    A short chain whose links actually touch.
+
+    am.chain spaces its links evenly over whatever distance it is given, so a long run
+    comes out as loose washers lying in a line. Links are counted from the distance
+    instead, so consecutive rings overlap and read as linked.
+
+    Two numbers are set by cost rather than by looks. A torus is 96 triangles and comes
+    out of the bevel pass at roughly 790, so a chain is the most expensive thing per
+    metre in this whole file - a 1.4m run to the ground took one design from 9,240
+    triangles to 19,568 on its own. Hence heavy links rather than fine ones, and short
+    runs: a half metre of chain hanging off a ring says fettered just as clearly as a
+    length of it puddled on the floor, and costs a fifth as much.
+    """
+    ax, ay, az = a
+    bx, by, bz = b
+    span = math.sqrt((bx - ax) ** 2 + (by - ay) ** 2 + (bz - az) ** 2)
+
+    links = max(3, int(round(span / (radius * 1.25))))
+    return am.chain(name, a, b, links=links, radius=radius, mat=mat)
+
+
+def staple(name, a, b, radius=0.052, mat="iron"):
+    """An iron bar driven between two points - a staple, a peg, a fetter's anchor."""
+    ax, ay, az = a
+    bx, by, bz = b
+    mid = ((ax + bx) * 0.5, (ay + by) * 0.5, (az + bz) * 0.5)
+
+    dx, dy, dz = bx - ax, by - ay, bz - az
+    length = math.sqrt(dx * dx + dy * dy + dz * dz)
+
+    bpy.ops.mesh.primitive_cylinder_add(vertices=7, radius=radius, depth=length,
+                                        location=mid)
+    obj = bpy.context.active_object
+    obj.name = name
+
+    # Point the cylinder's +Z down the a->b vector.
+    obj.rotation_euler[1] = math.acos(max(-1.0, min(1.0, dz / max(length, 1e-6))))
+    obj.rotation_euler[2] = math.atan2(dy, dx) + math.radians(90.0)
+    obj["thralls_collide"] = False
+    return am.surface(obj, mat)
 
 
 # ----------------------------------------------------------------- the designs
 
-def build_stele():
+def build_fetter():
     """
-    One carved slab standing on end, the boss stone read down to piece scale.
+    Gjoll: one boulder with a ring driven into it and a chain lying slack.
 
-    A single vertical blade, so the outline is unmistakable from any angle - which is
-    the thing the shipped box does not have. The offering plate is deliberately low and
-    forward: it gives the eye somewhere to land that is not the top of the stone, and it
-    is where you would actually put something down.
-    """
-    parts = []
-
-    # Half-buried footing stones. The slab wants to look driven into the ground rather
-    # than stood on it, and a kerb that overlaps the shaft is what sells that.
-    for i in range(6):
-        angle = math.radians(i * 60.0 + 15.0)
-        dist = am.random.uniform(0.46, 0.62)
-        stone = am.add_block("foot_%d" % i, (0.40, 0.34, 0.26),
-                             (math.cos(angle) * dist, math.sin(angle) * dist, 0.09),
-                             rot_z=math.degrees(angle) + am.random.uniform(-12, 12),
-                             mat="kerbstone")
-        am.jitter(stone, 0.03, 5.0)
-        parts.append(stone)
-
-    # The shaft, as three courses of nearly the same width rather than a wide box with a
-    # narrow one balanced on it. The first pass stepped 0.98 down to 0.84 and the step
-    # landed at eye level: it read as a chimney with a shoulder, because a visible ledge
-    # halfway up a stone is the one thing that says two objects rather than one. Each
-    # course now overlaps the one below by a third of its height and differs only in yaw.
-    courses = ((1.02, 0.36, 0.86, 0.43, -3.0),
-               (0.96, 0.34, 0.80, 1.12, 4.5),
-               (0.88, 0.32, 0.72, 1.72, -6.0))
-
-    for i, (w, d, h, z, rz) in enumerate(courses):
-        course = am.add_block("shaft_%d" % i, (w, d, h), (0.0, -i * 0.05, z),
-                              rot_z=rz, mat="crownstone")
-        course.rotation_euler[0] = math.radians(4.5)
-        course.rotation_euler[1] = math.radians(am.random.uniform(-2.0, 2.0))
-        parts.append(course)
-
-    # A broken head rather than a flat cut: one wedge sheared off the top corner, sunk
-    # far enough into the last course to be part of it.
-    head = am.add_block("head", (0.62, 0.32, 0.26), (-0.14, -0.16, 2.04),
-                        rot_z=11.0, mat="crownstone")
-    head.rotation_euler[1] = math.radians(-9.0)
-    parts.append(head)
-
-    # Three bone bosses pegged into the face. The carved runes live in the runestone
-    # texture; these are what catches the light and says the stone is *used*.
-    for i, (bx, bz) in enumerate(((-0.22, 1.42), (0.20, 1.10), (-0.06, 0.78))):
-        parts.append(am.add_sphere("boss_%d" % i, (0.15, 0.10, 0.15),
-                                   (bx, -0.20, bz), segments=8, rings=5, mat="bone"))
-
-    # Offering plate: a low disc on a stub, standing clear in front of the slab.
-    parts.append(am.add_block("plate_foot", (0.34, 0.34, 0.26), (0.0, -0.78, 0.13),
-                              rot_z=18.0, mat="kerbstone"))
-    plate = am.add_drum("plate", 0.40, 0.12, 0.26, sides=11, taper=0.98)
-    plate.location.y = -0.78
-    am.surface(plate, "darkstone")
-    parts.append(plate)
-
-    return parts
-
-
-def build_gate():
-    """
-    Two uprights and a lintel: a doorway you bind something through.
-
-    The outline is a portal, which is as far from a blade as the set gets, and the gap
-    between the posts is the whole design - it frames whatever hangs in it, and a piece
-    with a hole in it reads at distance where a solid mass does not.
+    The plainest reading of the name there is, and the one with the least to go wrong -
+    a rock is a rock at any distance and in any biome. Its whole silhouette is a single
+    rounded mass, so the iron has to carry the meaning, which is why the chain runs out
+    across the ground rather than staying tidy: slack chain says something was held.
     """
     parts = []
 
-    parts.append(am.add_block("sill", (1.90, 0.72, 0.20), (0.0, 0.0, 0.10),
-                              rot_z=2.0, mat="kerbstone"))
+    parts.append(rock("boulder", (1.72, 1.44, 1.55), (0.0, 0.0, 0.60),
+                      rot_z=24.0, rough=0.19, mat="crownstone", seed=SEED + 1))
 
-    # Uprights lean out slightly at the top, which is what stops a rectangle reading as
-    # a door frame someone hung.
-    for i, x in enumerate((-0.66, 0.66)):
-        post = am.add_block("post_%d" % i, (0.36, 0.40, 1.62), (x, 0.0, 0.94),
-                            rot_z=am.random.uniform(-5, 5), mat="crownstone")
-        post.rotation_euler[1] = math.radians(-3.5 if x < 0 else 3.5)
-        parts.append(post)
-
-        # A collar where each post meets the sill, so the join is a joint and not a seam.
-        parts.append(am.add_block("collar_%d" % i, (0.48, 0.50, 0.20), (x, 0.0, 0.26),
-                                  rot_z=am.random.uniform(-8, 8), mat="kerbstone"))
-
-    lintel = am.add_block("lintel", (1.98, 0.46, 0.34), (0.0, 0.0, 1.86), rot_z=-2.5,
-                          mat="crownstone")
-    lintel.rotation_euler[1] = math.radians(1.8)
-    parts.append(lintel)
-
-    # The skull hangs in the opening on a short cord - the thing the gap is for.
-    parts.append(am.add_cyl("cord", 0.022, 0.34, (0.05, 0.0, 1.55), sides=5, mat="rag"))
-    parts.extend(am.skull("hung", (0.05, 0.0, 1.16), yaw=-8.0, scale=1.15))
-
-    # Offering stone under it, off centre so the piece is not symmetrical twice over.
-    parts.append(am.add_block("offer", (0.62, 0.50, 0.26), (-0.10, -0.34, 0.30),
-                              rot_z=13.0, mat="darkstone"))
-
-    for i in range(4):
-        angle = math.radians(i * 90.0 + 38.0)
-        parts.append(am.add_block("tumble_%d" % i, (0.30, 0.26, 0.20),
-                                  (math.cos(angle) * 1.15, math.sin(angle) * 0.78, 0.09),
-                                  rot_z=am.random.uniform(0, 90), mat="kerbstone"))
-
-    return parts
-
-
-def build_howe():
-    """
-    A burial mound with a carved slab leaning out of it.
-
-    Norse practice for reaching the dead was utiseta, sitting out on a howe to speak with
-    whoever lies under it. So the mass is low and wide and the only vertical is the stone
-    - the opposite reading of the same subject to the stele, and a dome in silhouette.
-    """
-    parts = []
-
-    # One squashed dome, not a stack of discs. Four concentric drums of falling radius is
-    # a wedding cake however hard they are jittered - the tiers are concentric and the eye
-    # reads concentric long before it reads rough. A mound is a single mass.
-    parts.append(am.add_sphere("mound", (2.45, 2.05, 1.44), (0.0, 0.0, 0.30),
-                               segments=13, rings=7, mat="mosstone"))
-
-    # Boulders half sunk into its flank at heights that have nothing to do with each
-    # other, which breaks the dome up again without tiering it.
-    for i in range(7):
-        angle = math.radians(i * (360.0 / 7.0) + 22.0)
-        dist = am.random.uniform(0.70, 1.00)
-        parts.append(am.add_sphere("boulder_%d" % i,
-                                   (am.random.uniform(0.40, 0.62),
-                                    am.random.uniform(0.36, 0.54),
-                                    am.random.uniform(0.30, 0.46)),
-                                   (math.cos(angle) * dist, math.sin(angle) * dist,
-                                    am.random.uniform(0.12, 0.54)),
-                                   rot_z=am.random.uniform(0, 90),
-                                   segments=8, rings=5, mat="kerbstone"))
-
-    # Kerb round the foot, the way a real howe is retained. Seven at uneven spacing -
-    # eleven evenly spaced came out as the teeth of a cog.
-    for i in range(7):
-        angle = math.radians(i * (360.0 / 7.0) + am.random.uniform(-16.0, 16.0))
-        dist = am.random.uniform(1.14, 1.32)
-        stone = am.add_block("kerb_%d" % i,
-                             (am.random.uniform(0.26, 0.40),
-                              am.random.uniform(0.22, 0.32), 0.26),
-                             (math.cos(angle) * dist, math.sin(angle) * dist, 0.09),
-                             rot_z=math.degrees(angle), mat="kerbstone")
-        am.jitter(stone, 0.03, 8.0)
-        parts.append(stone)
-
-    z = 1.00
-
-    # The stone at the head of the mound, leaning back out of it under its own age.
-    slab = am.add_block("slab", (0.86, 0.28, 1.52), (0.0, 0.72, 0.86), rot_z=-7.0,
-                        mat="crownstone")
-    slab.rotation_euler[0] = math.radians(15.0)
+    # Thviti, the slab hammered down on top as the anchor.
+    slab = am.add_block("thviti", (0.74, 0.60, 0.38), (0.05, -0.08, 1.24),
+                        rot_z=-13.0, mat="kerbstone")
+    slab.rotation_euler[1] = math.radians(-6.0)
     parts.append(slab)
 
-    parts.append(am.add_block("slab_wedge", (0.62, 0.44, 0.30), (0.0, 0.60, 0.22),
-                              rot_z=5.0, mat="kerbstone"))
+    # The ring the fetter runs through, driven through the slab into the rock.
+    ring = am.add_ring("fetter_ring", 0.13, 0.030, (0.05, -0.30, 1.36), sides=11,
+                       mat="iron")
+    ring.rotation_euler[0] = math.radians(72.0)
+    parts.append(ring)
 
-    # Blood bowl set into the crown, as a foot and a rim of rough stones rather than a
-    # turned basin - a lathe-true bowl is the one shape that never appears in Valheim.
-    bowl_z = z - 0.04
-    foot = am.add_drum("bowl_foot", 0.26, 0.14, bowl_z, sides=9, taper=0.86)
-    am.surface(foot, "darkstone")
-    parts.append(foot)
+    parts.append(staple("fetter_peg", (0.05, -0.22, 1.44), (0.05, -0.10, 1.16)))
 
-    for i in range(7):
-        angle = math.radians(i * (360.0 / 7.0) + 14.0)
-        parts.append(am.add_block("bowl_rim_%d" % i, (0.17, 0.12, 0.17),
-                                  (math.cos(angle) * 0.30, math.sin(angle) * 0.30,
-                                   bowl_z + 0.16),
-                                  rot_z=math.degrees(angle), mat="darkstone"))
+    # Chain out across the ground, falling as it goes. Nothing at the far end: what was
+    # on it is walking around your base.
+    parts.extend(fetter("chain", (0.05, -0.40, 1.30), (-0.16, -0.72, 0.78)))
 
-    parts.append(am.add_sphere("blood", (0.34, 0.34, 0.08),
-                               (0.0, 0.0, bowl_z + 0.19), segments=11, rings=4,
-                               mat="pitch"))
+    # Two smaller rocks shouldered against the big one, so it sits in the ground rather
+    # than on it.
+    for i, (angle, size) in enumerate(((38.0, 0.74), (196.0, 0.62))):
+        rad = math.radians(angle)
+        parts.append(rock("shoulder_%d" % i, (size, size * 0.82, size * 0.66),
+                          (math.cos(rad) * 0.92, math.sin(rad) * 0.86, 0.16),
+                          rot_z=angle, seed=SEED + 10 + i))
+
+    parts.extend(am.skull("skull", (-0.62, -0.72, 0.20), yaw=34.0, scale=0.95))
 
     return parts
 
 
-def build_pole():
+def build_cleft():
     """
-    A nithing pole: a stake driven into a cairn with a skull on top.
+    A standing stone split down the middle, held together by iron.
 
-    A leaning diagonal, which none of the other three is, and the only one whose mass is
-    mostly air. It is also the most literally Norse of the set - a nidstang was raised to
-    curse, with a horse's head fixed facing the one it was meant for, which is about as
-    close to "binding something to work for you" as the sources get.
+    The outline is a blade with a slot cut out of it, which reads at any distance and is
+    the only shape here with a hole in its upper half. The staples bridging the crack are
+    the design: the stone is itself something being bound, and whatever comes out of it
+    comes out of the gap.
     """
     parts = []
 
-    # Cairn socket, as a heap of boulders rather than three stacked drums. Concentric
-    # discs of falling radius read as a wedding cake at any roughness, which is the same
-    # mistake the mound made - a pile is a pile because no two stones agree.
-    z = 0.60
+    # Two halves leaning apart from a shared foot. Not one block with a notch - the gap
+    # has to run all the way through or it is a groove.
+    for i, (side, height, lean) in enumerate(((-1.0, 1.94, -4.5), (1.0, 1.72, 5.5))):
+        half = am.add_block("half_%d" % i, (0.46, 0.52, height),
+                            (side * 0.30, 0.0, height * 0.5),
+                            rot_z=side * 4.0, mat="crownstone")
+        half.rotation_euler[1] = math.radians(lean)
+        parts.append(half)
+
+        # A shoulder low down where the two are still one stone.
+        parts.append(rock("root_%d" % i, (0.78, 0.72, 0.52),
+                          (side * 0.34, 0.0, 0.16), rot_z=side * 30.0,
+                          seed=SEED + 20 + i))
+
+    # Three staples across the crack, driven in at angles that do not agree.
+    for i, (z, span) in enumerate(((0.86, 0.40), (1.28, 0.34), (1.58, 0.28))):
+        parts.append(staple("staple_%d" % i,
+                            (-span, -0.24 - i * 0.02, z),
+                            (span, -0.24 - i * 0.02, z + am.random.uniform(-0.07, 0.07))))
+
+    # A chain hanging down through the gap, anchored at the top.
+    parts.extend(fetter("hang", (0.0, -0.12, 1.58), (0.02, -0.16, 1.14), radius=0.07))
+
+    parts.append(am.add_block("offer", (0.66, 0.50, 0.22), (0.0, -0.72, 0.11),
+                              rot_z=11.0, mat="kerbstone"))
+
+    for i in range(4):
+        angle = math.radians(i * 90.0 + 41.0)
+        parts.append(rock("spall_%d" % i, (0.34, 0.28, 0.22),
+                          (math.cos(angle) * 1.05, math.sin(angle) * 0.82, 0.07),
+                          rot_z=angle * 30.0, seed=SEED + 30 + i))
+
+    return parts
+
+
+def build_holed():
+    """
+    A holed stone stood on edge, the fetter passed through it.
+
+    A ring of rock is the most distinctive outline any of these can have - it is the only
+    one you could identify from its shadow. Holed stones are real Norse and Scots
+    practice, oaths were sworn through them and things were passed through to change what
+    they were, which is exactly what this piece does to a corpse.
+    """
+    parts = []
+
+    # The stone as eight blocks round a circle, which leaves a real hole rather than a
+    # torus. A torus reads as a machined washer: perfectly round section, no facets.
+    hole_r = 0.40
+    ring_r = 0.66
     for i in range(9):
-        angle = math.radians(i * 40.0 + 17.0)
-        ring = 0.62 - (i % 3) * 0.16
-        parts.append(am.add_sphere("cairn_%d" % i,
-                                   (am.random.uniform(0.34, 0.52),
-                                    am.random.uniform(0.30, 0.46),
-                                    am.random.uniform(0.26, 0.40)),
-                                   (math.cos(angle) * ring, math.sin(angle) * ring,
-                                    am.random.uniform(0.08, 0.44)),
-                                   rot_z=am.random.uniform(0, 90),
-                                   segments=8, rings=5, mat="kerbstone"))
+        angle = math.radians(i * (360.0 / 9.0) + 8.0)
+        thick = am.random.uniform(0.30, 0.44)
+        block = am.add_block("ring_%d" % i, (thick, 0.42, ring_r - hole_r + 0.26),
+                             (math.cos(angle) * ring_r, 0.0,
+                              0.86 + math.sin(angle) * ring_r),
+                             rot_z=0.0, mat="crownstone")
+        block.rotation_euler[1] = -angle + math.radians(am.random.uniform(-7.0, 7.0))
+        parts.append(block)
 
-    # The stake. Two tapering segments overlapping, so it thins towards the head rather
-    # than being one rotated stick. Lowered from 1.86 to 1.52 above the cairn: at the old
-    # height the skull sat exactly on the top edge of the frame and the render came back
-    # looking like a bare pole.
-    lean = 11.0
-    lower = am.add_taper("stake_lower", 0.115, 0.092, 1.24, (0.0, 0.0, z + 0.42),
-                         mat="timber")
-    lower.rotation_euler[0] = math.radians(lean)
-    parts.append(lower)
+    # Foot: the stone is set into a heap, not balanced on its rim.
+    for i, (dx, size) in enumerate(((-0.52, 0.82), (0.48, 0.74), (0.02, 0.66))):
+        parts.append(rock("foot_%d" % i, (size, size * 0.86, size * 0.62),
+                          (dx, am.random.uniform(-0.14, 0.14), 0.14),
+                          rot_z=i * 47.0, seed=SEED + 40 + i))
 
-    drift = math.tan(math.radians(lean)) * 1.04
-    upper = am.add_taper("stake_upper", 0.095, 0.072, 0.86, (0.0, -drift, z + 1.22),
-                         mat="timber")
-    upper.rotation_euler[0] = math.radians(lean)
-    parts.append(upper)
+    # The fetter through the hole, hanging out of the bottom of it.
+    parts.extend(fetter("through", (0.0, -0.17, 1.24), (-0.04, -0.22, 0.76), radius=0.072))
 
-    # One crossbar, not two. Two bars at different heights on an upright is a crucifix -
-    # unmistakably so in a render, and about as wrong as a Norse altar can read.
-    bar_h = 1.02
-    bar_off = math.tan(math.radians(lean)) * bar_h
-    bar = am.add_cyl("bar", 0.040, 0.66, (0.0, -bar_off, z + bar_h), axis="x",
-                     rot_z=13.0, sides=7, mat="timber")
-    bar.rotation_euler[1] += math.radians(-7.0)
-    parts.append(bar)
-    parts.append(am.add_cyl("lash", 0.058, 0.14, (0.0, -bar_off, z + bar_h),
-                            axis="x", rot_z=13.0, sides=7, mat="rag"))
+    ring = am.add_ring("eye", 0.15, 0.032, (0.0, -0.18, 1.24), sides=11, mat="iron")
+    ring.rotation_euler[0] = math.radians(90.0)
+    parts.append(ring)
 
-    # Two cords hanging off the bar with charms on them, which is what makes the bar read
-    # as something things are tied to rather than a spar.
-    for i, bx in enumerate((-0.24, 0.21)):
-        drop = 0.26 + i * 0.09
-        parts.append(am.add_cyl("cord_%d" % i, 0.016, drop,
-                                (bx, -bar_off, z + bar_h - drop * 0.5),
-                                sides=5, mat="rag"))
-        parts.append(am.add_sphere("charm_%d" % i, (0.11, 0.08, 0.15),
-                                   (bx, -bar_off, z + bar_h - drop),
-                                   segments=7, rings=5, mat="bone"))
+    parts.extend(am.skull("skull", (0.54, -0.44, 0.16), yaw=-28.0, scale=0.92))
 
-    # The head, facing out along -y so it looks at whoever walks up.
-    head_off = math.tan(math.radians(lean)) * 1.52
-    parts.extend(am.skull("head", (0.0, -head_off, z + 1.52), yaw=0.0, scale=1.35))
+    return parts
 
-    # A flat stone at the foot to put an offering on, and loose spill around it.
-    parts.append(am.add_block("offer", (0.60, 0.46, 0.18), (0.10, -0.86, 0.09),
-                              rot_z=-14.0, mat="darkstone"))
-    parts.extend(am.add_clutter("spill", (0.0, -0.55, 0.0), 0.95, 5, scale=0.9,
-                                on_top=0.0, mat="kerbstone"))
+
+def build_pinned():
+    """
+    A low broad slab with four rings at its corners and something still chained to it.
+
+    The only horizontal in the set - it reads as a table or a threshold rather than a
+    monument, and it is the one you could actually walk up to and put a trophy on. What
+    makes it a bindstone rather than a bench is the iron: four corners, four chains, all
+    of them going to the middle.
+    """
+    parts = []
+
+    # The slab, as three overlapping blocks so its edge is broken rather than milled.
+    for i, (dx, dy, w, d, rz) in enumerate(((0.0, 0.0, 1.55, 1.15, -4.0),
+                                            (-0.42, 0.16, 0.86, 0.92, 13.0),
+                                            (0.46, -0.12, 0.78, 0.84, -17.0))):
+        block = am.add_block("slab_%d" % i, (w, d, 0.34), (dx, dy, 0.30),
+                             rot_z=rz, mat="crownstone")
+        block.rotation_euler[1] = math.radians(am.random.uniform(-2.5, 2.5))
+        parts.append(block)
+
+    # Rocks propping it, visible under the overhang.
+    # Three props, not four. The fourth sat behind the slab where nothing could see it
+    # and cost the last three hundred triangles over the cap.
+    for i, (dx, dy) in enumerate(((-0.58, 0.34), (0.62, 0.30), (0.54, -0.32))):
+        parts.append(rock("prop_%d" % i, (0.48, 0.44, 0.34), (dx, dy, 0.10),
+                          rot_z=i * 63.0, seed=SEED + 50 + i))
+
+    # Four rings at the corners, and four chains converging on the middle.
+    corners = ((-0.62, 0.40), (0.64, 0.36), (-0.58, -0.42), (0.60, -0.38))
+    for i, (cx, cy) in enumerate(corners):
+        ring = am.add_ring("corner_%d" % i, 0.11, 0.026, (cx, cy, 0.48), sides=6,
+                           mat="iron")
+        ring.rotation_euler[0] = math.radians(am.random.uniform(60.0, 90.0))
+        parts.append(ring)
+
+        # Only one of the four is chained. Runs converging on one point from every
+        # corner read as a diagram rather than a restraint, and chain is by far the most
+        # expensive thing per metre here - four runs put this model at 21,496 triangles
+        # against a cap of 10,000, and two still left it at 14,296.
+        if i == 0:
+            parts.extend(fetter("pull_%d" % i, (cx, cy, 0.50),
+                                (cx * 0.42, cy * 0.42, 0.50), radius=0.062))
+
+    # The thing being held down, in the middle where the chains meet.
+    parts.extend(am.skull("held", (0.0, -0.06, 0.50), yaw=6.0, scale=1.25))
+
+    # A short standing stone at the back, so the piece has something above knee height
+    # and does not vanish behind a fence.
+    back = am.add_block("marker", (0.52, 0.30, 1.05), (0.16, 0.68, 0.56), rot_z=-9.0,
+                        mat="crownstone")
+    back.rotation_euler[0] = math.radians(7.0)
+    parts.append(back)
 
     return parts
 
 
 DESIGNS = [
-    ("a_stele", "carved slab on end, plate at its foot", build_stele),
-    ("b_gate",  "two posts and a lintel, skull hung in the gap", build_gate),
-    ("c_howe",  "low mound, stone leaning out of it, blood bowl", build_howe),
-    ("d_pole",  "stake in a cairn, skull facing you", build_pole),
+    ("e_fetter", "boulder, slab and a slack chain (Gjoll)", build_fetter),
+    ("f_cleft",  "split stone stapled back together", build_cleft),
+    ("g_holed",  "holed stone on edge, fetter through it", build_holed),
+    ("h_pinned", "low slab, four corner rings, chained down", build_pinned),
 ]
 
 
@@ -332,7 +334,7 @@ def reference_cube():
     A 1m cube beside the piece. Without one every render is scaleless and a design gets
     picked that turns out to be head height in game.
     """
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(1.35, 0.55, 0.50))
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(1.45, 0.60, 0.50))
     cube = bpy.context.active_object
     cube.name = "reference_metre"
 
@@ -397,8 +399,7 @@ def main():
         textures = am.make_surface_textures(name, kinds) if kinds \
             else {None: am.make_texture(name)}
 
-        # Dress and light through the shipped path, then add the cube and take the frame.
-        # The cube goes in after render_preview so the dressing pass cannot texture it.
+        # The cube goes in after the dressing pass so it cannot be textured with stone.
         am.render_preview(name, altar, textures, shots=False)
         reference_cube()
 
