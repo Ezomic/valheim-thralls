@@ -135,9 +135,6 @@ namespace Thralls
         public static ConfigEntry<float> AltarLightStrength;
         public static ConfigEntry<int> OneStarRank;
         public static ConfigEntry<int> TwoStarRank;
-        public static ConfigEntry<bool> AltarAmbience;
-        public static ConfigEntry<string> AltarAmbienceFrom;
-        public static ConfigEntry<float> AltarAmbienceVolume;
         public static ConfigEntry<bool> AltarFlattenNormals;
         public static ConfigEntry<string> AltarVanillaGroups;
         public static ConfigEntry<string> AltarVanillaWoodGroups;
@@ -567,13 +564,6 @@ namespace Thralls
                 "Rank at which a thrall gains its first star. Stars are the game's own creature levels, so a starred thrall is tougher as well as marked.");
             TwoStarRank = cfg.Bind("2 - Thralls", "TwoStarRank", 20,
                 "Rank at which a thrall gains its second star.");
-            AltarAmbience = cfg.Bind("6 - Altar props", "Ambience", true,
-                "A looping sound on each altar, lifted off a vanilla piece so it belongs to the world rather than being a foreign clip. The altars were silent, and Valheim leans on ambient sound for presence more than most games.");
-            AltarAmbienceFrom = cfg.Bind("6 - Altar props", "AmbienceFrom",
-                "portal_wood,guard_stone,piece_magetable,fire_pit",
-                "Pieces to lift a looping sound from, first one that carries a clip wins.");
-            AltarAmbienceVolume = cfg.Bind("6 - Altar props", "AmbienceVolume", 0.35f,
-                "How loud the altar's own sound is. Kept well under the donor's, since a hum you notice is a hum you will get tired of.");
             AltarFlattenNormals = cfg.Bind("2 - Thralls", "AltarFlattenNormals", false,
                 "Replace the borrowed material's normal map with a flat one on our own textures. Off keeps it, which is where the game's surfaces get their highlights: with it on, every custom sheet reads flat and dead next to real wood and stone however bright the texture is. On is the old behaviour, worth returning to if the donor's bumps land in obviously wrong places on our geometry.");
             AltarVanillaWoodGroups = cfg.Bind("2 - Thralls", "AltarVanillaWoodGroups", "timber,wood",

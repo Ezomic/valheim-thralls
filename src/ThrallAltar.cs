@@ -910,7 +910,12 @@ namespace Thralls
 
             // Before the props, so an altar with no props still gets its motes.
             AltarEffects.Attach(parent, key);
-            AltarAmbience.Attach(parent);
+            // No ambient loop. It borrowed a clip from the first prefab in a list that
+            // had one, and that was portal_wood - so every altar in the world hummed like
+            // a portal, which is a sound Valheim has already taught you to read as "there
+            // is a portal here". Borrowing a sound is not like borrowing a material: a
+            // texture that belongs to something else still just looks like stone, while a
+            // sound that belongs to something else means that thing.
 
             string recipe;
             switch (key)
