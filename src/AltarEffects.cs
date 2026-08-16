@@ -286,134 +286,17 @@ namespace Thralls
         }
     }
 
-    /// <summary>
-    /// Switches the bindstone's light and motes on and off on every altar in the scene, so
-    /// which of them is responsible for something can be settled by looking rather than
-    /// by a rebuild and a restart per guess.
-    /// </summary>
-    internal static class AltarDebug
-    {
-        private static int _state;
-
-        private static readonly string[] Names =
-        {
-            "everything on",
-            "light OFF",
-            "motes OFF",
-            "VANILLA STONE material",
-            "vertex colours WHITE"
-        };
-
-        public static void Cycle()
-        {
-            _state = (_state + 1) % Names.Length;
-
-            var wantLight = _state != 1;
-            var wantMotes = _state != 2;
-
-            SetMaterials(_state == 3);
-            SetVertexColours(_state == 4);
-
-            var lights = 0;
-            var systems = 0;
-
-            // Muted through the glow component rather than by switching the Light off:
-            // LightLod runs a coroutine that turns lights back on as you approach, so
-            // anything toggling 'enabled' would simply be undone a second later.
-            foreach (var glow in Object.FindObjectsOfType<AltarGlow>())
-            {
-                glow.Muted = !wantLight;
-                lights++;
-            }
-
-            foreach (var ps in Object.FindObjectsOfType<ParticleSystem>())
-            {
-                if (ps.gameObject.name != "altar_motes") continue;
-
-                var renderer = ps.GetComponent<ParticleSystemRenderer>();
-                if (renderer != null) renderer.enabled = wantMotes;
-
-                if (wantMotes) ps.Play(); else ps.Clear();
-                systems++;
-            }
-
-            var report = "Bindstone test " + (_state + 1) + "/" + Names.Length + ": " + Names[_state];
-
-            ThrallsPlugin.Log.LogInfo(report);
-            if (Player.m_localPlayer != null)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, report, 0, null);
-
-            // A photograph of each state, so the comparison can be made by looking at the
-            // pictures rather than by asking someone to describe them.
-            AltarShot.Capture(Names[_state]);
-        }
-
-        private static readonly Dictionary<Renderer, Material[]> Original =
-            new Dictionary<Renderer, Material[]>();
-
-        /// <summary>
-        /// Swaps the bindstone onto the untouched vanilla stone material.
-        ///
-        /// This is the test that actually splits the problem in two. If the black facets
-        /// survive a plain vanilla material, nothing about our textures, UVs or normal maps
-        /// can be causing them and the fault is in the mesh itself. If they vanish, it is
-        /// something we put on the material and the mesh is fine.
-        /// </summary>
-        private static void SetMaterials(bool vanilla)
-        {
-            foreach (var renderer in Object.FindObjectsOfType<MeshRenderer>())
-            {
-                if (renderer.gameObject.name != "altar_model") continue;
-
-                if (!Original.ContainsKey(renderer))
-                    Original[renderer] = renderer.sharedMaterials;
-
-                if (!vanilla)
-                {
-                    renderer.sharedMaterials = Original[renderer];
-                    continue;
-                }
-
-                var donor = AltarPrefab.DonorMaterial;
-                if (donor == null) continue;
-
-                var swap = new Material[Original[renderer].Length];
-                for (int i = 0; i < swap.Length; i++) swap[i] = donor;
-                renderer.sharedMaterials = swap;
-            }
-        }
-
-        private static readonly Dictionary<Mesh, Color[]> Baked = new Dictionary<Mesh, Color[]>();
-
-        /// <summary>
-        /// Blanks the vertex colours. Valheim's piece shader may use those channels for
-        /// blending or wear rather than as a plain tint, in which case the occlusion baked
-        /// into them is telling the shader something quite different from "darker here".
-        /// </summary>
-        private static void SetVertexColours(bool white)
-        {
-            foreach (var filter in Object.FindObjectsOfType<MeshFilter>())
-            {
-                if (filter.gameObject.name != "altar_model") continue;
-
-                var mesh = filter.sharedMesh;
-                if (mesh == null) continue;
-
-                if (!Baked.ContainsKey(mesh)) Baked[mesh] = mesh.colors;
-
-                if (!white)
-                {
-                    if (Baked[mesh] != null && Baked[mesh].Length == mesh.vertexCount)
-                        mesh.colors = Baked[mesh];
-                    continue;
-                }
-
-                var blank = new Color[mesh.vertexCount];
-                for (int i = 0; i < blank.Length; i++) blank[i] = Color.white;
-                mesh.colors = blank;
-            }
-        }
-    }
+    // AltarDebug stood here: a five-state cycle that switched the bindstone's light
+    // and motes off, swapped in the vanilla stone material and whitened the vertex
+    // colours, so which of them was responsible for something could be settled by
+    // looking instead of by a rebuild per guess.
+    //
+    // It was reachable only from Numpad-minus, and Thralls binds no keys now. The
+    // light-and-motes half moved to Devkit as a generic "mute whatever I am looking
+    // at", which needs no knowledge of this mod. The material and vertex-colour
+    // states did not survive the move and are the real cost of it - they were
+    // specific to how these prefabs are skinned, and answering that question now
+    // means editing AltarSkins and rebuilding, the way it was before this existed.
 
     /// <summary>
     /// Breathes the altar light in and out. A point light held at one intensity reads as

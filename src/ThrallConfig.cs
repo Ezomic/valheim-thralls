@@ -8,12 +8,7 @@ namespace Thralls
     /// <summary>All tunables. Everything the player is likely to want to change lives here.</summary>
     internal static class ThrallConfig
     {
-        // --- keys ---
-        public static ConfigEntry<KeyboardShortcut> KeyTimeOfDay;
-        public static ConfigEntry<KeyboardShortcut> KeyFlatten;
-        public static ConfigEntry<float> FlattenRadius;
-        public static ConfigEntry<KeyboardShortcut> KeyGodMode;
-        public static ConfigEntry<KeyboardShortcut> KeyAltarEffects;
+        // Thralls binds no keys at all. See Bind() for why the last four went.
         public static ConfigEntry<bool> ShowThrallsOnMap;
         public static ConfigEntry<float> MapToggleOffset;
         public static ConfigEntry<string> MapPinType;
@@ -259,17 +254,29 @@ namespace Thralls
 
         public static void Bind(ConfigFile cfg)
         {
-            // Recruit, Assign, FollowToggle, Dismiss and OpenAltar were bound here.
+            // Thralls binds no keys, and the "1 - Keys" section no longer exists.
             //
-            // All five are menu entries now - the first four in the panel you get by
-            // pressing use on a thrall, and the altar's ledger by pressing use on the
-            // altar - and a key that shadows a menu entry is a second thing to keep in
-            // step. What is left on keys is only what no menu can reach: the site tools.
-            // The stale lines in an existing cfg do nothing.
-            KeyTimeOfDay = cfg.Bind("1 - Keys", "TimeOfDay", new KeyboardShortcut(KeyCode.Keypad7),
-                "Step the time of day through dawn, midday, dusk and night, then back to normal.");
-            KeyFlatten = cfg.Bind("1 - Keys", "FlattenGround", new KeyboardShortcut(KeyCode.Keypad8),
-                "Level a wide circle of ground at the spot you are looking at.");
+            // Recruit, Assign, FollowToggle, Dismiss and OpenAltar went first, to menus:
+            // the first four to the panel you get by pressing use on a thrall, the ledger
+            // to pressing use on the bindstone. A key that shadows a menu entry is a
+            // second thing to keep in step.
+            //
+            // The last four - TimeOfDay, FlattenGround, GodMode and AltarEffects - have
+            // now gone to Devkit, and three reasons stack up behind that. They quietly
+            // owned most of the numpad, which cost two silent collisions with Tether
+            // before devkit's BindAudit was written to catch exactly this. Most Macs have
+            // no numpad at all, and Valheim ships a macOS build - so a Mac player pressed
+            // nothing that worked and concluded the mod had not loaded. And all four were
+            // build aids or a diagnostic, which is what Devkit is for and Devkit never
+            // reaches a player.
+            //
+            // Flatten is not merely relocated: it levels a wide circle instantly with no
+            // hoe and no stamina, so it is a build cheat, and the point of Devkit is that
+            // it does not ship. God mode and the time cycle were dropped outright rather
+            // than moved, because Devkit already has both and its clock reads off
+            // EnvMan.CalculateDay instead of guessing at phase times.
+            //
+            // Stale "1 - Keys" lines in an existing cfg do nothing and are left alone.
             ShowThrallsOnMap = cfg.Bind("2 - Thralls", "ShowThrallsOnMap", false,
                 "Whether thralls are marked on the map. Set by the 'Show thralls' checkbox on the map itself, under the one that shares your position.");
             MapToggleOffset = cfg.Bind("2 - Thralls", "MapToggleOffset", 26f,
@@ -280,16 +287,11 @@ namespace Thralls
             MapPinLabels = cfg.Bind("2 - Thralls", "MapPinLabels", true,
                 "Write each thrall's name and job beside its marker. Turn off if a large crew makes the map unreadable.");
 
-            KeyAltarEffects = cfg.Bind("1 - Keys", "AltarEffects",
-                new KeyboardShortcut(KeyCode.KeypadMinus),
-                "Cycles the bindstone's light and drifting motes on and off: both, no light, no motes, neither. For working out which of them is behind something you can see.");
-
-            KeyGodMode = cfg.Bind("1 - Keys", "GodMode", new KeyboardShortcut(KeyCode.Keypad9),
-                "Toggle unlimited health and stamina. A building aid, not a feature.");
+            // No key to toggle this any more: it is set here or not at all. That is the
+            // right shape for it - it is a testing crutch rather than a feature, and
+            // Devkit's God button does the same job where a button belongs.
             GodMode = cfg.Bind("4 - Misc", "GodMode", false,
                 "Hold health and stamina full and switch on the game's own god mode. For building and testing.");
-            FlattenRadius = cfg.Bind("3 - Work", "FlattenRadius", 5f,
-                "Radius of the ground levelling tool, so 5 gives a 10m circle.");
 
             Breeds = cfg.Bind("2 - Thralls", "Breeds", 1,
                 "How many of the five kinds of thrall are offered, counting up from the greydwarf brute. One ships the brute alone: a thrall is a whole thing to learn rather than the bottom of a ladder, and one kind done properly is a release where five half-tested ones are a wishlist. The other four are written and their code stays in - raise this to 2, 3, 4 or 5 to turn the draugr, golem, berserker and seeker back on. This also decides how many bindstone upgrades exist, since an upgrade is what unlocks the breed above it: at 1 there are none.");

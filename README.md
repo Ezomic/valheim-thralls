@@ -8,7 +8,7 @@ Built against the installed game (Unity 6000.0.61, BepInEx 5.4.23.3, Harmony 2.9
 
 ## Controls
 
-There are no keys for ordering thralls about. Everything is a menu:
+**Thralls binds no keys at all.** Everything is a menu:
 
 | What you want | Where |
 | --- | --- |
@@ -16,15 +16,20 @@ There are no keys for ordering thralls about. Everything is a menu:
 | Order one thrall — job, where it works, follow, release | press `E` on that thrall |
 | Somewhere to unload | build a depot |
 
-The keys that remain are building aids rather than thrall commands, and all four are
-rebindable in the config.
+That is deliberate, and it went in two stages. Recruit, assign, follow, dismiss and
+open-the-ledger became menu entries because a key that shadows a menu entry is a second
+thing to keep in step. The four that outlasted them — time of day, flatten ground, god
+mode and a light/motes diagnostic — were build aids rather than thrall commands, and they
+have moved out of the mod entirely.
 
-| Key | What it does |
-| --- | --- |
-| `Numpad 7` | Step the time of day through dawn, midday, dusk and night |
-| `Numpad 8` | Level a wide circle of ground where you are looking |
-| `Numpad 9` | Toggle unlimited health and stamina |
-| `Numpad -` | Cycle the bindstone's light and motes, for diagnosing what you can see |
+Three reasons stacked up. They quietly owned most of the numpad, which caused two silent
+collisions with another of my mods before a bind audit was written to catch it. **Most
+Macs have no numpad**, and Valheim ships a macOS build, so a Mac player pressed nothing
+that worked and reasonably concluded the mod had not loaded. And a mod that ships to
+players should not carry a one-press ground-levelling cheat.
+
+They live in Devkit now, which is the mod that exists for that and never ships. Nothing in
+Thralls replaced them — the count is zero, not four moved to safer keys.
 
 ## Talking to a thrall
 

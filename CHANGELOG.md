@@ -3,6 +3,34 @@
 Notable changes to Thralls. Format follows [Keep a Changelog](https://keepachangelog.com),
 and the mod uses [semantic versioning](https://semver.org).
 
+## Unreleased
+
+### Changed
+
+- **Thralls binds no keys at all.** The last four — `TimeOfDay` (Numpad 7),
+  `FlattenGround` (Numpad 8), `GodMode` (Numpad 9) and `AltarEffects` (Numpad −) — are
+  gone, and nothing replaced them. They were build aids and a diagnostic rather than
+  thrall commands, so they belong in Devkit, which never ships to players.
+
+  Three reasons. The mod quietly owned most of the numpad and had already collided
+  silently with Tether twice. Most Macs have no numpad and Valheim ships a macOS build,
+  so a Mac player pressed nothing that worked and concluded the mod had not loaded.
+  And ground-flatten levels a wide circle instantly with no hoe and no stamina, which is
+  a build cheat to hand a player.
+
+  Ground flatten and a light/particle mute are Devkit menu entries now. The mute is
+  generic — it works on whatever you point at — rather than reaching into Thralls, since
+  the dependency runs one way and Thralls must work with Devkit absent. God mode and the
+  time cycle were dropped rather than moved: Devkit already had both, and its clock reads
+  off `EnvMan.CalculateDay` instead of guessing at phase times.
+
+  The `GodMode` setting under `4 - Misc` survives and can still be switched on by hand;
+  it just has no key. Stale `1 - Keys` lines in an existing cfg do nothing and can be
+  left alone.
+
+  Lost in the move: the diagnostic's material-swap and vertex-colour states, which were
+  specific to how these prefabs are skinned and had no generic equivalent worth inventing.
+
 ## [1.0.0] — 2026-08-16
 
 First release.

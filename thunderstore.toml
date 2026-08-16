@@ -8,7 +8,7 @@ schemaVersion = "0.0.1"
 namespace = "Ezomic"
 name = "Thralls"
 versionNumber = "1.0.0"
-description = "Bind workers at an altar and set them to chop, mine, gather, farm and repair, hauling it all to a depot you build."
+description = "Bind the dead at a bindstone and set them to chop, mine, gather, farm and repair, hauling it all to a depot you build."
 websiteUrl = "https://github.com/Ezomic/valheim-thralls"
 containsNsfwContent = false
 

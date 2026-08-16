@@ -85,32 +85,16 @@ namespace Thralls
             Fallen.Tick();
             Resting.Tick();
 
-            if (InputBlocked()) return;
-
-            // Both panels swallow every key while they are open. Only the site tools are
-            // left on keys, and none of them should fire at a window.
-            if (AltarUI.IsOpen || ThrallTalk.IsOpen) return;
-
-            if (Hotkey.Down(ThrallConfig.KeyTimeOfDay)) SiteTools.CycleTimeOfDay();
-            else if (Hotkey.Down(ThrallConfig.KeyFlatten)) FlattenHere();
-            else if (Hotkey.Down(ThrallConfig.KeyGodMode)) SiteTools.ToggleGodMode();
-            else if (Hotkey.Down(ThrallConfig.KeyAltarEffects)) AltarDebug.Cycle();
-
-            // Outside the key dispatch: the markers have to keep up with the thralls
-            // whether or not anything was pressed this frame.
+            // The key dispatch that stood here is gone with the last four keybinds, and
+            // so are the two guards in front of it. InputBlocked() and the open-panel
+            // check existed only to stop a hotkey firing into a text field or through a
+            // window; with nothing bound there is nothing to stop.
+            //
+            // ThrallMap.Update() is now unconditional, which is a small behaviour change
+            // and the correct one. It sat below those returns, so markers quietly stopped
+            // keeping up whenever the ledger, the chat box or the map itself was open -
+            // and the map being open is exactly when a stale marker is visible.
             ThrallMap.Update();
-        }
-
-        private static bool InputBlocked()
-        {
-            if (global::Console.IsVisible()) return true;
-            if (Chat.instance != null && Chat.instance.HasFocus()) return true;
-            if (TextInput.IsVisible()) return true;
-            if (InventoryGui.IsVisible()) return true;
-            if (StoreGui.IsVisible()) return true;
-            if (Menu.IsVisible()) return true;
-            if (Minimap.IsOpen()) return true;
-            return false;
         }
 
         // ------------------------------------------------------------------ commands
@@ -295,17 +279,10 @@ namespace Thralls
             return go;
         }
 
-        private void FlattenHere()
-        {
-            Vector3 spot;
-            if (!LookAtPoint(40f, out spot))
-            {
-                Say("Look at the ground you want levelled.");
-                return;
-            }
-
-            SiteTools.Flatten(spot, Mathf.Clamp(ThrallConfig.FlattenRadius.Value, 1f, 24f));
-        }
+        // FlattenHere lived here and has moved to Devkit whole, along with the flatten
+        // itself. It is a build cheat rather than a convenience - a wide circle levelled
+        // instantly, with no hoe and no stamina - and the reason it belongs in Devkit is
+        // precisely that Devkit does not ship to players.
 
         // Assign, follow, dismiss and open-the-altar all used to be keys here.
         //
