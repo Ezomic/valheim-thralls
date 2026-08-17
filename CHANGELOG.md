@@ -3,10 +3,10 @@
 Notable changes to Thralls. Format follows [Keep a Changelog](https://keepachangelog.com),
 and the mod uses [semantic versioning](https://semver.org).
 
-## [0.5.0] — 2026-08-17
+## [0.5.0] - 2026-08-17
 
-Renumbered down from 1.0.0, which was wrong. Nothing had been released under it — no
-tag, nothing on Thunderstore — so the number was a claim rather than a record, and the
+Renumbered down from 1.0.0, which was wrong. Nothing had been released under it, with no
+tag and nothing on Thunderstore, so the number was a claim rather than a record, and the
 mod is not that far along: the bindstone's model is being redesigned, the binding cost
 is mid-rework, and the ledger, depot overflow, raise and recall have never been
 exercised in a real session.
@@ -16,8 +16,8 @@ thing that changed.
 
 ### Changed
 
-- **Thralls binds no keys at all.** The last four — `TimeOfDay` (Numpad 7),
-  `FlattenGround` (Numpad 8), `GodMode` (Numpad 9) and `AltarEffects` (Numpad −) — are
+- **Thralls binds no keys at all.** The last four, `TimeOfDay` (Numpad 7),
+  `FlattenGround` (Numpad 8), `GodMode` (Numpad 9) and `AltarEffects` (Numpad −), are
   gone, and nothing replaced them. They were build aids and a diagnostic rather than
   thrall commands, so they belong in Devkit, which never ships to players.
 
@@ -28,7 +28,7 @@ thing that changed.
   a build cheat to hand a player.
 
   Ground flatten and a light/particle mute are Devkit menu entries now. The mute is
-  generic — it works on whatever you point at — rather than reaching into Thralls, since
+  generic, since it works on whatever you point at, rather than reaching into Thralls, since
   the dependency runs one way and Thralls must work with Devkit absent. God mode and the
   time cycle were dropped rather than moved: Devkit already had both, and its clock reads
   off `EnvMan.CalculateDay` instead of guessing at phase times.
@@ -50,7 +50,7 @@ thing that changed.
 - **Five work at once**, flat, with nothing to build to raise it.
 - **No bindstone upgrades.** An upgrade only ever unlocked the breed above it, so with a
   single breed they were four buildable pieces that did nothing.
-- **Binding** costs goods from its biome and one head of that creature in particular — a
+- **Binding** costs goods from its biome and one head of that creature in particular: a
   greydwarf brute's head to raise a greydwarf brute.
 - **Levelling is earned, not bought.** Thralls gain experience by working and level to 20 on
   their own, hitting harder, working faster and carrying more. Tier fixes the tool tier and
@@ -63,7 +63,7 @@ thing that changed.
 - Jobs: **chop, mine, gather, farm, repair**, plus follow and idle.
 - A thrall works a **radius around a base point** rather than a single target, picks the
   nearest valid resource, walks over, swings on a timer and picks up what falls.
-- **Farming is the whole loop** — harvest, sow from the pack, and restock seed from the
+- **Farming is the whole loop**: harvest, sow from the pack, and restock seed from the
   depot when it runs out. It runs the crop's own checks before sowing, so it will not waste
   seed on ground where nothing grows.
 - **Repairing** makes a thrall the site foreman for its radius: it finds the most damaged
@@ -104,14 +104,14 @@ thing that changed.
 - Thralls appear on the **map**, with a checkbox to turn them off and labels that can be
   turned off separately.
 - Building aids on the numpad: time of day, ground levelling, god mode, and a bindstone effect
-  cycle for diagnosing what you can see. There are no keys for ordering thralls about —
+  cycle for diagnosing what you can see. There are no keys for ordering thralls about,
   that is all menus.
 - Around 140 config settings, every one of them read by something.
 
 ### Not in this release
 
-- **The draugr, the golem, the berserker and the seeker.** All four are finished — bodies,
-  costs, gates and hand-built models — and are switched off behind `Breeds`. Set it to 2, 3,
+- **The draugr, the golem, the berserker and the seeker.** All four are finished (bodies,
+  costs, gates and hand-built models) and are switched off behind `Breeds`. Set it to 2, 3,
   4 or 5 to turn them on in order.
 - **The bindstone upgrades.** One exists per breed above the first, so they return with the
   breeds rather than needing to be switched on separately.

@@ -7,8 +7,8 @@ see the [README](README.md).
 
 That is deliberate, and it went in two stages. Recruit, assign, follow, dismiss and
 open-the-ledger became menu entries because a key that shadows a menu entry is a second
-thing to keep in step. The four that outlasted them — time of day, flatten ground, god
-mode and a light/motes diagnostic — were build aids rather than thrall commands, and they
+thing to keep in step. The four that outlasted them (time of day, flatten ground, god
+mode and a light/motes diagnostic) were build aids rather than thrall commands, and they
 have moved out of the mod entirely.
 
 Three reasons stacked up. They quietly owned most of the numpad, which caused two silent
@@ -18,12 +18,12 @@ that worked and reasonably concluded the mod had not loaded. And a mod that ship
 players should not carry a one-press ground-levelling cheat.
 
 They live in Devkit now, which is the mod that exists for that and never ships. Nothing in
-Thralls replaced them — the count is zero, not four moved to safer keys.
+Thralls replaced them: the count is zero, not four moved to safer keys.
 
 ## Why one breed rather than five
 
 One rather than five is a deliberate cut, and not a placeholder. A thrall is a whole thing
-to learn — where it works, what it carries, what it will and will not touch — and one kind
+to learn (where it works, what it carries, what it will and will not touch), and one kind
 finished and tested is a release, where five half-tested ones are a wishlist. The draugr,
 golem, berserker and seeker are written and their code stays in; `Breeds` turns them back
 on one at a time.
@@ -36,7 +36,7 @@ rather than building a fixed four.
 ## Why the base is separate from the job
 
 **Work from here** is the whole point of the orders panel. A thrall works within `WorkRadius` of a
-base point, and until now that point could only be set by giving a fresh job — so moving a
+base point, and until now that point could only be set by giving a fresh job, so moving a
 crew twenty metres up the treeline meant re-assigning every one of them and losing what they
 were in the middle of. Now you lead them over and say it. The order deliberately takes the
 ground under *your* feet rather than the thrall's position or your crosshair: you walked to
@@ -57,12 +57,12 @@ free storage, and you would bind five, rest four, and swap whichever you needed 
 
 The head is the point of it: a greydwarf brute's head to raise a greydwarf brute. There used
 to be a second trophy price on top, taking any head of the tier or better, from a mechanism
-older than these lists — so every thrall quietly wanted two trophies. That mechanism is gone
+older than these lists, so every thrall quietly wanted two trophies. That mechanism is gone
 and this line is the whole cost.
 
 ## The golem smashes (not in this release)
 
-The golem is tier 3, so this waits for the release that turns it on — it is written and
+The golem is tier 3, so this waits for the release that turns it on. It is written and
 works, and setting `Breeds` to 3 brings it in along with the draugr below it.
 
 The golem is the one breed that does not use an axe. Set it to chopping with empty hands
@@ -70,7 +70,7 @@ and it walks at trees and knocks them down, which makes it far and away the fast
 clear a treeline.
 
 It keeps **a fifth of what the tree drops** and wastes the rest, and the wasted part does
-not fall on the ground for you to pick up either — it is gone. So the golem is a tool for
+not fall on the ground for you to pick up either. It is gone. So the golem is a tool for
 clearing ground, not for getting wood. If you want the wood, send something with an axe.
 
 Both halves are config. `SmashTiers` lists which breeds work this way, so you can hand the
