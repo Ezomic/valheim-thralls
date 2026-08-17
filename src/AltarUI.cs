@@ -6,7 +6,7 @@ namespace Thralls
     /// <summary>
     /// The altar's ledger. Plain IMGUI so the mod stays a single DLL with no asset bundle.
     ///
-    /// Full screen, in the shape Boon's panel settled on: a black field over the whole
+    /// Full screen, in the shape Rist's panel settled on: a black field over the whole
     /// screen, a centred board with no frame around it, and three columns separated by
     /// hairlines. There is no window and nothing to drag.
     ///
@@ -17,7 +17,7 @@ namespace Thralls
     /// button between them. Full screen pays for a third column, and the third column is
     /// the two other screens standing still while you work down the list.
     ///
-    /// Borrowing a frame is what Boon spent three designs learning not to do: IMGUI cannot
+    /// Borrowing a frame is what Rist spent three designs learning not to do: IMGUI cannot
     /// draw with the game's shaders, so a copied sprite arrives the wrong colour and reads
     /// as an imitation of a Valheim window rather than one. A black field, the game's own
     /// fonts and flat bands have nothing that can arrive wrong.
@@ -705,7 +705,7 @@ namespace Thralls
         /// except the card itself. Eight job buttons on every row turned the overview into
         /// a wall of controls you had to read past to find out anything.
         ///
-        /// Selection is a click, not a hover. Boon's field selects on hover because a click
+        /// Selection is a click, not a hover. Rist's field selects on hover because a click
         /// there only ever spends a pick, so the two gestures never overlap - here the
         /// right hand column has buttons in it, and a detail that changed as the cursor
         /// crossed the field on its way to them would be unusable.
