@@ -3,7 +3,16 @@
 Notable changes to Thralls. Format follows [Keep a Changelog](https://keepachangelog.com),
 and the mod uses [semantic versioning](https://semver.org).
 
-## Unreleased
+## [0.5.0] — 2026-08-17
+
+Renumbered down from 1.0.0, which was wrong. Nothing had been released under it — no
+tag, nothing on Thunderstore — so the number was a claim rather than a record, and the
+mod is not that far along: the bindstone's model is being redesigned, the binding cost
+is mid-rework, and the ledger, depot overflow, raise and recall have never been
+exercised in a real session.
+
+Everything listed under 1.0.0 below is part of this release; the heading was the only
+thing that changed.
 
 ### Changed
 
@@ -30,10 +39,6 @@ and the mod uses [semantic versioning](https://semver.org).
 
   Lost in the move: the diagnostic's material-swap and vertex-colour states, which were
   specific to how these prefabs are skinned and had no generic equivalent worth inventing.
-
-## [1.0.0] — 2026-08-16
-
-First release.
 
 ### The crew
 
