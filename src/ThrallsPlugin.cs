@@ -3,19 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.CompilerServices;
 using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Logging;
-using Ezomic.Core;
 using HarmonyLib;
 using UnityEngine;
 
 namespace Thralls
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
-    // Soft, not hard. Thralls installs and runs on its own; a hard dependency
-    // that is absent does not degrade, the plugin simply never loads. Soft still buys
-    // the load-order guarantee when Core is present, which is what registering needs.
-    [BepInDependency(CoreGuid, BepInDependency.DependencyFlags.SoftDependency)]
     // No BepInProcess. It is a whitelist, and a dedicated server runs valheim_server.exe.
     // Thralls are creatures whose AI and ZDOs the server owns once nobody is nearby, and the
     // prefabs must resolve there or ZNetScene discards them.
@@ -26,9 +20,6 @@ namespace Thralls
         public const string PluginVersion = "0.5.0";
         public const string PluginAuthor = "Robbin Thijssen";
 
-        /// <summary>Core's plugin GUID. Optional - see TryRegisterWithCore.</summary>
-        private const string CoreGuid = "ezomic.valheim.core";
-
         internal static ManualLogSource Log;
 
         private Harmony _harmony;
@@ -38,7 +29,6 @@ namespace Thralls
         {
             Log = Logger;
             ThrallConfig.Bind(Config);
-            TryRegisterWithCore();
 
             _harmony = new Harmony(PluginGuid);
             // Named one class at a time on purpose. PatchAll(Type) applies only the class
@@ -55,46 +45,15 @@ namespace Thralls
                                + "Turn TestMode off in the config before playing for real.");
         }
 
-        /// <summary>
-        /// Joins Core's version gate when Core is installed, and does nothing when it is not.
-        ///
-        /// Thralls is worth installing on its own, and a hard dependency that is absent does
-        /// not degrade gracefully - the plugin never loads at all. So the reference is
-        /// compile-time only and the call is made behind a check.
-        ///
-        /// What is given up standing alone is the gate, not the mod.
-        /// A thrall is a tamed vanilla creature with a waypoint, so nothing here is an
-        /// unresolvable prefab. What is lost is the report when two ends run different builds.
-        /// </summary>
-        private void TryRegisterWithCore()
-        {
-            if (!Chainloader.PluginInfos.ContainsKey(CoreGuid))
-            {
-                Log.LogInfo("Core not installed - running standalone, without the version gate.");
-                return;
-            }
-
-            RegisterWithCore();
-        }
-
-        /// <summary>
-        /// Kept separate and never inlined on purpose. The JIT resolves the assemblies a method
-        /// needs when it first compiles that method, so a Suite call sitting directly in Awake
-        /// would drag Ezomic.Core in before the check above could prevent it - and the
-        /// missing-assembly exception would land during plugin load, which is the failure this
-        /// whole arrangement exists to avoid. Isolating it means the type is only ever resolved
-        /// on a machine that has Core.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void RegisterWithCore()
-        {
-            // Everyone, not HostOnly. Both ends have to agree about this mod, and the
-            // disagreement is silent when they do not: a client that cannot resolve a prefab
-            // hash discards the ZDO rather than erroring - destroying what is already standing
-            // in the world - and item data that differs desyncs inventories.
-            Suite.Register(PluginGuid, PluginName, PluginVersion, Config);
-        }
-
+        // Thralls no longer registers with Core's version gate, and no longer references
+        // Core at all - Suite.Register was the only thing it ever used from it.
+        //
+        // It was pulled from the Longhouse pack and the server list on 2026-08-17 while it
+        // sits at 0.5.0, so there is no shared set left for it to be in step with. What the
+        // gate bought was a refused connection when two ends ran different builds of this
+        // mod; standing alone, a mismatch is quiet again. That is the right trade while it
+        // is a single-player mod under redesign, and it is one line and one reference to
+        // put back when it rejoins the pack.
 
         private void OnDestroy()
         {
