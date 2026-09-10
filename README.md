@@ -4,7 +4,7 @@ A Valheim mod that lets you put workers to task. Bind a thrall at a bindstone, l
 forest, a copper vein or a berry patch, and tell it to work from there. It clears the
 ground around that spot and hauls what it gathers to a depot you build.
 
-Built against the installed game (Unity 6000.0.61, BepInEx 5.4.23.3, Harmony 2.9).
+Built against the installed game (Unity 6000.0.75, BepInEx 5.4.23.5, Harmony 2.9).
 
 ## Controls
 
